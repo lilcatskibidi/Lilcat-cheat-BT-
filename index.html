@@ -33,6 +33,8 @@
   @keyframes shimmer{0%{background-position:-500px 0}100%{background-position:500px 0}}
   @keyframes bounceIn{0%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.05)}70%{transform:scale(.95)}100%{transform:scale(1)}}
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  @keyframes ping{75%,100%{transform:scale(2);opacity:0}}
   .anim-fadeInUp{animation:fadeInUp .5s ease both}
   .anim-fadeIn{animation:fadeIn .4s ease both}
   .anim-slideDown{animation:slideDown .5s ease both}
@@ -40,6 +42,7 @@
   .anim-bounceIn{animation:bounceIn .6s cubic-bezier(.34,1.56,.64,1) both}
   .anim-float{animation:float 3s ease-in-out infinite}
   .anim-pulseGlow{animation:pulseGlow 2s ease-in-out infinite}
+  .anim-shake{animation:shake .5s ease}
   .q-box{background:#1c1c26;border-left:3px solid var(--neon);border-radius:8px;padding:12px 14px;margin-bottom:10px;animation:fadeInUp .35s ease both;transition:transform .2s,box-shadow .2s}
   .q-box:hover{transform:translateX(3px);box-shadow:-4px 0 16px rgba(255,106,193,.15)}
   .ans-green{color:#2ecc71;font-weight:700}
@@ -68,6 +71,31 @@
   ::-webkit-scrollbar-thumb{background:#3a3a52;border-radius:4px}
   ::-webkit-scrollbar-thumb:hover{background:var(--neon)}
   ._x{display:none}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(10,10,18,.85);backdrop-filter:blur(6px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .25s ease}
+  .modal-backdrop.hidden{display:none}
+  .modal-box{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:24px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 24px 64px rgba(0,0,0,.7)}
+  .modal-box h3{font-size:20px;font-weight:900;margin-bottom:16px;color:var(--neon)}
+  .modal-label{display:block;font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .modal-input,.modal-select,.modal-textarea{width:100%;padding:12px 14px;background:#0a0a12;border:1.5px solid var(--border);border-radius:10px;color:#e0e0e0;font-size:14px;transition:border-color .2s;font-family:inherit}
+  .modal-input:focus,.modal-select:focus,.modal-textarea:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(255,106,193,.15)}
+  .modal-textarea{resize:vertical;min-height:100px;line-height:1.5}
+  .modal-select{cursor:pointer}
+  .modal-select option{background:#0a0a12;color:#e0e0e0}
+  .fab{position:fixed;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:9000;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;border:none;color:white}
+  .fab:hover{transform:scale(1.12) rotate(5deg);box-shadow:0 12px 32px rgba(0,0,0,.6)}
+  .fab:active{transform:scale(.95)}
+  #fab-bug{bottom:24px;right:24px;background:linear-gradient(135deg,#ff4757,#c0392b)}
+  #fab-bell{bottom:24px;right:96px;background:linear-gradient(135deg,#5865F2,#4752c4)}
+  .fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:#ff4757;color:white;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)}
+  #notif-panel{position:fixed;bottom:96px;right:24px;width:360px;max-width:calc(100vw - 48px);max-height:70vh;overflow-y:auto;background:var(--card);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.7);z-index:9500;padding:16px;transform-origin:bottom right;animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both}
+  #notif-panel.hidden{display:none}
+  .notif-item{background:#1c1c26;border-left:3px solid var(--neon);border-radius:8px;padding:12px 14px;margin-bottom:10px;animation:fadeInUp .35s ease both}
+  .notif-item.level-success{border-left-color:#22c55e}
+  .notif-item.level-error{border-left-color:#ef4444}
+  .notif-item.level-warn{border-left-color:#f59e0b}
+  .notif-item h4{font-size:14px;font-weight:900;color:#f1c40f;margin-bottom:4px}
+  .notif-item p{font-size:13px;color:#ccc;line-height:1.5}
+  .notif-item time{font-size:10px;color:#666;display:block;margin-top:6px}
 </style>
 </head>
 <body class="min-h-screen">
@@ -143,6 +171,71 @@
   </footer>
 </div>
 
+<button id="fab-bell" class="fab" title="Thông báo">
+  🔔
+  <span id="bell-badge" class="fab-badge hidden">0</span>
+</button>
+<button id="fab-bug" class="fab" title="Báo lỗi">
+  🐛
+</button>
+
+<div id="notif-panel" class="hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:10px">
+    <h3 style="font-size:16px;font-weight:900;color:var(--neon)">🔔 Thông báo</h3>
+    <button onclick="w._closeNotif()" class="btn-ghost" style="padding:4px 10px;border-radius:6px;font-size:12px">✕</button>
+  </div>
+  <div id="notif-list">
+    <p style="text-align:center;color:#666;font-size:13px;padding:20px">Đang tải...</p>
+  </div>
+</div>
+
+<div id="bug-modal" class="modal-backdrop hidden">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <h3 style="margin:0">🐛 Báo lỗi</h3>
+      <button onclick="w._closeBug()" class="btn-ghost" style="padding:4px 10px;border-radius:6px;font-size:14px;line-height:1">✕</button>
+    </div>
+    <p style="font-size:12px;color:#888;margin-bottom:18px">Báo cáo sẽ được gửi tới Discord. Giúp mình cải thiện công cụ nhé!</p>
+
+    <div style="margin-bottom:14px">
+      <label class="modal-label" for="bug-name">Tên của bạn (tuỳ chọn)</label>
+      <input type="text" id="bug-name" class="modal-input" placeholder="VD: Nguyễn Văn A" maxlength="60">
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label class="modal-label" for="bug-type">Loại lỗi <span style="color:var(--neon)">*</span></label>
+      <select id="bug-type" class="modal-select">
+        <option value="">-- Chọn loại lỗi --</option>
+        <option value="Không tìm thấy đáp án">Không tìm thấy đáp án</option>
+        <option value="Đáp án sai">Đáp án sai</option>
+        <option value="Không đọc được file">Không đọc được file</option>
+        <option value="Lỗi CORS khi dán link">Lỗi CORS khi dán link</option>
+        <option value="Giao diện lỗi/hiển thị sai">Giao diện lỗi/hiển thị sai</option>
+        <option value="Trang bị treo/đơ">Trang bị treo/đơ</option>
+        <option value="Khác">Khác</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label class="modal-label" for="bug-desc">Mô tả chi tiết <span style="color:var(--neon)">*</span></label>
+      <textarea id="bug-desc" class="modal-textarea" placeholder="Mô tả càng chi tiết càng tốt: bạn đã làm gì, kết quả mong đợi, kết quả thực tế..." maxlength="1000"></textarea>
+      <div style="font-size:11px;color:#666;margin-top:4px;text-align:right"><span id="bug-count">0</span>/1000</div>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label class="modal-label" for="bug-context">File/Link đang dùng (tuỳ chọn)</label>
+      <input type="text" id="bug-context" class="modal-input" placeholder="URL web quiz hoặc tên file" maxlength="200">
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="w._closeBug()" class="btn-ghost" style="padding:10px 20px;border-radius:10px;font-size:14px">Huỷ</button>
+      <button id="bug-submit" class="btn-neon" style="padding:10px 24px;border-radius:10px;font-size:14px">📨 Gửi báo cáo</button>
+    </div>
+
+    <div id="bug-status" style="margin-top:14px;font-size:12px;text-align:center;color:#888;display:none"></div>
+  </div>
+</div>
+
 <div id="loading-overlay" class="hidden">
   <div class="spinner"></div>
   <div class="loading-text" id="lt">Đang xử lý...</div>
@@ -157,28 +250,32 @@
 
 <script>
 /* =========================================================================
-   🔐 ANSWER CHECKER — SECURITY LAYER (v3.0)
-   -------------------------------------------------------------------------
-   Chiến lược bảo vệ source:
-   1. Toàn bộ logic trong IIFE → không expose biến toàn cục
-   2. Tên hàm/biến rút gọn thành _a, _b, _c... (không có nghĩa)
-   3. Chuỗi quan trọng mã hoá base64 + XOR với key
-   4. Logic điều khiển "làm phẳng" bằng switch-case giả
-   5. Chèn dead code để đánh lạc hướng đọc
-   6. Anti-devtools: phát hiện console mở và log cảnh báo
-   7. Chặn chuột phải + F12 (tùy chọn)
-   8. Không lưu key/URL nhạy cảm dạng plaintext
-   -------------------------------------------------------------------------
-   Lưu ý: KHÔNG có cách nào bảo vệ 100% client-side. Đây chỉ là obfuscation
-   làm cho việc đọc source trở nên khó khăn, không phải bảo mật thật sự.
+   🔐 ANSWER CHECKER v5.0 — DISCORD WEBHOOK INTEGRATION
    ========================================================================= */
 (function(){
 'use strict';
 
 // ============================================================================
-// [1] DECODE UTILITIES — chuỗi mã hoá XOR + Base64
+// [0] ⚙️ CONFIG — ĐIỀN WEBHOOK URL VÀO ĐÂY
 // ============================================================================
-const _k = 'Qw9FzXk2'; // XOR key — thay đổi nếu muốn
+const _cfg = {
+  // 👇👇👇 WEBHOOK DISCORD CHO KÊNH BUG REPORTS 👇👇👇
+  bugWebhook: 'https://discord.com/api/webhooks/1549784660043632792/_hVAUHbku6aMX8jsYczJT6PB6_8EZIefFhNN8c7wJVBuwLBJxfb_R1IeRyIgViMypNg5',
+
+  // 👇👇👇 WEBHOOK DISCORD CHO KÊNH NOTIFICATIONS 👇👇👇
+  notifWebhook: 'https://discord.com/api/webhooks/1549784660043632792/_hVAUHbku6aMX8jsYczJT6PB6_8EZIefFhNN8c7wJVBuwLBJxfb_R1IeRyIgViMypNg5',
+
+  // 👇👇👇 CHANNEL ID (tuỳ chọn — để hiển thị thông báo cũ) 👇👇👇
+  notifChannelId: 'YOUR_NOTIFICATIONS_CHANNEL_ID',
+
+  notifCheckInterval: 5 * 60 * 1000,
+  maxNotif: 10, // số thông báo gần nhất hiển thị
+};
+
+// ============================================================================
+// [1] DECODE UTILITIES
+// ============================================================================
+const _k = 'Qw9FzXk2';
 const _b = (s) => { try { return decodeURIComponent(escape(atob(s))); } catch(e){ return ''; } };
 const _u = (s) => {
   const raw = _b(s);
@@ -190,42 +287,17 @@ const _u = (s) => {
 };
 
 // ============================================================================
-// [2] STRING TABLE — tất cả chuỗi nhạy cảm được XOR+Base64
+// [2] STATE
 // ============================================================================
-const _T = {
-  // tên biến có thể gặp trong các file quiz khác nhau
-  v1: _u('I1UfBzVRBg=='),           // quizData
-  v2: _u('I1UfBzVRBg=='),           // allQuestions (sẽ encode riêng)
-  v3: _u('I1UfBzVRBg=='),           // questions
-  v4: _u('I1UfBzVRBg=='),           // data
-  // format
-  fA: _u('Bg=='),                    // A
-  fB: _u('Bw=='),                    // B
-  fC: _u('CA=='),                    // C
-  // type câu hỏi
-  tMCQ: _u('EQ=='),
-  tMC:  _u('EQ=='),
-  tTF:  _u('Eg=='),
-  tSA:  _u('Ew=='),
-  // UI
-  okMsg: _u('BlMQEwQLB10MAxYWHQ0HDA=='),
-  errMsg: _u('BAQdDQ=='),
-  noData: _u('BAEdCBVXABUTFQYdDAdWVwYWDwMdHQ=='),
-  noFile: _u('DAccBwYGFw0VVQAGCQgXHQ=='),
-  noHtml: _u('DAccBwYGFw0VVwAGAR8LA=='),
-  noUrl: _u('DAccBwYGFw0VVwAGCQgXHQ=='),
-};
-
-// ============================================================================
-// [3] STATE (tên rút gọn để khó đọc)
-// ============================================================================
-let _d = null;  // parsed decks
-let _t = 0;     // current tab
-let _f = null;  // selected file
+let _d = null;
+let _t = 0;
+let _f = null;
+let _notifOpen = false;
+let _notifLoaded = false;
 const $ = (id) => document.getElementById(id);
 
 // ============================================================================
-// [4] STATUS POPUP
+// [3] STATUS / LOADING
 // ============================================================================
 function _s(msg, type){
   const el = $('status');
@@ -237,9 +309,6 @@ function _s(msg, type){
   el._t = setTimeout(() => el.className = '', 4500);
 }
 
-// ============================================================================
-// [5] LOADING OVERLAY
-// ============================================================================
 let _lt = null;
 const _ldMsgs = [
   ['Đang đọc file', 'Phân tích cấu trúc HTML...'],
@@ -267,7 +336,7 @@ function _l(show, msg, sub){
 }
 
 // ============================================================================
-// [6] HELPERS
+// [4] HELPERS
 // ============================================================================
 const _e = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
@@ -276,7 +345,7 @@ const _isU = (t) => { try{ const u=new URL(t); return u.protocol==='http:'||u.pr
 const _fmt = (b) => b<1024 ? b+' B' : b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(2)+' MB';
 
 // ============================================================================
-// [7] TAB SWITCH
+// [5] TAB / FILE / URL
 // ============================================================================
 function _sw(m){
   ['f','u','h'].forEach(k => {
@@ -285,9 +354,6 @@ function _sw(m){
   });
 }
 
-// ============================================================================
-// [8] FILE PICKER
-// ============================================================================
 function _setupFile(){
   const dz = $('dz'), fi = $('fi');
   dz.addEventListener('click', () => fi.click());
@@ -326,7 +392,7 @@ function _clrF(){
 }
 
 async function _readF(){
-  if (!_f){ _s('⚠️ ' + _T.noFile, 'warn'); return; }
+  if (!_f){ _s('⚠️ Chưa chọn file', 'warn'); return; }
   _l(true, 'Đang đọc file...', _f.name);
   try {
     const text = await _f.text();
@@ -340,9 +406,6 @@ async function _readF(){
   }
 }
 
-// ============================================================================
-// [9] URL FETCH (multi-proxy)
-// ============================================================================
 async function _fetch(url){
   const proxies = [
     (u) => u,
@@ -358,14 +421,14 @@ async function _fetch(url){
         const t = await res.text();
         if (_isH(t)) return t;
       }
-    } catch(e){ /* next */ }
+    } catch(e){}
   }
   throw new Error('Không thể tải HTML. Trang có thể chặn CORS.');
 }
 
 async function _checkU(){
   const v = $('ui').value.trim();
-  if (!v){ _s('⚠️ ' + _T.noUrl, 'warn'); return; }
+  if (!v){ _s('⚠️ Chưa có link', 'warn'); return; }
   if (!_isU(v)){ _s('❌ Link không hợp lệ', 'error'); return; }
   _l(true, 'Đang tải HTML...', v.substring(0, 50));
   try {
@@ -381,7 +444,7 @@ async function _checkU(){
 
 async function _checkH(){
   const v = $('hi').value.trim();
-  if (!v){ _s('⚠️ ' + _T.noHtml, 'warn'); return; }
+  if (!v){ _s('⚠️ Chưa có HTML', 'warn'); return; }
   if (!_isH(v)){ _s('❌ Nội dung không giống HTML', 'error'); return; }
   _l(true, 'Đang parse HTML...', v.length + ' ký tự');
   await new Promise(r => setTimeout(r, 500));
@@ -390,65 +453,43 @@ async function _checkH(){
 }
 
 // ============================================================================
-// [10] PARSER — TÌM quizData / allQuestions QUA NHIỀU CÁCH
+// [6] PARSER
 // ============================================================================
 function _extract(html){
-  // Lấy tất cả nội dung <script>
   const re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
   let m; const scripts = [];
   while ((m = re.exec(html)) !== null) scripts.push(m[1]);
   if (!scripts.length) scripts.push(html);
   const js = scripts.join('\n');
 
-  // ========================================================================
-  // Chiến lược 1: tìm biến có tên quen thuộc — quizData / allQuestions / ...
-  // ========================================================================
   const varNames = ['quizData', 'allQuestions', 'questions', 'quizBank', 'QUIZ_DATA', 'data', 'quiz', 'questionsData'];
   for (const name of varNames){
     const re1 = new RegExp('(?:const|var|let)\\s+' + name + '\\s*=\\s*(\\[\\s*\\{[\\s\\S]*?\\}\\s*\\]|\\{[\\s\\S]*?\\})\\s*;', 'm');
     const match = js.match(re1);
     if (match){
       const parsed = _safeEval(match[1]);
-      if (parsed) {
-        console.log('[Answer Checker] Tìm thấy biến:', name);
-        return { data: parsed, source: name };
-      }
+      if (parsed) return { data: parsed, source: name };
     }
   }
 
-  // ========================================================================
-  // Chiến lược 2: tìm MỌI object/mảng có cấu trúc giống quiz
-  //            (mảng các đề, mỗi đề có 'questions' hoặc là mảng câu hỏi)
-  // ========================================================================
   const reObj = /(?:const|var|let)\s+(\w+)\s*=\s*(\[[\s\S]*?\]|\{[\s\S]*?\})\s*;/g;
   let mm;
   while ((mm = reObj.exec(js)) !== null){
-    const name = mm[1];
     const parsed = _safeEval(mm[2]);
-    if (parsed && _looksLikeQuiz(parsed)){
-      console.log('[Answer Checker] Phát hiện biến quiz tiềm năng:', name);
-      return { data: parsed, source: name };
-    }
+    if (parsed && _looksLikeQuiz(parsed)) return { data: parsed, source: mm[1] };
   }
 
-  // ========================================================================
-  // Chiến lược 3: tìm chuỗi JSON có key đặc trưng của câu hỏi
-  // ========================================================================
   const markers = ['"question"', "'question'", '"options"', '"statements"', '"answer"', '"type"'];
   for (const mk of markers){
     const idx = js.indexOf(mk);
     if (idx >= 0){
-      // tìm ngược về '[' hoặc '{'
       const start = _findOpen(js, idx);
       if (start >= 0){
         const end = _matchBracket(js, start);
         if (end > start){
           const candidate = js.substring(start, end + 1);
           const parsed = _safeEval(candidate);
-          if (parsed && _looksLikeQuiz(parsed)){
-            console.log('[Answer Checker] Phát hiện cấu trúc quiz qua marker:', mk);
-            return { data: parsed, source: 'marker:' + mk };
-          }
+          if (parsed && _looksLikeQuiz(parsed)) return { data: parsed, source: 'marker:' + mk };
         }
       }
     }
@@ -457,18 +498,14 @@ function _extract(html){
   throw new Error('Không tìm thấy dữ liệu câu hỏi trong HTML.');
 }
 
-// Tìm dấu mở ngoặc gần nhất trước vị trí idx
 function _findOpen(s, idx){
   for (let i = idx; i >= 0; i--){
     if (s[i] === '[' || s[i] === '{') return i;
-    if (s[i] === ';' || s[i] === '\n') {
-      if (i < idx - 200) break;
-    }
+    if (s[i] === ';' || s[i] === '\n') { if (i < idx - 200) break; }
   }
   return -1;
 }
 
-// Tìm dấu đóng ngoặc khớp
 function _matchBracket(s, start){
   const open = s[start];
   const close = open === '[' ? ']' : '}';
@@ -483,15 +520,11 @@ function _matchBracket(s, start){
     }
     if (c === '"' || c === "'") { inStr = c; continue; }
     if (c === open) depth++;
-    else if (c === close) {
-      depth--;
-      if (depth === 0) return i;
-    }
+    else if (c === close) { depth--; if (depth === 0) return i; }
   }
   return -1;
 }
 
-// Eval an toàn
 function _safeEval(code){
   try { return eval('(' + code + ')'); }
   catch(e){
@@ -500,66 +533,51 @@ function _safeEval(code){
   }
 }
 
-// Kiểm tra object/mảng có phải dữ liệu quiz không
 function _looksLikeQuiz(obj){
   if (!obj) return false;
-  // Trường hợp 1: mảng 2 chiều — mỗi phần tử là mảng câu hỏi
   if (Array.isArray(obj)){
     if (obj.length === 0) return false;
     const first = obj[0];
-    // Format A: [[{question,...}], [{...}]]
     if (Array.isArray(first) && first.length > 0 && typeof first[0] === 'object'){
       return !!(first[0].question || first[0].type);
     }
-    // Format B: [{questions: [...]}, ...]
     if (typeof first === 'object' && first !== null){
       if (Array.isArray(first.questions)) return true;
       if (first.question || first.type) return true;
     }
   }
-  // Trường hợp 2: object — có key de1/de2/de3 hoặc questions
   if (typeof obj === 'object' && obj !== null){
     const keys = Object.keys(obj);
-    // {de1: [...], de2: [...]}
     const deckKeys = keys.filter(k => /^de\d+|^deck\d+|^set\d+|^đề\d+/i.test(k));
     if (deckKeys.length > 0){
       const firstVal = obj[deckKeys[0]];
       if (Array.isArray(firstVal) && firstVal.length && (firstVal[0].question || firstVal[0].type)) return true;
     }
-    // {questions: [...]}
     if (Array.isArray(obj.questions) && obj.questions.length && (obj.questions[0].question || obj.questions[0].type)) return true;
   }
   return false;
 }
 
-// ============================================================================
-// [11] NORMALIZER — chuyển mọi format về [ {name, questions, format}, ... ]
-// ============================================================================
 function _norm(raw){
-  // Format A: [[câu hỏi], [câu hỏi], ...]
   if (Array.isArray(raw) && raw.length && Array.isArray(raw[0])){
     return raw.map((q,i) => ({ name: 'Đề ' + (i+1), questions: q, format: 'A' }));
   }
-  // Format B: [{deckName, questions}, ...]
   if (Array.isArray(raw) && raw.length && raw[0] && Array.isArray(raw[0].questions)){
     return raw.map((d,i) => ({ name: d.deckName || d.name || 'Đề ' + (i+1), questions: d.questions, format: 'B' }));
   }
-  // Format C: {de1: [...], de2: [...], de3: [...]}
   if (raw && typeof raw === 'object' && !Array.isArray(raw)){
     const deckKeys = Object.keys(raw).filter(k => Array.isArray(raw[k]));
     if (deckKeys.length > 0){
-      return deckKeys.map((k,i) => ({
+      return deckKeys.map((k) => ({
         name: k.replace(/^de/i, 'Đề '),
         questions: raw[k],
         format: 'C'
       }));
     }
-    // {questions: [...]}
     if (Array.isArray(raw.questions)){
       return [{ name: raw.deckName || 'Đề 1', questions: raw.questions, format: 'C2' }];
     }
   }
-  // Fallback: coi là mảng câu hỏi đơn
   if (Array.isArray(raw) && raw.length && (raw[0].question || raw[0].type)){
     return [{ name: 'Đề 1', questions: raw, format: '?' }];
   }
@@ -567,7 +585,7 @@ function _norm(raw){
 }
 
 // ============================================================================
-// [12] RENDER
+// [7] RENDER
 // ============================================================================
 function _rQ(q, i){
   let h = '<div class="q-box" style="animation-delay:' + (i*0.03) + 's">';
@@ -643,9 +661,6 @@ function _renderAll(){
   setTimeout(() => $('rs').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 }
 
-// ============================================================================
-// [13] MAIN
-// ============================================================================
 function _proc(html, label){
   $('rs').classList.add('hidden');
   _d = null;
@@ -670,7 +685,7 @@ function _proc(html, label){
 }
 
 // ============================================================================
-// [14] COPY
+// [8] COPY
 // ============================================================================
 function _copy(){
   if (!_d) return;
@@ -713,45 +728,271 @@ function _copy(){
 }
 
 // ============================================================================
-// [15] DEMO
+// [9] DEMO
 // ============================================================================
 function _demo(){
-  const d = '<!DOCTYPE html>\n<html><head><title>Ôn tập chương 1. Cân bằng hoá học</title></head>\n<body>\n<script>\nconst allQuestions = {\n  de1: [\n    { type: \'mcq\', topic: \'Khái niệm CBHH\', question: \'Phản ứng thuận nghịch là?\', options: [\'Một chiều\',\'Hai chiều\',\'Không xảy ra\',\'Tỏa nhiệt\'], answer: \'B\', explanation: \'...\' },\n    { type: \'tf\', topic: \'Test\', question: \'Xét:\', statements: [\'A đúng\',\'B sai\'], answers: [true, false], explanation: \'...\' },\n    { type: \'short\', topic: \'Tính\', question: \'K_C = ?\', answer: \'36\', explanation: \'...\' }\n  ],\n  de2: [ { type: \'mcq\', question: \'Câu đề 2?\', options: [\'A\',\'B\',\'C\',\'D\'], answer: \'C\' } ]\n};\n<\/script>\n</body></html>';
+  const d = '<!DOCTYPE html>\n<html><head><title>Ôn tập chương 1. Cân bằng hoá học</title></head>\n<body>\n<script>\nconst allQuestions = {\n  de1: [\n    { type: \'mcq\', topic: \'Khái niệm CBHH\', question: \'Phản ứng thuận nghịch là?\', options: [\'Một chiều\',\'Hai chiều\',\'Không xảy ra\',\'Tỏa nhiệt\'], answer: \'B\' },\n    { type: \'tf\', topic: \'Test\', question: \'Xét:\', statements: [\'A đúng\',\'B sai\'], answers: [true, false] },\n    { type: \'short\', topic: \'Tính\', question: \'K_C = ?\', answer: \'36\' }\n  ],\n  de2: [ { type: \'mcq\', question: \'Câu đề 2?\', options: [\'A\',\'B\',\'C\',\'D\'], answer: \'C\' } ]\n};\n<\/script>\n</body></html>';
   $('hi').value = d;
   _sw('h');
-  _s('📋 Đã dán HTML mẫu (Format C — Cân bằng hoá học)', 'info');
+  _s('📋 Đã dán HTML mẫu (Format C)', 'info');
 }
 
 // ============================================================================
-// [16] ANTI-TAMPER (tùy chọn)
+// [10] 🐛 DISCORD BUG REPORT
 // ============================================================================
-(function _anti(){
-  // Phát hiện DevTools mở qua kích thước window
-  let _devOpen = false;
-  const _chk = () => {
-    const w = window.outerWidth - window.innerWidth;
-    const h = window.outerHeight - window.innerHeight;
-    if (w > 160 || h > 160){
-      if (!_devOpen){
-        _devOpen = true;
-        // Chỉ log cảnh báo, không phá UX
-        try {
-          console.log('%c⚠️ CẢNH BÁO', 'color:#fff;background:#e74c3c;padding:4px 10px;border-radius:4px;font-weight:bold;font-size:14px');
-          console.log('%cĐây là công cụ hỗ trợ học tập. Vui lòng không sao chép hoặc chỉnh sửa mã nguồn.', 'color:#ff6ac1;font-weight:bold');
-        } catch(e){}
-      }
-    } else {
-      _devOpen = false;
-    }
-  };
-  setInterval(_chk, 1500);
+function _openBug(){
+  $('bug-modal').classList.remove('hidden');
+  if ($('ui').value.trim() && !$('bug-context').value){
+    $('bug-context').value = $('ui').value.trim();
+  } else if (_f && !$('bug-context').value){
+    $('bug-context').value = 'file: ' + _f.name;
+  }
+  setTimeout(() => $('bug-name').focus(), 100);
+}
 
-  // Chặn chuột phải (tùy chọn — có thể tắt)
-  // document.addEventListener('contextmenu', e => e.preventDefault());
+function _closeBug(){
+  $('bug-modal').classList.add('hidden');
+  $('bug-status').style.display = 'none';
+}
+
+// Escape Markdown cho Discord
+function _escMd(s){
+  return String(s || '').replace(/([*_`~|\\])/g, '\\$1');
+}
+
+async function _submitBug(){
+  const name = $('bug-name').value.trim();
+  const type = $('bug-type').value;
+  const desc = $('bug-desc').value.trim();
+  const ctx = $('bug-context').value.trim();
+
+  if (!type){
+    _s('⚠️ Vui lòng chọn loại lỗi', 'warn');
+    $('bug-type').focus();
+    return;
+  }
+  if (!desc || desc.length < 10){
+    _s('⚠️ Mô tả phải có ít nhất 10 ký tự', 'warn');
+    $('bug-desc').focus();
+    return;
+  }
+
+  const btn = $('bug-submit');
+  const oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Đang gửi...';
+  $('bug-status').style.display = 'block';
+  $('bug-status').innerHTML = '<span style="color:#f1c40f">⏳ Đang gửi tới Discord...</span>';
+
+  const payload = {
+    name: name || '(ẩn danh)',
+    type: type,
+    description: desc,
+    context: ctx || '(không có)',
+    userAgent: navigator.userAgent.substring(0, 200),
+    timestamp: new Date().toISOString()
+  };
+
+  let success = false;
+
+  // Discord webhook payload (dạng embed đẹp)
+  if (_cfg.bugWebhook && _cfg.bugWebhook.includes('/api/webhooks/')){
+    try {
+      const colorMap = {
+        'Không tìm thấy đáp án': 0xe74c3c,
+        'Đáp án sai': 0xe67e22,
+        'Không đọc được file': 0xf39c12,
+        'Lỗi CORS khi dán link': 0x9b59b6,
+        'Giao diện lỗi/hiển thị sai': 0x3498db,
+        'Trang bị treo/đơ': 0xe91e63,
+        'Khác': 0x95a5a6,
+      };
+
+      const embed = {
+        title: '🐛 Báo lỗi mới — ' + type,
+        color: colorMap[type] || 0xff6ac1,
+        fields: [
+          { name: '👤 Người báo', value: _escMd(payload.name), inline: true },
+          { name: '📁 File/Link', value: _escMd(payload.context).substring(0, 200), inline: true },
+          { name: '📝 Mô tả', value: _escMd(payload.description).substring(0, 1000) }
+        ],
+        footer: { text: 'Answer Checker • Bug Report System' },
+        timestamp: payload.timestamp
+      };
+
+      const res = await fetch(_cfg.bugWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: 'Answer Checker 🐱',
+          avatar_url: 'https://cdn-icons-png.flaticon.com/512/616/616430.png',
+          embeds: [embed]
+        })
+      });
+
+      if (res.ok || res.status === 204){
+        success = true;
+        $('bug-status').innerHTML = '<span style="color:#22c55e">✅ Đã gửi báo cáo tới Discord!</span>';
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    } catch (err) {
+      console.warn('Discord gửi thất bại:', err);
+      $('bug-status').innerHTML = '<span style="color:#f1c40f">⚠️ Không gửi được, đã lưu cục bộ.</span>';
+    }
+  } else {
+    $('bug-status').innerHTML = '<span style="color:#f1c40f">ℹ️ Chưa cấu hình Discord webhook.</span>';
+  }
+
+  // Lưu localStorage dự phòng
+  try {
+    const key = 'ac_bug_reports';
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    arr.push(payload);
+    // Chỉ giữ 50 báo cáo gần nhất
+    if (arr.length > 50) arr.splice(0, arr.length - 50);
+    localStorage.setItem(key, JSON.stringify(arr));
+  } catch(e){}
+
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = oldText;
+    _closeBug();
+    $('bug-name').value = '';
+    $('bug-type').value = '';
+    $('bug-desc').value = '';
+    $('bug-context').value = '';
+    $('bug-count').textContent = '0';
+    if (success) _s('✅ Cảm ơn bạn đã báo cáo!', 'success');
+    else _s('ℹ️ Báo cáo đã được lưu cục bộ', 'info');
+  }, 1500);
+}
+
+// ============================================================================
+// [11] 🔔 DISCORD NOTIFICATIONS
+// ============================================================================
+async function _loadNotif(force = false){
+  if (_notifLoaded && !force) return;
+  const list = $('notif-list');
+
+  if (!_cfg.notifChannelId || _cfg.notifChannelId === 'YOUR_NOTIFICATIONS_CHANNEL_ID'){
+    list.innerHTML = '<p style="text-align:center;color:#666;font-size:13px;padding:20px">⚠️ Chưa cấu hình Channel ID.<br><br>Để xem thông báo, cần có bot Discord.<br>Xem hướng dẫn bên dưới.</p>';
+    return;
+  }
+
+  list.innerHTML = '<p style="text-align:center;color:#666;font-size:13px;padding:20px">⏳ Đang tải...</p>';
+
+  // Gọi qua bot API (cần proxy hoặc bot token — KHÔNG khuyến nghị để token trong client)
+  // Giải pháp an toàn: dùng 1 Cloudflare Worker làm proxy
+  // Hoặc đơn giản: chỉ load từ localStorage cache
+
+  // CÁCH ĐƠN GIẢN: đọc từ localStorage cache (do admin paste vào hoặc do webhook đầu tiên)
+  const cached = localStorage.getItem('ac_notifs_cache');
+  if (cached){
+    try {
+      const notifs = JSON.parse(cached);
+      if (Array.isArray(notifs) && notifs.length){
+        _renderNotifs(notifs);
+        _notifLoaded = true;
+        return;
+      }
+    } catch(e){}
+  }
+
+  // Nếu không có cache → hiện thông báo hướng dẫn
+  list.innerHTML = `
+    <div style="text-align:center;color:#888;font-size:13px;padding:20px;line-height:1.6">
+      📭 <b style="color:#f1c40f">Chưa có thông báo</b><br>
+      <span style="font-size:11px;color:#666">Admin có thể gửi thông báo qua kênh Discord #notifications.<br>
+      Sau đó bấm nút làm mới bên dưới.</span>
+      <br><br>
+      <button onclick="w._refreshNotif()" class="btn-neon" style="padding:8px 16px;border-radius:8px;font-size:12px">🔄 Làm mới</button>
+    </div>
+  `;
+}
+
+function _renderNotifs(notifs){
+  const list = $('notif-list');
+  list.innerHTML = '';
+  notifs.forEach(n => {
+    const div = document.createElement('div');
+    const level = n.level || 'info';
+    div.className = 'notif-item level-' + level;
+    div.innerHTML = `
+      <h4>${_e(n.title || 'Thông báo')}</h4>
+      <p>${_e(n.message || '')}</p>
+      <time>${_e(n.timestamp ? new Date(n.timestamp).toLocaleString('vi-VN') : '')}</time>
+    `;
+    list.appendChild(div);
+  });
+
+  const badge = $('bell-badge');
+  const count = notifs.length;
+  if (count > 0){
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+  _notifLoaded = true;
+}
+
+function _toggleNotif(){
+  const panel = $('notif-panel');
+  _notifOpen = !_notifOpen;
+  if (_notifOpen){
+    panel.classList.remove('hidden');
+    _loadNotif(true);
+  } else {
+    panel.classList.add('hidden');
+  }
+}
+
+function _closeNotif(){
+  _notifOpen = false;
+  $('notif-panel').classList.add('hidden');
+}
+
+function _refreshNotif(){
+  _notifLoaded = false;
+  _loadNotif(true);
+}
+
+// ============================================================================
+// [12] ADMIN HELPER — nhận notification qua URL
+// ============================================================================
+// Cách dùng: mở
+// https://your-page.com/?notif=Title|Message|level
+// → sẽ lưu vào localStorage và hiển thị
+// → chia sẻ link cho user để họ tự "nhận" thông báo
+(function _checkNotifParam(){
+  try {
+    const params = new URLSearchParams(location.search);
+    const notif = params.get('notif');
+    if (notif){
+      const parts = notif.split('|');
+      const title = parts[0] || 'Thông báo';
+      const message = parts[1] || '';
+      const level = parts[2] || 'info';
+      const arr = JSON.parse(localStorage.getItem('ac_notifs_cache') || '[]');
+      arr.unshift({
+        title: title,
+        message: message,
+        level: level,
+        timestamp: new Date().toISOString()
+      });
+      // Giữ tối đa 20
+      if (arr.length > 20) arr.splice(20);
+      localStorage.setItem('ac_notifs_cache', JSON.stringify(arr));
+      console.log('✅ Đã nhận thông báo:', title);
+      // Xóa param khỏi URL
+      window.history.replaceState({}, '', location.pathname);
+    }
+  } catch(e){}
 })();
 
 // ============================================================================
-// [17] EVENTS
+// [13] EVENTS
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
   _setupFile();
@@ -763,13 +1004,53 @@ document.addEventListener('DOMContentLoaded', () => {
   $('bh').addEventListener('click', _checkH);
   $('bc').addEventListener('click', _copy);
   $('ui').addEventListener('keypress', e => { if (e.key === 'Enter') _checkU(); });
+
+  $('fab-bug').addEventListener('click', _openBug);
+  $('bug-submit').addEventListener('click', _submitBug);
+
+  $('bug-desc').addEventListener('input', e => {
+    $('bug-count').textContent = e.target.value.length;
+  });
+
+  $('bug-modal').addEventListener('click', e => {
+    if (e.target === $('bug-modal')) _closeBug();
+  });
+
+  $('fab-bell').addEventListener('click', _toggleNotif);
+
+  document.addEventListener('click', e => {
+    if (_notifOpen &&
+        !$('notif-panel').contains(e.target) &&
+        !$('fab-bell').contains(e.target)){
+      _closeNotif();
+    }
+  });
+
+  setTimeout(() => _loadNotif(), 1000);
 });
 
-// Chỉ expose tối thiểu cho inline onclick
-window.w = { _clrF, _demo };
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){
+    if (!$('bug-modal').classList.contains('hidden')) _closeBug();
+    if (_notifOpen) _closeNotif();
+  }
+});
 
-console.log('%c🐱 Answer Checker v3.0', 'color:#fff;background:#ff6ac1;padding:4px 10px;border-radius:4px;font-weight:bold;font-size:13px');
-console.log('%cHỗ trợ: Tốc độ phản ứng • Ester – Lipid • Cân bằng hoá học', 'color:#888');
+// ============================================================================
+// [14] EXPOSE
+// ============================================================================
+window.w = {
+  _clrF,
+  _demo,
+  _closeBug,
+  _closeNotif,
+  _submitBug,
+  _loadNotif,
+  _refreshNotif,
+};
+
+console.log('%c🐱 Answer Checker v5.0', 'color:#fff;background:#5865F2;padding:4px 10px;border-radius:4px;font-weight:bold;font-size:13px');
+console.log('%c✨ Discord integration loaded', 'color:#2ecc71;font-weight:bold');
 
 })();
 </script>
