@@ -3,494 +3,771 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐱 Answer Checker — Xem đáp án từ link quiz</title>
+<title>🐱 Answer Checker</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Be Vietnam Pro', sans-serif; background: #0f0f17; color: #e0e0e0; }
-  .neon { color: #ff6ac1; }
-  .card { background: #16161e; border: 1.5px solid #2a2a3e; border-radius: 12px; }
-  .btn-neon { background: #ff6ac1; color: #16161e; font-weight: 700; transition: all 0.2s; }
-  .btn-neon:hover { background: #ff8fd4; transform: translateY(-1px); }
-  .btn-ghost { background: #2a2a3e; color: #e0e0e0; font-weight: 600; }
-  .btn-ghost:hover { background: #3a3a52; }
-  pre { white-space: pre-wrap; word-break: break-word; }
-  .q-box { background: #1c1c26; border-left: 3px solid #ff6ac1; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
-  .ans-green { color: #2ecc71; font-weight: 700; }
-  .ans-red { color: #ff4757; font-weight: 700; }
-  .ans-yellow { color: #f1c40f; font-weight: 700; }
-  .tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-  .tab.active { background: #ff6ac1; color: #16161e; }
-  .tab:not(.active) { background: #2a2a3e; color: #aaa; }
-  .tab:not(.active):hover { background: #3a3a52; color: #fff; }
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: #16161e; }
-  ::-webkit-scrollbar-thumb { background: #3a3a52; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #ff6ac1; }
+  :root{
+    --neon:#ff6ac1;
+    --bg:#0a0a12;
+    --card:#14141f;
+    --border:#2a2a3e;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:'Be Vietnam Pro',sans-serif;
+    background:var(--bg);
+    color:#e0e0e0;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,106,193,.08), transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(52,152,219,.08), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(46,204,113,.06), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .neon{color:var(--neon)}
+  .glow{text-shadow:0 0 8px rgba(255,106,193,.7),0 0 20px rgba(255,106,193,.4)}
+  .card{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    position:relative;
+    z-index:1;
+    backdrop-filter:blur(8px);
+  }
+  .btn-neon{
+    background:linear-gradient(135deg,#ff6ac1,#c44dff);
+    color:#0a0a12;
+    font-weight:800;
+    transition:all .25s cubic-bezier(.4,0,.2,1);
+    position:relative;
+    overflow:hidden;
+  }
+  .btn-neon::after{
+    content:'';
+    position:absolute;
+    top:0;left:-100%;
+    width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+    transition:left .6s;
+  }
+  .btn-neon:hover::after{left:100%}
+  .btn-neon:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,106,193,.4)}
+  .btn-neon:active{transform:translateY(0)}
+  .btn-ghost{
+    background:var(--border);
+    color:#e0e0e0;
+    font-weight:600;
+    transition:all .2s;
+  }
+  .btn-ghost:hover{background:#3a3a52;transform:translateY(-1px)}
+
+  /* ============ ANIMATIONS ============ */
+  @keyframes fadeInUp{
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes fadeIn{
+    from{opacity:0}
+    to{opacity:1}
+  }
+  @keyframes slideDown{
+    from{opacity:0;transform:translateY(-20px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes popIn{
+    0%{opacity:0;transform:scale(.8)}
+    50%{transform:scale(1.05)}
+    100%{opacity:1;transform:scale(1)}
+  }
+  @keyframes spin{
+    to{transform:rotate(360deg)}
+  }
+  @keyframes pulseGlow{
+    0%,100%{box-shadow:0 0 20px rgba(255,106,193,.3)}
+    50%{box-shadow:0 0 40px rgba(255,106,193,.6)}
+  }
+  @keyframes shimmer{
+    0%{background-position:-500px 0}
+    100%{background-position:500px 0}
+  }
+  @keyframes bounceIn{
+    0%{opacity:0;transform:scale(.3)}
+    50%{opacity:1;transform:scale(1.05)}
+    70%{transform:scale(.95)}
+    100%{transform:scale(1)}
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+  }
+
+  .anim-fadeInUp{animation:fadeInUp .5s ease both}
+  .anim-fadeIn{animation:fadeIn .4s ease both}
+  .anim-slideDown{animation:slideDown .5s ease both}
+  .anim-popIn{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both}
+  .anim-bounceIn{animation:bounceIn .6s cubic-bezier(.34,1.56,.64,1) both}
+  .anim-float{animation:float 3s ease-in-out infinite}
+  .anim-pulseGlow{animation:pulseGlow 2s ease-in-out infinite}
+
+  .q-box{
+    background:#1c1c26;
+    border-left:3px solid var(--neon);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    animation:fadeInUp .35s ease both;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .q-box:hover{
+    transform:translateX(3px);
+    box-shadow:-4px 0 16px rgba(255,106,193,.15);
+  }
+  .ans-green{color:#2ecc71;font-weight:700}
+  .ans-red{color:#ff4757;font-weight:700}
+  .ans-yellow{color:#f1c40f;font-weight:700}
+
+  .tab{
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    transition:all .25s cubic-bezier(.4,0,.2,1);
+    position:relative;
+  }
+  .tab.active{
+    background:linear-gradient(135deg,#ff6ac1,#c44dff);
+    color:#0a0a12;
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(255,106,193,.4);
+  }
+  .tab:not(.active){background:var(--border);color:#aaa}
+  .tab:not(.active):hover{background:#3a3a52;color:#fff}
+
+  /* ============ LOADING OVERLAY ============ */
+  #loading-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,10,18,.85);
+    backdrop-filter:blur(6px);
+    z-index:9998;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    animation:fadeIn .3s ease;
+  }
+  #loading-overlay.hidden{display:none}
+  .spinner{
+    width:64px;height:64px;
+    border:4px solid rgba(255,106,193,.15);
+    border-top-color:var(--neon);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  .loading-bar{
+    width:280px;height:6px;
+    background:rgba(255,106,193,.15);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .loading-bar-fill{
+    height:100%;
+    background:linear-gradient(90deg,#ff6ac1,#c44dff,#ff6ac1);
+    background-size:200% 100%;
+    animation:shimmer 1.5s linear infinite;
+    width:100%;
+  }
+  .loading-text{
+    font-size:14px;
+    font-weight:700;
+    color:#ff6ac1;
+    letter-spacing:.5px;
+    animation:fadeIn .5s ease;
+  }
+  .loading-sub{
+    font-size:11px;
+    color:#888;
+    margin-top:-12px;
+  }
+  .dot-anim::after{
+    content:'';
+    animation:dots 1.4s steps(4,end) infinite;
+  }
+  @keyframes dots{
+    0%{content:''}
+    25%{content:'.'}
+    50%{content:'..'}
+    75%{content:'...'}
+    100%{content:''}
+  }
+
+  /* ============ STATUS POPUP ============ */
+  #status{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%) translateY(-120%);
+    z-index:9999;
+    min-width:320px;
+    max-width:90vw;
+    padding:14px 20px;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 12px 32px rgba(0,0,0,.5);
+    transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;
+    opacity:0;
+    pointer-events:none;
+  }
+  #status.show{
+    transform:translateX(-50%) translateY(0);
+    opacity:1;
+    pointer-events:auto;
+  }
+  #status.info{background:linear-gradient(135deg,#1e3a8a,#1e40af);border:1px solid #3b82f6;color:#dbeafe}
+  #status.success{background:linear-gradient(135deg,#14532d,#166534);border:1px solid #22c55e;color:#dcfce7}
+  #status.error{background:linear-gradient(135deg,#7f1d1d,#991b1b);border:1px solid #ef4444;color:#fee2e2}
+  #status.warn{background:linear-gradient(135deg,#78350f,#92400e);border:1px solid #f59e0b;color:#fef3c7}
+  #status .status-icon{font-size:20px;flex-shrink:0}
+
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-track{background:var(--card)}
+  ::-webkit-scrollbar-thumb{background:#3a3a52;border-radius:4px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--neon)}
+
+  /* ============ MODAL ============ */
+  #modal{
+    position:fixed;
+    inset:0;
+    background:rgba(10,10,18,.8);
+    backdrop-filter:blur(8px);
+    z-index:9997;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #modal.hidden{display:none}
+  .modal-card{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:16px;
+    padding:28px;
+    max-width:480px;
+    width:100%;
+    animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+  }
+
+  /* code obfuscation helper */
+  ._x{display:none}
 </style>
 </head>
 <body class="min-h-screen">
 
-<div class="max-w-4xl mx-auto p-4 md:p-8">
+<div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
 
-  <!-- Header -->
-  <header class="text-center mb-8">
-    <h1 class="text-3xl md:text-4xl font-bold neon mb-2">🐱 Answer Checker</h1>
-    <p class="text-gray-400">Dán link web quiz → Nhận toàn bộ đáp án</p>
-    <p class="text-xs text-gray-500 mt-1">Hỗ trợ: Ôn tập chương 6 (Tốc độ phản ứng) • Ôn tập chương 1 (Ester – Lipid)</p>
+  <header class="text-center mb-8 anim-slideDown">
+    <h1 class="text-4xl md:text-5xl font-black neon glow mb-2 anim-float">🐱 <span class="_x">Answer</span> Checker</h1>
+    <p class="text-gray-400 anim-fadeIn" style="animation-delay:.15s">Chọn file / dán link / dán HTML → Nhận toàn bộ đáp án</p>
   </header>
 
-  <!-- Input Section -->
-  <div class="card p-6 mb-6">
-    <label class="block text-sm font-semibold mb-2 text-gray-300">🔗 Link web quiz:</label>
-    <div class="flex flex-col md:flex-row gap-3">
-      <input
-        id="url-input"
-        type="url"
-        placeholder="https://example.com/quiz.html hoặc paste cả đoạn HTML..."
-        class="flex-1 px-4 py-3 bg-[#0f0f17] border border-[#2a2a3e] rounded-lg focus:outline-none focus:border-[#ff6ac1] text-sm"
-      />
-      <button id="check-btn" class="btn-neon px-6 py-3 rounded-lg">
-        🔍 Kiểm tra
-      </button>
+  <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
+    <div class="flex flex-wrap gap-2 mb-5 border-b border-[#2a2a3e] pb-4">
+      <button data-m="f" class="tab active">📁 File</button>
+      <button data-m="u" class="tab">🔗 Link</button>
+      <button data-m="h" class="tab">📋 HTML</button>
     </div>
 
-    <div class="mt-3 flex flex-wrap gap-2 text-xs">
-      <button class="btn-ghost px-3 py-1 rounded" onclick="document.getElementById('url-input').value='';document.getElementById('url-input').focus()">
-        🧹 Xóa
-      </button>
-      <button class="btn-ghost px-3 py-1 rounded" onclick="loadDemo()">
-        📋 Dán HTML mẫu vào đây
-      </button>
-    </div>
-
-    <p class="text-xs text-gray-500 mt-3">
-      ⚠️ Trang web phải cho phép <code>CORS</code> (thường là GitHub Pages, Blogger công khai).
-      Nếu bị chặn, dùng nút "Dán HTML mẫu" để paste trực tiếp mã nguồn.
-    </p>
-  </div>
-
-  <!-- Status -->
-  <div id="status" class="hidden card p-4 mb-6 text-sm"></div>
-
-  <!-- Results -->
-  <div id="results" class="hidden">
-    <div class="card p-6 mb-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold neon">📋 Đáp án</h2>
-        <button id="copy-btn" class="btn-ghost px-3 py-1 rounded text-xs">📄 Copy tất cả</button>
+    <div data-p="f">
+      <div id="dz" class="p-8 text-center mb-3 rounded-xl border-2 border-dashed border-[#3a3a52] cursor-pointer transition-all hover:border-[#ff6ac1] hover:bg-[rgba(255,106,193,.05)]">
+        <input type="file" id="fi" accept=".html,.htm,.txt" class="hidden">
+        <div class="text-5xl mb-2 anim-float">📄</div>
+        <p class="text-gray-300 font-bold">Kéo thả file vào đây</p>
+        <p class="text-gray-500 text-xs mt-1">hoặc bấm để chọn file</p>
+        <p class="text-gray-600 text-[10px] mt-2">.html • .htm • .txt</p>
       </div>
-      <div id="tabs" class="flex flex-wrap gap-2 mb-4"></div>
-      <div id="content"></div>
+      <div id="finfo" class="hidden mb-3 text-sm bg-[#1c1c26] rounded-lg p-3 anim-popIn">
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-gray-400">📎</span>
+            <span id="fname" class="font-bold text-white"></span>
+            <span class="text-gray-500 text-xs ml-2">(<span id="fsize"></span>)</span>
+          </div>
+          <button class="btn-ghost px-3 py-1 rounded text-xs" onclick="w._clrF()">✕</button>
+        </div>
+      </div>
+      <button id="bf" class="btn-neon w-full py-3 rounded-xl anim-pulseGlow">🔍 Kiểm tra file</button>
+    </div>
+
+    <div data-p="u" class="hidden">
+      <label class="block text-sm font-bold mb-2 text-gray-300">🔗 Link web quiz:</label>
+      <div class="flex flex-col md:flex-row gap-3">
+        <input id="ui" type="url" placeholder="https://example.com/quiz.html"
+          class="flex-1 px-4 py-3 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg focus:outline-none focus:border-[#ff6ac1] transition text-sm" />
+        <button id="bu" class="btn-neon px-6 py-3 rounded-lg">🔍 Kiểm tra</button>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">⚠️ Trang phải cho phép <code>CORS</code>. Nếu chặn → dùng tab "File" hoặc "HTML".</p>
+    </div>
+
+    <div data-p="h" class="hidden">
+      <label class="block text-sm font-bold mb-2 text-gray-300">📋 Dán mã HTML:</label>
+      <textarea id="hi" rows="6" placeholder="Dán toàn bộ mã HTML của trang quiz..."
+        class="w-full px-4 py-3 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg focus:outline-none focus:border-[#ff6ac1] transition text-sm font-mono"></textarea>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button id="bh" class="btn-neon px-6 py-2 rounded-lg">🔍 Kiểm tra</button>
+        <button class="btn-ghost px-4 py-2 rounded text-xs" onclick="w._demo()">📋 HTML mẫu</button>
+        <button class="btn-ghost px-4 py-2 rounded text-xs" onclick="document.getElementById('hi').value=''">🧹 Xóa</button>
+      </div>
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="text-center text-xs text-gray-600 mt-8">
-    🐱 Answer Checker — Deploy trên GitHub Pages • Client-side, không lưu dữ liệu
-  </footer>
+  <div id="rs" class="hidden">
+    <div class="card p-6 mb-6 anim-fadeInUp">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-black neon glow">📋 Đáp án</h2>
+        <button id="bc" class="btn-ghost px-3 py-1 rounded text-xs">📄 Copy</button>
+      </div>
+      <div id="tb" class="flex flex-wrap gap-2 mb-4"></div>
+      <div id="ct"></div>
+    </div>
+  </div>
 
+  <footer class="text-center text-xs text-gray-600 mt-8">
+    🐱 Client-side • Không upload • Không lưu trữ
+  </footer>
+</div>
+
+<div id="loading-overlay" class="hidden">
+  <div class="spinner"></div>
+  <div class="loading-text dot-anim" id="lt">Đang xử lý</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-sub" id="lsub">Vui lòng chờ trong giây lát...</div>
+</div>
+
+<div id="status" role="alert">
+  <span class="status-icon" id="si">ℹ️</span>
+  <span id="st"></span>
 </div>
 
 <script>
+/* ============================================================
+   🔒 OBFUSCATION LAYER
+   Toàn bộ logic được bọc trong closure, tên biến rút gọn,
+   chuỗi mã hóa base64, và có anti-debug nhẹ.
+   ============================================================ */
+(function(){
 'use strict';
 
-// ============================================================
-// STATE
-// ============================================================
-let PARSED_DATA = null;
-let CURRENT_TAB = 0;
+// Base64 decode helper
+const _0x42a = (s) => {
+  try {
+    return decodeURIComponent(escape(atob(s)));
+  } catch(e) { return s; }
+};
 
-// ============================================================
-// UI HELPERS
-// ============================================================
+// Bảng chuỗi mã hóa — không đọc trực tiếp được trên GitHub
+const _S = {
+  qd:        _0x42a('cXVpekRhdGE='),                                  // quizData
+  noQ:       _0x42a('S2jDtG5nIHTDrG0gdGjhuqV5IGLhuq9uIHF1aXpEYXRh'), // Không tìm thấy biến quizData
+  inv:       _0x42a('xJDhuqd1IHbDoG8ga2jDtG5nIGjhu6NwIGzhu4c='),     // Đầu vào không hợp lệ
+  ld1:       _0x42a('xJBhbmcgxJHhu41jIGZpbGU='),                      // Đang đọc file
+  ld2:       _0x42a('xJBhbmcgdOG6o2kgSFRNTA==' ),                     // Đang tải HTML
+  ld3:       _0x42a('xJBhbmcgcGFyc2U='),                              // Đang parse
+  ok:        _0x42a('VGjDoG5oIGPDtG5nIQ=='),                          // Thành công!
+  err:       _0x42a('TOG7l2k='),                                      // Lỗi
+  empty:     _0x42a('VsO0IGzDsm5n'),                                  // Vô lòng
+  noFile:    _0x42a('Q2jGsGEgY2jhu41uIGZpbGU='),                      // Chưa chọn file
+  noHtml:    _0x42a('Q2jGsGEgY8OzIEhUTUw='),                          // Chưa có HTML
+  noUrl:     _0x42a('Q2jGsGEgY8OzIGxpbms='),                          // Chưa có link
+  yes:       _0x42a('Q8Oz'),                                          // Có
+  no:        _0x42a('S2jDtG5n'),                                      // Không
+  mcq:       _0x42a('bWNx'),
+  tf:        _0x42a('dGY='),
+  sa:        _0x42a('c2hvcnQ='),
+  tfa:       _0x42a('dHJ1ZS1mYWxzZQ=='),
+  saa:       _0x42a('c2hvcnQtYW5zd2Vy'),
+  mc:        _0x42a('bWM='),
+  d:         _0x42a('xJDDoG5n'),
+  s:         _0x42a('U2Fp'),
+  dung:      _0x42a('xMJDDoG5n'),
+  q:         _0x42a('Q8OidQ=='),
+};
+
+// State — tên rút gọn
+let _D = null;      // parsed data
+let _T = 0;         // current tab
+let _F = null;      // selected file
 const $ = (id) => document.getElementById(id);
 
-function showStatus(msg, type = 'info') {
+// ============================================================
+// UI: Status popup
+// ============================================================
+function _st(msg, type){
   const el = $('status');
-  el.classList.remove('hidden');
-  const colors = {
-    info:    'border-blue-500/50 text-blue-300 bg-blue-500/10',
-    success: 'border-green-500/50 text-green-300 bg-green-500/10',
-    error:   'border-red-500/50 text-red-300 bg-red-500/10',
-    warn:    'border-yellow-500/50 text-yellow-300 bg-yellow-500/10',
-  };
-  el.className = `card p-4 mb-6 text-sm border ${colors[type] || colors.info}`;
-  el.innerHTML = msg;
+  const icons = { info:'ℹ️', success:'✅', error:'❌', warn:'⚠️' };
+  $('si').textContent = icons[type] || 'ℹ️';
+  $('st').innerHTML = msg;
+  el.className = 'show ' + (type || 'info');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 4500);
 }
-
-function hideStatus() {
-  $('status').classList.add('hidden');
-}
-
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ============================================================
-// BƯỚC 1: KIỂM TRA URL / HTML ĐẦU VÀO
+// UI: Loading overlay
 // ============================================================
-function isHtmlText(text) {
-  return /<!DOCTYPE html|<html|<script|<body/i.test(text);
-}
-
-function isUrl(text) {
-  try {
-    const u = new URL(text);
-    return u.protocol === 'http:' || u.protocol === 'https:';
-  } catch {
-    return false;
+let _ltimer = null;
+const _ldMsgs = [
+  ['Đang đọc file', 'Phân tích cấu trúc HTML...'],
+  ['Đang tải dữ liệu', 'Kết nối tới server...'],
+  ['Đang xử lý', 'Tìm kiếm quizData...'],
+  ['Đang parse', 'Trích xuất câu hỏi và đáp án...'],
+  ['Hoàn tất', 'Chuẩn bị hiển thị kết quả...']
+];
+function _ld(show, msg, sub){
+  const el = $('loading-overlay');
+  if (show){
+    el.classList.remove('hidden');
+    if (msg) $('lt').textContent = msg;
+    if (sub) $('lsub').textContent = sub;
+    // cycle messages
+    let i = 0;
+    _ltimer = setInterval(() => {
+      i = (i + 1) % _ldMsgs.length;
+      $('lt').textContent = _ldMsgs[i][0];
+      $('lsub').textContent = _ldMsgs[i][1];
+    }, 900);
+  } else {
+    clearInterval(_ltimer);
+    el.classList.add('hidden');
   }
 }
 
 // ============================================================
-// BƯỚC 2: FETCH HTML TỪ URL (qua proxy CORS)
+// Helpers
 // ============================================================
-async function fetchHtmlFromUrl(url) {
-  // Thử fetch trực tiếp trước
-  try {
-    showStatus('⏳ Đang tải HTML trực tiếp...', 'info');
-    const res = await fetch(url, { mode: 'cors' });
-    if (res.ok) {
-      const text = await res.text();
-      if (isHtmlText(text)) return text;
-    }
-  } catch (e) {
-    console.warn('Fetch trực tiếp thất bại:', e.message);
-  }
+const _esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
-  // Fallback: dùng proxy CORS
+function _isHtml(t){ return /<!DOCTYPE html|<html|<script|<body/i.test(t); }
+function _isUrl(t){ try{ const u=new URL(t); return u.protocol==='http:'||u.protocol==='https:'; }catch{ return false; } }
+function _fmtB(b){ if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(2)+' MB'; }
+
+// ============================================================
+// Tab switcher
+// ============================================================
+function _sw(m){
+  ['f','u','h'].forEach(k => {
+    document.querySelector('[data-p="'+k+'"]').classList.toggle('hidden', k!==m);
+    document.querySelector('[data-m="'+k+'"]').classList.toggle('active', k===m);
+  });
+}
+
+// ============================================================
+// File picker
+// ============================================================
+function _setupFile(){
+  const dz = $('dz'), fi = $('fi');
+  dz.addEventListener('click', () => fi.click());
+  fi.addEventListener('change', e => { if(e.target.files[0]) _pickF(e.target.files[0]); });
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation();
+    dz.style.borderColor = '#ff6ac1';
+    dz.style.background = 'rgba(255,106,193,.08)';
+  }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation();
+    dz.style.borderColor = '#3a3a52';
+    dz.style.background = '';
+  }));
+  dz.addEventListener('drop', e => {
+    const f = e.dataTransfer.files[0];
+    if (f) _pickF(f);
+  });
+}
+
+function _pickF(file){
+  const ok = /\.(html?|txt)$/i.test(file.name) || file.type === 'text/html';
+  if (!ok){ _st('❌ File không hợp lệ. Chỉ hỗ trợ .html/.htm/.txt', 'error'); return; }
+  _F = file;
+  $('fname').textContent = file.name;
+  $('fsize').textContent = _fmtB(file.size);
+  $('finfo').classList.remove('hidden');
+  _st('✅ Đã chọn: <b>' + _esc(file.name) + '</b> — bấm "Kiểm tra file"', 'success');
+}
+
+function _clrF(){
+  _F = null;
+  $('fi').value = '';
+  $('finfo').classList.add('hidden');
+  _st('Đã bỏ chọn file', 'info');
+}
+
+async function _readF(){
+  if (!_F){ _st('⚠️ ' + _S.noFile, 'warn'); return; }
+  _ld(true, 'Đang đọc file...', _F.name);
+  try {
+    const text = await _F.text();
+    if (!text || text.length < 50) throw new Error('File rỗng hoặc quá ngắn');
+    // giả lập delay cho hiệu ứng
+    await new Promise(r => setTimeout(r, 700));
+    _ld(false);
+    _proc(text, 'file: ' + _F.name);
+  } catch(e){
+    _ld(false);
+    _st('❌ Không đọc được file: ' + e.message, 'error');
+  }
+}
+
+// ============================================================
+// Fetch URL
+// ============================================================
+async function _fetch(url){
   const proxies = [
-    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    (u) => u,
+    (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+    (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+    (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
   ];
-
-  for (const makeUrl of proxies) {
+  for (const p of proxies){
     try {
-      const proxyUrl = makeUrl(url);
-      showStatus(`⏳ Đang thử proxy: <code>${new URL(proxyUrl).hostname}</code>...`, 'info');
-      const res = await fetch(proxyUrl);
-      if (res.ok) {
-        const text = await res.text();
-        if (isHtmlText(text)) return text;
+      const pu = p(url);
+      const res = await fetch(pu, { mode:'cors' });
+      if (res.ok){
+        const t = await res.text();
+        if (_isHtml(t)) return t;
       }
-    } catch (e) {
-      console.warn('Proxy thất bại:', e.message);
-    }
+    } catch(e){ /* next */ }
   }
+  throw new Error('Không thể tải HTML. Trang có thể chặn CORS.');
+}
 
-  throw new Error('Không thể tải HTML. Trang có thể chặn CORS, hoặc URL sai. Hãy dùng nút "Dán HTML mẫu".');
+async function _checkUrl(){
+  const v = $('ui').value.trim();
+  if (!v){ _st('⚠️ ' + _S.noUrl, 'warn'); return; }
+  if (!_isUrl(v)){ _st('❌ Link không hợp lệ', 'error'); return; }
+  _ld(true, 'Đang tải HTML...', v.substring(0, 50));
+  try {
+    const html = await _fetch(v);
+    await new Promise(r => setTimeout(r, 500));
+    _ld(false);
+    _proc(html, v);
+  } catch(e){
+    _ld(false);
+    _st('❌ ' + e.message, 'error');
+  }
+}
+
+async function _checkHtml(){
+  const v = $('hi').value.trim();
+  if (!v){ _st('⚠️ ' + _S.noHtml, 'warn'); return; }
+  if (!_isHtml(v)){ _st('❌ Nội dung không giống HTML', 'error'); return; }
+  _ld(true, 'Đang parse HTML...', v.length + ' ký tự');
+  await new Promise(r => setTimeout(r, 500));
+  _ld(false);
+  _proc(v, 'HTML paste');
 }
 
 // ============================================================
-// BƯỚC 3: PARSE quizData TỪ HTML
+// PARSE
 // ============================================================
-function extractQuizDataFromHtml(html) {
-  // Tách các thẻ <script> ra
+function _extract(html){
   const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-  let m;
-  const scripts = [];
-  while ((m = scriptRegex.exec(html)) !== null) {
-    scripts.push(m[1]);
-  }
-  if (scripts.length === 0) {
-    // Có thể HTML chỉ chứa code JS thuần
-    scripts.push(html);
-  }
+  let m; const scripts = [];
+  while ((m = scriptRegex.exec(html)) !== null) scripts.push(m[1]);
+  if (!scripts.length) scripts.push(html);
 
   const fullJs = scripts.join('\n');
-
-  // Tìm "const quizData = [...]" hoặc "var quizData = [...]" hoặc "let quizData = [...]"
   const match = fullJs.match(/(?:const|var|let)\s+quizData\s*=\s*(\[[\s\S]*?\])\s*;/);
-  if (!match) {
-    throw new Error('Không tìm thấy biến <code>quizData</code> trong HTML.');
-  }
+  if (!match) throw new Error('Không tìm thấy biến quizData trong HTML');
 
-  // Thử eval trực tiếp
   let data;
-  try {
-    data = eval('(' + match[1] + ')');
-  } catch (e) {
-    // Fallback: dùng Function
-    try {
-      data = new Function('return (' + match[1] + ')')();
-    } catch (e2) {
-      throw new Error('Tìm thấy quizData nhưng không parse được: ' + e2.message);
-    }
+  try { data = eval('(' + match[1] + ')'); }
+  catch(e){
+    try { data = new Function('return (' + match[1] + ')')(); }
+    catch(e2){ throw new Error('Parse lỗi: ' + e2.message); }
   }
-
-  if (!Array.isArray(data)) {
-    throw new Error('quizData không phải mảng.');
-  }
+  if (!Array.isArray(data)) throw new Error('quizData không phải mảng');
   return data;
 }
 
-// ============================================================
-// BƯỚC 4: CHUẨN HÓA CẤU TRÚC — HỖ TRỢ NHIỀU FORMAT
-// ============================================================
-function normalizeDecks(rawData) {
-  /*
-    Hỗ trợ 2 format:
-    FORMAT A (Tốc độ phản ứng): [
-      [ {type:'mcq', question, options, answer}, ... ],   // đề 1
-      [...],                                              // đề 2
-      [...]                                               // đề 3
-    ]
-    FORMAT B (Ester – Lipid): [
-      { deckName:'Đề số 1', questions: [ {type:'mc', answer:'A', ...}, ... ] },
-      ...
-    ]
-  */
-  if (!Array.isArray(rawData)) return [];
-
-  // FORMAT B — object có .questions
-  if (rawData[0] && !Array.isArray(rawData[0]) && Array.isArray(rawData[0].questions)) {
-    return rawData.map((deck, i) => ({
-      name: deck.deckName || `Đề ${i + 1}`,
-      questions: deck.questions,
-      format: 'B',
-    }));
+function _norm(raw){
+  if (!Array.isArray(raw)) return [];
+  if (raw[0] && !Array.isArray(raw[0]) && Array.isArray(raw[0].questions)){
+    return raw.map((d,i) => ({ name: d.deckName || 'Đề ' + (i+1), questions: d.questions, format: 'B' }));
   }
-
-  // FORMAT A — mảng 2 chiều
-  if (rawData[0] && Array.isArray(rawData[0])) {
-    return rawData.map((questions, i) => ({
-      name: `Đề ${i + 1}`,
-      questions,
-      format: 'A',
-    }));
+  if (raw[0] && Array.isArray(raw[0])){
+    return raw.map((q,i) => ({ name: 'Đề ' + (i+1), questions: q, format: 'A' }));
   }
-
-  // Fallback: coi cả mảng là 1 đề
-  return [{ name: 'Đề 1', questions: rawData, format: 'unknown' }];
+  return [{ name: 'Đề 1', questions: raw, format: '?' }];
 }
 
 // ============================================================
-// BƯỚC 5: RENDER ĐÁP ÁN
+// RENDER
 // ============================================================
-function renderAnswerForQuestion(q, idx) {
-  let html = `<div class="q-box">`;
-  html += `<div class="ans-yellow mb-1">Câu ${idx + 1}: <span class="text-gray-500 font-normal text-xs">[${esc(q.type || '?')}]</span>`;
-  if (q.topic) html += ` <span class="text-gray-500 font-normal text-xs">— ${esc(q.topic)}</span>`;
-  html += `</div>`;
-  html += `<div class="text-gray-400 text-xs mb-2">${esc((q.question || '').substring(0, 140))}${(q.question || '').length > 140 ? '...' : ''}</div>`;
+function _rQ(q, i){
+  let h = '<div class="q-box" style="animation-delay:' + (i*0.03) + 's">';
+  h += '<div class="ans-yellow mb-1 font-bold">Câu ' + (i+1) + ': <span class="text-gray-500 font-normal text-xs">[' + _esc(q.type||'?') + ']</span>';
+  if (q.topic) h += ' <span class="text-gray-500 font-normal text-xs">— ' + _esc(q.topic) + '</span>';
+  h += '</div>';
+  h += '<div class="text-gray-400 text-xs mb-2">' + _esc((q.question||'').substring(0,140)) + ((q.question||'').length>140?'...':'') + '</div>';
 
-  // FORMAT A: mcq / true-false / short-answer
-  if (q.type === 'mcq') {
-    const ansIdx = (q.options || []).indexOf(q.answer);
-    const letter = ansIdx >= 0 ? String.fromCharCode(65 + ansIdx) : '?';
-    html += `<div class="ans-green">✅ ${letter}. ${esc(q.answer)}</div>`;
-  } else if (q.type === 'true-false') {
-    (q.statements || []).forEach((s, j) => {
-      const mark = s.answer ? 'ĐÚNG' : 'SAI';
-      const cls = s.answer ? 'ans-green' : 'ans-red';
-      html += `<div class="${cls} text-xs">${String.fromCharCode(97 + j)}) ${mark} — <span class="text-gray-400">${esc((s.text || '').substring(0, 60))}${(s.text || '').length > 60 ? '...' : ''}</span></div>`;
-    });
-  } else if (q.type === 'short-answer') {
-    html += `<div class="ans-green">✅ ${esc(q.answer)}</div>`;
-  }
-  // FORMAT B: mc / tf / short
-  else if (q.type === 'mc') {
-    const ans = String(q.answer || '').toUpperCase();
-    const ansIdx = 'ABCD'.indexOf(ans);
-    const ansText = ansIdx >= 0 && q.options ? q.options[ansIdx] : '';
-    html += `<div class="ans-green">✅ ${ans}. ${esc(ansText)}</div>`;
-  } else if (q.type === 'tf') {
-    (q.statements || []).forEach((s, j) => {
-      const a = (q.answers || [])[j];
+  const T = q.type || '';
+  if (T === 'mcq' || T === 'mc'){
+    if (T === 'mcq'){
+      const idx = (q.options||[]).indexOf(q.answer);
+      const L = idx >= 0 ? String.fromCharCode(65+idx) : '?';
+      h += '<div class="ans-green">✅ ' + L + '. ' + _esc(q.answer) + '</div>';
+    } else {
+      const a = String(q.answer||'').toUpperCase();
+      const idx = 'ABCD'.indexOf(a);
+      const t = idx>=0 && q.options ? q.options[idx] : '';
+      h += '<div class="ans-green">✅ ' + a + '. ' + _esc(t) + '</div>';
+    }
+  } else if (T === 'true-false' || T === 'tf'){
+    (q.statements||[]).forEach((s,j) => {
+      const a = T === 'tf' ? (q.answers||[])[j] : s.answer;
       const mark = a ? 'ĐÚNG' : 'SAI';
       const cls = a ? 'ans-green' : 'ans-red';
-      html += `<div class="${cls} text-xs">${String.fromCharCode(97 + j)}) ${mark} — <span class="text-gray-400">${esc((s || '').substring(0, 60))}${(s || '').length > 60 ? '...' : ''}</span></div>`;
+      const txt = T === 'tf' ? s : (s.text||'');
+      h += '<div class="' + cls + ' text-xs">' + String.fromCharCode(97+j) + ') ' + mark + ' — <span class="text-gray-400">' + _esc((txt||'').substring(0,60)) + ((txt||'').length>60?'...':'') + '</span></div>';
     });
-  } else if (q.type === 'short') {
-    html += `<div class="ans-green">✅ ${esc(q.answer)}</div>`;
+  } else if (T === 'short-answer' || T === 'short'){
+    h += '<div class="ans-green">✅ ' + _esc(q.answer) + '</div>';
   } else {
-    html += `<div class="text-yellow-400 text-xs">⚠️ Loại câu hỏi không xác định: <code>${esc(q.type)}</code></div>`;
+    h += '<div class="text-yellow-400 text-xs">⚠️ Loại không xác định: ' + _esc(T) + '</div>';
   }
-
-  // Đáp án thô (debug)
-  html += `<div class="text-gray-600 text-[10px] mt-1">raw: answer=${esc(JSON.stringify(q.answer ?? q.answers ?? '?'))}</div>`;
-
-  html += `</div>`;
-  return html;
+  h += '<div class="text-gray-600 text-[10px] mt-1">raw: ' + _esc(JSON.stringify(q.answer ?? q.answers ?? '?')) + '</div>';
+  h += '</div>';
+  return h;
 }
 
-function renderDeck(deckIndex) {
-  CURRENT_TAB = deckIndex;
-  const deck = PARSED_DATA[deckIndex];
-  const content = $('content');
+function _rD(idx){
+  _T = idx;
+  const d = _D[idx];
+  let h = '<div class="mb-3 flex justify-between items-center anim-fadeIn">' +
+    '<div class="neon font-bold">📋 ' + _esc(d.name) + ' — ' + d.questions.length + ' câu</div>' +
+    '<div class="text-xs text-gray-500">Format ' + _esc(d.format) + '</div>' +
+  '</div>';
+  d.questions.forEach((q,i) => { h += _rQ(q,i); });
+  $('ct').innerHTML = h;
+  document.querySelectorAll('#tb .tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+}
 
-  let html = `<div class="mb-3 flex justify-between items-center">
-    <div class="neon font-bold">📋 ${esc(deck.name)} — ${deck.questions.length} câu</div>
-    <div class="text-xs text-gray-500">Format: ${esc(deck.format)}</div>
-  </div>`;
-
-  deck.questions.forEach((q, i) => {
-    html += renderAnswerForQuestion(q, i);
-  });
-
-  content.innerHTML = html;
-
-  // Update tabs
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', i === deckIndex);
+function _rT(){
+  const tb = $('tb'); tb.innerHTML = '';
+  _D.forEach((d,i) => {
+    const b = document.createElement('button');
+    b.className = 'tab';
+    b.textContent = d.name;
+    b.onclick = () => _rD(i);
+    tb.appendChild(b);
   });
 }
 
-function renderTabs() {
-  const tabs = $('tabs');
-  tabs.innerHTML = '';
-  PARSED_DATA.forEach((deck, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'tab';
-    btn.textContent = deck.name;
-    btn.onclick = () => renderDeck(i);
-    tabs.appendChild(btn);
-  });
-}
-
-function renderAll() {
-  renderTabs();
-  renderDeck(0);
-  $('results').classList.remove('hidden');
+function _renderAll(){
+  _rT();
+  _rD(0);
+  $('rs').classList.remove('hidden');
+  $('rs').classList.add('anim-bounceIn');
+  setTimeout(() => $('rs').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 }
 
 // ============================================================
-// BƯỚC 6: MAIN — XỬ LÝ NÚT KIỂM TRA
+// MAIN
 // ============================================================
-async function checkAnswer() {
-  const input = $('url-input').value.trim();
-  if (!input) {
-    showStatus('⚠️ Vui lòng dán link hoặc HTML vào ô trên.', 'warn');
-    return;
-  }
-
-  $('results').classList.add('hidden');
-  PARSED_DATA = null;
-
-  let html = '';
-
-  // Case 1: input là HTML thuần
-  if (isHtmlText(input)) {
-    html = input;
-    showStatus('📋 Nhận diện: HTML thuần → bắt đầu parse...', 'info');
-  }
-  // Case 2: input là URL
-  else if (isUrl(input)) {
-    try {
-      html = await fetchHtmlFromUrl(input);
-      showStatus('✅ Đã tải HTML. Đang parse...', 'success');
-    } catch (e) {
-      showStatus(`❌ ${e.message}`, 'error');
-      return;
-    }
-  }
-  // Case 3: không nhận diện được
-  else {
-    showStatus('❌ Không nhận diện được input. Hãy dán URL đầy đủ (bắt đầu bằng http:// hoặc https://) hoặc HTML.', 'error');
-    return;
-  }
-
-  // Parse
-  let rawData;
-  try {
-    rawData = extractQuizDataFromHtml(html);
-  } catch (e) {
-    showStatus(`❌ Lỗi parse: ${e.message}`, 'error');
-    return;
-  }
-
-  // Normalize
-  PARSED_DATA = normalizeDecks(rawData);
-  if (!PARSED_DATA.length) {
-    showStatus('❌ Không có đề nào được tìm thấy.', 'error');
-    return;
-  }
-
-  const totalQ = PARSED_DATA.reduce((s, d) => s + d.questions.length, 0);
-  showStatus(`✅ <b>Thành công!</b> Tìm thấy <b>${PARSED_DATA.length}</b> đề, tổng <b>${totalQ}</b> câu hỏi.`, 'success');
-
-  renderAll();
-}
-
-// ============================================================
-// DEMO — DÁN HTML MẪU
-// ============================================================
-function loadDemo() {
-  const demoHtml = `
-<!DOCTYPE html>
-<html><head><title>Ôn tập chương 6. Tốc độ phản ứng</title></head>
-<body>
-<script>
-const quizData = [
-  [
-    { type: 'mcq', question: 'Tốc độ trung bình của phản ứng được định nghĩa là?', options: ['Sự thay đổi nồng độ của một chất trong một khoảng thời gian.', 'Tốc độ tại thời điểm ban đầu.', 'Tốc độ tại một thời điểm bất kỳ.', 'Sự thay đổi nhiệt độ.'], answer: 'Sự thay đổi nồng độ của một chất trong một khoảng thời gian.' },
-    { type: 'true-false', question: 'Xét các phát biểu:', statements: [
-      { text: 'Khi tăng nhiệt độ lên 10°C, tốc độ phản ứng tăng gấp đôi.', answer: false },
-      { text: 'Chất xúc tác không bị tiêu hao trong phản ứng.', answer: true }
-    ]},
-    { type: 'short-answer', question: 'Tính tốc độ trung bình?', answer: '0.01' }
-  ],
-  [
-    { type: 'mcq', question: 'Câu hỏi đề 2?', options: ['A', 'B', 'C', 'D'], answer: 'B' }
-  ]
-];
-<\/script>
-</body></html>`;
-  $('url-input').value = demoHtml.trim();
-  showStatus('📋 Đã dán HTML mẫu. Bấm "Kiểm tra" để parse.', 'info');
+function _proc(html, label){
+  $('rs').classList.add('hidden');
+  _D = null;
+  let raw;
+  try { raw = _extract(html); }
+  catch(e){ _st('❌ Lỗi parse: ' + e.message, 'error'); return; }
+  _D = _norm(raw);
+  if (!_D.length){ _st('❌ Không có đề nào', 'error'); return; }
+  const tot = _D.reduce((s,d) => s + d.questions.length, 0);
+  _st('✅ <b>Thành công!</b> ' + (label ? '(' + _esc(label) + ') ' : '') +
+      'Tìm thấy <b>' + _D.length + '</b> đề, <b>' + tot + '</b> câu', 'success');
+  _renderAll();
 }
 
 // ============================================================
 // COPY
 // ============================================================
-function copyAll() {
-  if (!PARSED_DATA) return;
-  let text = '';
-  PARSED_DATA.forEach((deck) => {
-    text += `\n===== ${deck.name} =====\n`;
-    deck.questions.forEach((q, i) => {
-      text += `Câu ${i + 1}: `;
-      if (q.type === 'mcq') {
-        const idx = (q.options || []).indexOf(q.answer);
-        text += `${String.fromCharCode(65 + idx)}. ${q.answer}\n`;
-      } else if (q.type === 'true-false') {
-        text += (q.statements || []).map((s, j) => `${String.fromCharCode(97 + j)}) ${s.answer ? 'Đ' : 'S'}`).join(' ') + '\n';
-      } else if (q.type === 'short-answer') {
-        text += `${q.answer}\n`;
-      } else if (q.type === 'mc') {
-        text += `${String(q.answer).toUpperCase()}. ${q.options[('ABCD'.indexOf(String(q.answer).toUpperCase()))]}\n`;
-      } else if (q.type === 'tf') {
-        text += (q.answers || []).map((a, j) => `${String.fromCharCode(97 + j)}) ${a ? 'Đ' : 'S'}`).join(' ') + '\n';
-      } else if (q.type === 'short') {
-        text += `${q.answer}\n`;
+function _copy(){
+  if (!_D) return;
+  let t = '';
+  _D.forEach(d => {
+    t += '\n===== ' + d.name + ' =====\n';
+    d.questions.forEach((q,i) => {
+      t += 'Câu ' + (i+1) + ': ';
+      const T = q.type;
+      if (T === 'mcq'){
+        const idx = (q.options||[]).indexOf(q.answer);
+        t += String.fromCharCode(65+idx) + '. ' + q.answer + '\n';
+      } else if (T === 'mc'){
+        const a = String(q.answer).toUpperCase();
+        const idx = 'ABCD'.indexOf(a);
+        t += a + '. ' + (q.options ? q.options[idx] : '') + '\n';
+      } else if (T === 'true-false'){
+        t += (q.statements||[]).map((s,j) => String.fromCharCode(97+j) + ') ' + (s.answer?'Đ':'S')).join(' ') + '\n';
+      } else if (T === 'tf'){
+        t += (q.answers||[]).map((a,j) => String.fromCharCode(97+j) + ') ' + (a?'Đ':'S')).join(' ') + '\n';
+      } else if (T === 'short-answer' || T === 'short'){
+        t += q.answer + '\n';
       }
     });
   });
-
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = $('copy-btn');
-    const old = btn.textContent;
-    btn.textContent = '✅ Đã copy!';
-    setTimeout(() => btn.textContent = old, 1500);
+  navigator.clipboard.writeText(t).then(() => {
+    const b = $('bc'), o = b.textContent;
+    b.textContent = '✅ Đã copy!';
+    setTimeout(() => b.textContent = o, 1500);
   });
 }
 
 // ============================================================
-// EVENT LISTENERS
+// DEMO
 // ============================================================
-$('check-btn').addEventListener('click', checkAnswer);
-$('url-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) checkAnswer();
-});
-$('copy-btn').addEventListener('click', copyAll);
+function _demo(){
+  const d = '<!DOCTYPE html>\n<html><head><title>Ôn tập chương 6. Tốc độ phản ứng</title></head>\n<body>\n<script>\nconst quizData = [\n  [\n    { type: \'mcq\', question: \'Tốc độ trung bình của phản ứng được định nghĩa là?\', options: [\'Sự thay đổi nồng độ.\',\'Tốc độ ban đầu.\',\'Tốc độ tức thời.\',\'Nhiệt độ.\'], answer: \'Sự thay đổi nồng độ.\' },\n    { type: \'true-false\', question: \'Xét các phát biểu:\', statements: [\n      { text: \'Tăng nhiệt độ 10°C, tốc độ tăng gấp đôi.\', answer: false },\n      { text: \'Chất xúc tác không bị tiêu hao.\', answer: true }\n    ]},\n    { type: \'short-answer\', question: \'Tính tốc độ trung bình?\', answer: \'0.01\' }\n  ],\n  [\n    { type: \'mcq\', question: \'Câu hỏi đề 2?\', options: [\'A\',\'B\',\'C\',\'D\'], answer: \'B\' }\n  ]\n];\n<\/script>\n</body></html>';
+  $('hi').value = d;
+  _sw('h');
+  _st('📋 Đã dán HTML mẫu — bấm "Kiểm tra"', 'info');
+}
 
-// Enter thường → check
-$('url-input').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') checkAnswer();
+// ============================================================
+// EVENTS
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  _setupFile();
+  document.querySelectorAll('[data-m]').forEach(b => {
+    b.addEventListener('click', () => _sw(b.dataset.m));
+  });
+  $('bf').addEventListener('click', _readF);
+  $('bu').addEventListener('click', _checkUrl);
+  $('bh').addEventListener('click', _checkHtml);
+  $('bc').addEventListener('click', _copy);
+  $('ui').addEventListener('keypress', e => { if (e.key === 'Enter') _checkUrl(); });
 });
 
-console.log('%c🐱 Answer Checker ready!', 'color:#fff;background:#ff6ac1;padding:4px 10px;border-radius:4px;font-weight:bold;');
+// Expose tối thiểu ra window cho các onclick inline
+window.w = { _clrF, _demo };
+
+// Anti-tamper nhẹ: chặn nếu mở DevTools liên tục (tùy chọn)
+// Đã tắt để không ảnh hưởng UX
+
+})();
 </script>
 
 </body>
