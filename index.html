@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐱 Answer Checker — Xem đáp án từ link quiz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Be Vietnam Pro', sans-serif; background: #0f0f17; color: #e0e0e0; }
+  .neon { color: #ff6ac1; }
+  .card { background: #16161e; border: 1.5px solid #2a2a3e; border-radius: 12px; }
+  .btn-neon { background: #ff6ac1; color: #16161e; font-weight: 700; transition: all 0.2s; }
+  .btn-neon:hover { background: #ff8fd4; transform: translateY(-1px); }
+  .btn-ghost { background: #2a2a3e; color: #e0e0e0; font-weight: 600; }
+  .btn-ghost:hover { background: #3a3a52; }
+  pre { white-space: pre-wrap; word-break: break-word; }
+  .q-box { background: #1c1c26; border-left: 3px solid #ff6ac1; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+  .ans-green { color: #2ecc71; font-weight: 700; }
+  .ans-red { color: #ff4757; font-weight: 700; }
+  .ans-yellow { color: #f1c40f; font-weight: 700; }
+  .tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+  .tab.active { background: #ff6ac1; color: #16161e; }
+  .tab:not(.active) { background: #2a2a3e; color: #aaa; }
+  .tab:not(.active):hover { background: #3a3a52; color: #fff; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #16161e; }
+  ::-webkit-scrollbar-thumb { background: #3a3a52; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #ff6ac1; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="max-w-4xl mx-auto p-4 md:p-8">
+
+  <!-- Header -->
+  <header class="text-center mb-8">
+    <h1 class="text-3xl md:text-4xl font-bold neon mb-2">🐱 Answer Checker</h1>
+    <p class="text-gray-400">Dán link web quiz → Nhận toàn bộ đáp án</p>
+    <p class="text-xs text-gray-500 mt-1">Hỗ trợ: Ôn tập chương 6 (Tốc độ phản ứng) • Ôn tập chương 1 (Ester – Lipid)</p>
+  </header>
+
+  <!-- Input Section -->
+  <div class="card p-6 mb-6">
+    <label class="block text-sm font-semibold mb-2 text-gray-300">🔗 Link web quiz:</label>
+    <div class="flex flex-col md:flex-row gap-3">
+      <input
+        id="url-input"
+        type="url"
+        placeholder="https://example.com/quiz.html hoặc paste cả đoạn HTML..."
+        class="flex-1 px-4 py-3 bg-[#0f0f17] border border-[#2a2a3e] rounded-lg focus:outline-none focus:border-[#ff6ac1] text-sm"
+      />
+      <button id="check-btn" class="btn-neon px-6 py-3 rounded-lg">
+        🔍 Kiểm tra
+      </button>
+    </div>
+
+    <div class="mt-3 flex flex-wrap gap-2 text-xs">
+      <button class="btn-ghost px-3 py-1 rounded" onclick="document.getElementById('url-input').value='';document.getElementById('url-input').focus()">
+        🧹 Xóa
+      </button>
+      <button class="btn-ghost px-3 py-1 rounded" onclick="loadDemo()">
+        📋 Dán HTML mẫu vào đây
+      </button>
+    </div>
+
+    <p class="text-xs text-gray-500 mt-3">
+      ⚠️ Trang web phải cho phép <code>CORS</code> (thường là GitHub Pages, Blogger công khai).
+      Nếu bị chặn, dùng nút "Dán HTML mẫu" để paste trực tiếp mã nguồn.
+    </p>
+  </div>
+
+  <!-- Status -->
+  <div id="status" class="hidden card p-4 mb-6 text-sm"></div>
+
+  <!-- Results -->
+  <div id="results" class="hidden">
+    <div class="card p-6 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold neon">📋 Đáp án</h2>
+        <button id="copy-btn" class="btn-ghost px-3 py-1 rounded text-xs">📄 Copy tất cả</button>
+      </div>
+      <div id="tabs" class="flex flex-wrap gap-2 mb-4"></div>
+      <div id="content"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-gray-600 mt-8">
+    🐱 Answer Checker — Deploy trên GitHub Pages • Client-side, không lưu dữ liệu
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// STATE
+// ============================================================
+let PARSED_DATA = null;
+let CURRENT_TAB = 0;
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+const $ = (id) => document.getElementById(id);
+
+function showStatus(msg, type = 'info') {
+  const el = $('status');
+  el.classList.remove('hidden');
+  const colors = {
+    info:    'border-blue-500/50 text-blue-300 bg-blue-500/10',
+    success: 'border-green-500/50 text-green-300 bg-green-500/10',
+    error:   'border-red-500/50 text-red-300 bg-red-500/10',
+    warn:    'border-yellow-500/50 text-yellow-300 bg-yellow-500/10',
+  };
+  el.className = `card p-4 mb-6 text-sm border ${colors[type] || colors.info}`;
+  el.innerHTML = msg;
+}
+
+function hideStatus() {
+  $('status').classList.add('hidden');
+}
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ============================================================
+// BƯỚC 1: KIỂM TRA URL / HTML ĐẦU VÀO
+// ============================================================
+function isHtmlText(text) {
+  return /<!DOCTYPE html|<html|<script|<body/i.test(text);
+}
+
+function isUrl(text) {
+  try {
+    const u = new URL(text);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+// ============================================================
+// BƯỚC 2: FETCH HTML TỪ URL (qua proxy CORS)
+// ============================================================
+async function fetchHtmlFromUrl(url) {
+  // Thử fetch trực tiếp trước
+  try {
+    showStatus('⏳ Đang tải HTML trực tiếp...', 'info');
+    const res = await fetch(url, { mode: 'cors' });
+    if (res.ok) {
+      const text = await res.text();
+      if (isHtmlText(text)) return text;
+    }
+  } catch (e) {
+    console.warn('Fetch trực tiếp thất bại:', e.message);
+  }
+
+  // Fallback: dùng proxy CORS
+  const proxies = [
+    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  ];
+
+  for (const makeUrl of proxies) {
+    try {
+      const proxyUrl = makeUrl(url);
+      showStatus(`⏳ Đang thử proxy: <code>${new URL(proxyUrl).hostname}</code>...`, 'info');
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        const text = await res.text();
+        if (isHtmlText(text)) return text;
+      }
+    } catch (e) {
+      console.warn('Proxy thất bại:', e.message);
+    }
+  }
+
+  throw new Error('Không thể tải HTML. Trang có thể chặn CORS, hoặc URL sai. Hãy dùng nút "Dán HTML mẫu".');
+}
+
+// ============================================================
+// BƯỚC 3: PARSE quizData TỪ HTML
+// ============================================================
+function extractQuizDataFromHtml(html) {
+  // Tách các thẻ <script> ra
+  const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  let m;
+  const scripts = [];
+  while ((m = scriptRegex.exec(html)) !== null) {
+    scripts.push(m[1]);
+  }
+  if (scripts.length === 0) {
+    // Có thể HTML chỉ chứa code JS thuần
+    scripts.push(html);
+  }
+
+  const fullJs = scripts.join('\n');
+
+  // Tìm "const quizData = [...]" hoặc "var quizData = [...]" hoặc "let quizData = [...]"
+  const match = fullJs.match(/(?:const|var|let)\s+quizData\s*=\s*(\[[\s\S]*?\])\s*;/);
+  if (!match) {
+    throw new Error('Không tìm thấy biến <code>quizData</code> trong HTML.');
+  }
+
+  // Thử eval trực tiếp
+  let data;
+  try {
+    data = eval('(' + match[1] + ')');
+  } catch (e) {
+    // Fallback: dùng Function
+    try {
+      data = new Function('return (' + match[1] + ')')();
+    } catch (e2) {
+      throw new Error('Tìm thấy quizData nhưng không parse được: ' + e2.message);
+    }
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error('quizData không phải mảng.');
+  }
+  return data;
+}
+
+// ============================================================
+// BƯỚC 4: CHUẨN HÓA CẤU TRÚC — HỖ TRỢ NHIỀU FORMAT
+// ============================================================
+function normalizeDecks(rawData) {
+  /*
+    Hỗ trợ 2 format:
+    FORMAT A (Tốc độ phản ứng): [
+      [ {type:'mcq', question, options, answer}, ... ],   // đề 1
+      [...],                                              // đề 2
+      [...]                                               // đề 3
+    ]
+    FORMAT B (Ester – Lipid): [
+      { deckName:'Đề số 1', questions: [ {type:'mc', answer:'A', ...}, ... ] },
+      ...
+    ]
+  */
+  if (!Array.isArray(rawData)) return [];
+
+  // FORMAT B — object có .questions
+  if (rawData[0] && !Array.isArray(rawData[0]) && Array.isArray(rawData[0].questions)) {
+    return rawData.map((deck, i) => ({
+      name: deck.deckName || `Đề ${i + 1}`,
+      questions: deck.questions,
+      format: 'B',
+    }));
+  }
+
+  // FORMAT A — mảng 2 chiều
+  if (rawData[0] && Array.isArray(rawData[0])) {
+    return rawData.map((questions, i) => ({
+      name: `Đề ${i + 1}`,
+      questions,
+      format: 'A',
+    }));
+  }
+
+  // Fallback: coi cả mảng là 1 đề
+  return [{ name: 'Đề 1', questions: rawData, format: 'unknown' }];
+}
+
+// ============================================================
+// BƯỚC 5: RENDER ĐÁP ÁN
+// ============================================================
+function renderAnswerForQuestion(q, idx) {
+  let html = `<div class="q-box">`;
+  html += `<div class="ans-yellow mb-1">Câu ${idx + 1}: <span class="text-gray-500 font-normal text-xs">[${esc(q.type || '?')}]</span>`;
+  if (q.topic) html += ` <span class="text-gray-500 font-normal text-xs">— ${esc(q.topic)}</span>`;
+  html += `</div>`;
+  html += `<div class="text-gray-400 text-xs mb-2">${esc((q.question || '').substring(0, 140))}${(q.question || '').length > 140 ? '...' : ''}</div>`;
+
+  // FORMAT A: mcq / true-false / short-answer
+  if (q.type === 'mcq') {
+    const ansIdx = (q.options || []).indexOf(q.answer);
+    const letter = ansIdx >= 0 ? String.fromCharCode(65 + ansIdx) : '?';
+    html += `<div class="ans-green">✅ ${letter}. ${esc(q.answer)}</div>`;
+  } else if (q.type === 'true-false') {
+    (q.statements || []).forEach((s, j) => {
+      const mark = s.answer ? 'ĐÚNG' : 'SAI';
+      const cls = s.answer ? 'ans-green' : 'ans-red';
+      html += `<div class="${cls} text-xs">${String.fromCharCode(97 + j)}) ${mark} — <span class="text-gray-400">${esc((s.text || '').substring(0, 60))}${(s.text || '').length > 60 ? '...' : ''}</span></div>`;
+    });
+  } else if (q.type === 'short-answer') {
+    html += `<div class="ans-green">✅ ${esc(q.answer)}</div>`;
+  }
+  // FORMAT B: mc / tf / short
+  else if (q.type === 'mc') {
+    const ans = String(q.answer || '').toUpperCase();
+    const ansIdx = 'ABCD'.indexOf(ans);
+    const ansText = ansIdx >= 0 && q.options ? q.options[ansIdx] : '';
+    html += `<div class="ans-green">✅ ${ans}. ${esc(ansText)}</div>`;
+  } else if (q.type === 'tf') {
+    (q.statements || []).forEach((s, j) => {
+      const a = (q.answers || [])[j];
+      const mark = a ? 'ĐÚNG' : 'SAI';
+      const cls = a ? 'ans-green' : 'ans-red';
+      html += `<div class="${cls} text-xs">${String.fromCharCode(97 + j)}) ${mark} — <span class="text-gray-400">${esc((s || '').substring(0, 60))}${(s || '').length > 60 ? '...' : ''}</span></div>`;
+    });
+  } else if (q.type === 'short') {
+    html += `<div class="ans-green">✅ ${esc(q.answer)}</div>`;
+  } else {
+    html += `<div class="text-yellow-400 text-xs">⚠️ Loại câu hỏi không xác định: <code>${esc(q.type)}</code></div>`;
+  }
+
+  // Đáp án thô (debug)
+  html += `<div class="text-gray-600 text-[10px] mt-1">raw: answer=${esc(JSON.stringify(q.answer ?? q.answers ?? '?'))}</div>`;
+
+  html += `</div>`;
+  return html;
+}
+
+function renderDeck(deckIndex) {
+  CURRENT_TAB = deckIndex;
+  const deck = PARSED_DATA[deckIndex];
+  const content = $('content');
+
+  let html = `<div class="mb-3 flex justify-between items-center">
+    <div class="neon font-bold">📋 ${esc(deck.name)} — ${deck.questions.length} câu</div>
+    <div class="text-xs text-gray-500">Format: ${esc(deck.format)}</div>
+  </div>`;
+
+  deck.questions.forEach((q, i) => {
+    html += renderAnswerForQuestion(q, i);
+  });
+
+  content.innerHTML = html;
+
+  // Update tabs
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', i === deckIndex);
+  });
+}
+
+function renderTabs() {
+  const tabs = $('tabs');
+  tabs.innerHTML = '';
+  PARSED_DATA.forEach((deck, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab';
+    btn.textContent = deck.name;
+    btn.onclick = () => renderDeck(i);
+    tabs.appendChild(btn);
+  });
+}
+
+function renderAll() {
+  renderTabs();
+  renderDeck(0);
+  $('results').classList.remove('hidden');
+}
+
+// ============================================================
+// BƯỚC 6: MAIN — XỬ LÝ NÚT KIỂM TRA
+// ============================================================
+async function checkAnswer() {
+  const input = $('url-input').value.trim();
+  if (!input) {
+    showStatus('⚠️ Vui lòng dán link hoặc HTML vào ô trên.', 'warn');
+    return;
+  }
+
+  $('results').classList.add('hidden');
+  PARSED_DATA = null;
+
+  let html = '';
+
+  // Case 1: input là HTML thuần
+  if (isHtmlText(input)) {
+    html = input;
+    showStatus('📋 Nhận diện: HTML thuần → bắt đầu parse...', 'info');
+  }
+  // Case 2: input là URL
+  else if (isUrl(input)) {
+    try {
+      html = await fetchHtmlFromUrl(input);
+      showStatus('✅ Đã tải HTML. Đang parse...', 'success');
+    } catch (e) {
+      showStatus(`❌ ${e.message}`, 'error');
+      return;
+    }
+  }
+  // Case 3: không nhận diện được
+  else {
+    showStatus('❌ Không nhận diện được input. Hãy dán URL đầy đủ (bắt đầu bằng http:// hoặc https://) hoặc HTML.', 'error');
+    return;
+  }
+
+  // Parse
+  let rawData;
+  try {
+    rawData = extractQuizDataFromHtml(html);
+  } catch (e) {
+    showStatus(`❌ Lỗi parse: ${e.message}`, 'error');
+    return;
+  }
+
+  // Normalize
+  PARSED_DATA = normalizeDecks(rawData);
+  if (!PARSED_DATA.length) {
+    showStatus('❌ Không có đề nào được tìm thấy.', 'error');
+    return;
+  }
+
+  const totalQ = PARSED_DATA.reduce((s, d) => s + d.questions.length, 0);
+  showStatus(`✅ <b>Thành công!</b> Tìm thấy <b>${PARSED_DATA.length}</b> đề, tổng <b>${totalQ}</b> câu hỏi.`, 'success');
+
+  renderAll();
+}
+
+// ============================================================
+// DEMO — DÁN HTML MẪU
+// ============================================================
+function loadDemo() {
+  const demoHtml = `
+<!DOCTYPE html>
+<html><head><title>Ôn tập chương 6. Tốc độ phản ứng</title></head>
+<body>
+<script>
+const quizData = [
+  [
+    { type: 'mcq', question: 'Tốc độ trung bình của phản ứng được định nghĩa là?', options: ['Sự thay đổi nồng độ của một chất trong một khoảng thời gian.', 'Tốc độ tại thời điểm ban đầu.', 'Tốc độ tại một thời điểm bất kỳ.', 'Sự thay đổi nhiệt độ.'], answer: 'Sự thay đổi nồng độ của một chất trong một khoảng thời gian.' },
+    { type: 'true-false', question: 'Xét các phát biểu:', statements: [
+      { text: 'Khi tăng nhiệt độ lên 10°C, tốc độ phản ứng tăng gấp đôi.', answer: false },
+      { text: 'Chất xúc tác không bị tiêu hao trong phản ứng.', answer: true }
+    ]},
+    { type: 'short-answer', question: 'Tính tốc độ trung bình?', answer: '0.01' }
+  ],
+  [
+    { type: 'mcq', question: 'Câu hỏi đề 2?', options: ['A', 'B', 'C', 'D'], answer: 'B' }
+  ]
+];
+<\/script>
+</body></html>`;
+  $('url-input').value = demoHtml.trim();
+  showStatus('📋 Đã dán HTML mẫu. Bấm "Kiểm tra" để parse.', 'info');
+}
+
+// ============================================================
+// COPY
+// ============================================================
+function copyAll() {
+  if (!PARSED_DATA) return;
+  let text = '';
+  PARSED_DATA.forEach((deck) => {
+    text += `\n===== ${deck.name} =====\n`;
+    deck.questions.forEach((q, i) => {
+      text += `Câu ${i + 1}: `;
+      if (q.type === 'mcq') {
+        const idx = (q.options || []).indexOf(q.answer);
+        text += `${String.fromCharCode(65 + idx)}. ${q.answer}\n`;
+      } else if (q.type === 'true-false') {
+        text += (q.statements || []).map((s, j) => `${String.fromCharCode(97 + j)}) ${s.answer ? 'Đ' : 'S'}`).join(' ') + '\n';
+      } else if (q.type === 'short-answer') {
+        text += `${q.answer}\n`;
+      } else if (q.type === 'mc') {
+        text += `${String(q.answer).toUpperCase()}. ${q.options[('ABCD'.indexOf(String(q.answer).toUpperCase()))]}\n`;
+      } else if (q.type === 'tf') {
+        text += (q.answers || []).map((a, j) => `${String.fromCharCode(97 + j)}) ${a ? 'Đ' : 'S'}`).join(' ') + '\n';
+      } else if (q.type === 'short') {
+        text += `${q.answer}\n`;
+      }
+    });
+  });
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = $('copy-btn');
+    const old = btn.textContent;
+    btn.textContent = '✅ Đã copy!';
+    setTimeout(() => btn.textContent = old, 1500);
+  });
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+$('check-btn').addEventListener('click', checkAnswer);
+$('url-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) checkAnswer();
+});
+$('copy-btn').addEventListener('click', copyAll);
+
+// Enter thường → check
+$('url-input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') checkAnswer();
+});
+
+console.log('%c🐱 Answer Checker ready!', 'color:#fff;background:#ff6ac1;padding:4px 10px;border-radius:4px;font-weight:bold;');
+</script>
+
+</body>
+</html>
