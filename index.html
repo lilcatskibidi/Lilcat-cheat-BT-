@@ -1,182 +1,230 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐱 Answer Checker — Made by Lilcat</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
-<script src="https://www.youtube.com/iframe_api"></script>
-<style>
-:root{--neon:#ff6ac1;--bg:#0a0a12;--card:#14141f;--border:#2a2a3e}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:#e0e0e0;overflow-x:hidden;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background:
-  radial-gradient(circle at 20% 30%,rgba(255,106,193,.08),transparent 45%),
-  radial-gradient(circle at 80% 70%,rgba(52,152,219,.08),transparent 45%),
-  radial-gradient(circle at 50% 90%,rgba(46,204,113,.06),transparent 45%);
-  pointer-events:none;z-index:0}
-.neon{color:var(--neon)}
-.glow{text-shadow:0 0 8px rgba(255,106,193,.7),0 0 20px rgba(255,106,193,.4)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐱 Answer Checker — Made by Lilcat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <style>
+    :root{--neon:#ff6ac1;--bg:#0a0a12;--card:#14141f;--border:#2a2a3e}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:#e0e0e0;overflow-x:hidden;min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;background:
+      radial-gradient(circle at 20% 30%,rgba(255,106,193,.08),transparent 45%),
+      radial-gradient(circle at 80% 70%,rgba(52,152,219,.08),transparent 45%),
+      radial-gradient(circle at 50% 90%,rgba(46,204,113,.06),transparent 45%);
+      pointer-events:none;z-index:0}
+    .neon{color:var(--neon)}
+    .glow{text-shadow:0 0 8px rgba(255,106,193,.7),0 0 20px rgba(255,106,193,.4)}
 
-.page{display:none;animation:fadeIn .4s ease}
-.page.active{display:block}
+    .page{display:none;animation:fadeIn .4s ease}
+    .page.active{display:block}
 
-.card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;position:relative;z-index:1;backdrop-filter:blur(8px)}
-.btn-neon{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;font-weight:800;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;cursor:pointer}
-.btn-neon::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .6s}
-.btn-neon:hover::after{left:100%}
-.btn-neon:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,106,193,.4)}
-.btn-neon:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-ghost{background:var(--border);color:#e0e0e0;font-weight:600;transition:all .2s;cursor:pointer}
-.btn-ghost:hover{background:#3a3a52;transform:translateY(-1px)}
-.input-field{padding:12px 14px;background:#0a0a12;border:1.5px solid var(--border);border-radius:10px;color:#e0e0e0;font-size:14px;font-family:inherit;transition:border-color .2s;width:100%}
-.input-field:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(255,106,193,.15)}
-.tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:700;transition:all .25s;border:none;background:var(--border);color:#aaa;font-family:inherit;font-size:14px}
-.tab:hover{background:#3a3a52;color:#fff}
-.tab.active{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;transform:translateY(-2px);box-shadow:0 6px 16px rgba(255,106,193,.4)}
-.drop-zone{padding:32px;text-align:center;margin-bottom:12px;border-radius:12px;border:2px dashed #3a3a52;cursor:pointer;transition:all .25s}
-.drop-zone:hover,.drop-zone.dragover{border-color:#ff6ac1;background:rgba(255,106,193,.05)}
-.file-info-card{background:#1c1c26;border-radius:8px;padding:12px;margin-bottom:12px}
-.q-box{background:#1c1c26;border-left:3px solid var(--neon);border-radius:8px;padding:12px 14px;margin-bottom:10px;transition:transform .2s;animation:fadeInUp .35s ease both}
-.q-box:hover{transform:translateX(3px);box-shadow:-4px 0 16px rgba(255,106,193,.15)}
-.ans-green{color:#2ecc71;font-weight:700}
-.ans-red{color:#ff4757;font-weight:700}
-.ans-yellow{color:#f1c40f;font-weight:700}
-.stat{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center}
-.stat-number{font-size:28px;font-weight:900;color:var(--neon)}
-.stat-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+    .card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;position:relative;z-index:1;backdrop-filter:blur(8px)}
+    .btn-neon{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;font-weight:800;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;cursor:pointer}
+    .btn-neon::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .6s}
+    .btn-neon:hover::after{left:100%}
+    .btn-neon:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,106,193,.4)}
+    .btn-neon:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-ghost{background:var(--border);color:#e0e0e0;font-weight:600;transition:all .2s;cursor:pointer}
+    .btn-ghost:hover{background:#3a3a52;transform:translateY(-1px)}
+    .input-field{padding:12px 14px;background:#0a0a12;border:1.5px solid var(--border);border-radius:10px;color:#e0e0e0;font-size:14px;font-family:inherit;transition:border-color .2s;width:100%}
+    .input-field:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(255,106,193,.15)}
+    .tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:700;transition:all .25s;border:none;background:var(--border);color:#aaa;font-family:inherit;font-size:14px}
+    .tab:hover{background:#3a3a52;color:#fff}
+    .tab.active{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;transform:translateY(-2px);box-shadow:0 6px 16px rgba(255,106,193,.4)}
+    .drop-zone{padding:32px;text-align:center;margin-bottom:12px;border-radius:12px;border:2px dashed #3a3a52;cursor:pointer;transition:all .25s}
+    .drop-zone:hover,.drop-zone.dragover{border-color:#ff6ac1;background:rgba(255,106,193,.05)}
+    .file-info-card{background:#1c1c26;border-radius:8px;padding:12px;margin-bottom:12px}
+    .q-box{background:#1c1c26;border-left:3px solid var(--neon);border-radius:8px;padding:12px 14px;margin-bottom:10px;transition:transform .2s;animation:fadeInUp .35s ease both}
+    .q-box:hover{transform:translateX(3px);box-shadow:-4px 0 16px rgba(255,106,193,.15)}
+    .ans-green{color:#2ecc71;font-weight:700}
+    .ans-red{color:#ff4757;font-weight:700}
+    .ans-yellow{color:#f1c40f;font-weight:700}
+    .stat{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+    .stat-number{font-size:28px;font-weight:900;color:var(--neon)}
+    .stat-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
 
-.navbar{position:sticky;top:0;z-index:8000;background:rgba(10,10,18,.85);backdrop-filter:blur(14px);border-bottom:1.5px solid var(--border);transition:all .3s}
-.navbar.scrolled{background:rgba(10,10,18,.96);box-shadow:0 8px 32px rgba(0,0,0,.5)}
-.nav-inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.nav-logo{font-size:18px;font-weight:900;background:linear-gradient(135deg,#ff6ac1,#c44dff,#ff6ac1);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 4s ease infinite;cursor:pointer;user-select:none;white-space:nowrap}
-.nav-menu{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex:1;justify-content:center}
-.nav-menu::-webkit-scrollbar{display:none}
-.nav-item{padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;color:#aaa;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px;white-space:nowrap;border:none;background:transparent;font-family:inherit}
-.nav-item:hover{color:#fff;background:rgba(255,106,193,.12);transform:translateY(-2px)}
-.nav-item.active{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;box-shadow:0 6px 20px rgba(255,106,193,.4);transform:translateY(-2px)}
-.nav-item .nav-icon{font-size:15px}
-@media (max-width:640px){.nav-item span:not(.nav-icon){display:none}.nav-item{padding:8px 10px}}
+    .navbar{position:sticky;top:0;z-index:8000;background:rgba(10,10,18,.85);backdrop-filter:blur(14px);border-bottom:1.5px solid var(--border);transition:all .3s}
+    .navbar.scrolled{background:rgba(10,10,18,.96);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+    .nav-inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .nav-logo{font-size:18px;font-weight:900;background:linear-gradient(135deg,#ff6ac1,#c44dff,#ff6ac1);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 4s ease infinite;cursor:pointer;user-select:none;white-space:nowrap}
+    .nav-menu{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex:1;justify-content:center}
+    .nav-menu::-webkit-scrollbar{display:none}
+    .nav-item{padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;color:#aaa;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px;white-space:nowrap;border:none;background:transparent;font-family:inherit}
+    .nav-item:hover{color:#fff;background:rgba(255,106,193,.12);transform:translateY(-2px)}
+    .nav-item.active{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;box-shadow:0 6px 20px rgba(255,106,193,.4);transform:translateY(-2px)}
+    .nav-item .nav-icon{font-size:15px}
+    @media (max-width:640px){.nav-item span:not(.nav-icon){display:none}.nav-item{padding:8px 10px}}
 
-.hero{padding:60px 20px;text-align:center}
-.hero-title{font-size:clamp(28px,6vw,56px);font-weight:900;line-height:1.1;background:linear-gradient(135deg,#ff6ac1,#c44dff,#3498db,#ff6ac1);background-size:300% 300%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 5s ease infinite;margin-bottom:16px}
-.hero-sub{font-size:clamp(14px,2vw,18px);color:#aaa;max-width:600px;margin:0 auto 32px;line-height:1.6}
-.hero-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.hero-btn{padding:14px 28px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .25s;font-family:inherit;display:flex;align-items:center;gap:8px}
-.hero-btn-primary{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12}
-.hero-btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(255,106,193,.5)}
-.hero-btn-outline{background:transparent;color:#e0e0e0;border:1.5px solid var(--border)}
-.hero-btn-outline:hover{background:var(--border);transform:translateY(-3px)}
-.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
-.feature-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:20px;transition:all .3s}
-.feature-card:hover{transform:translateY(-4px);border-color:rgba(255,106,193,.4);box-shadow:0 12px 32px rgba(255,106,193,.15)}
-.feature-icon{font-size:32px;margin-bottom:10px}
-.feature-title{font-size:16px;font-weight:900;color:#fff;margin-bottom:6px}
-.feature-desc{font-size:13px;color:#999;line-height:1.5}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:32px}
+    .hero{padding:60px 20px;text-align:center}
+    .hero-title{font-size:clamp(28px,6vw,56px);font-weight:900;line-height:1.1;background:linear-gradient(135deg,#ff6ac1,#c44dff,#3498db,#ff6ac1);background-size:300% 300%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 5s ease infinite;margin-bottom:16px}
+    .hero-sub{font-size:clamp(14px,2vw,18px);color:#aaa;max-width:600px;margin:0 auto 32px;line-height:1.6}
+    .hero-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .hero-btn{padding:14px 28px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .25s;font-family:inherit;display:flex;align-items:center;gap:8px}
+    .hero-btn-primary{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12}
+    .hero-btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(255,106,193,.5)}
+    .hero-btn-outline{background:transparent;color:#e0e0e0;border:1.5px solid var(--border)}
+    .hero-btn-outline:hover{background:var(--border);transform:translateY(-3px)}
+    .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
+    .feature-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:20px;transition:all .3s}
+    .feature-card:hover{transform:translateY(-4px);border-color:rgba(255,106,193,.4);box-shadow:0 12px 32px rgba(255,106,193,.15)}
+    .feature-icon{font-size:32px;margin-bottom:10px}
+    .feature-title{font-size:16px;font-weight:900;color:#fff;margin-bottom:6px}
+    .feature-desc{font-size:13px;color:#999;line-height:1.5}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:32px}
 
-.modal-backdrop{position:fixed;inset:0;background:rgba(10,10,18,.85);backdrop-filter:blur(6px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .25s ease}
-.modal-backdrop.hidden{display:none}
-.modal-box{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:24px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 24px 64px rgba(0,0,0,.7)}
-.modal-box h3{font-size:20px;font-weight:900;margin-bottom:16px;color:var(--neon)}
-.modal-label{display:block;font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.modal-textarea,.modal-select,.modal-input{width:100%;padding:12px 14px;background:#0a0a12;border:1.5px solid var(--border);border-radius:10px;color:#e0e0e0;font-size:14px;font-family:inherit;transition:border-color .2s}
-.modal-textarea:focus,.modal-select:focus,.modal-input:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(255,106,193,.15)}
-.modal-textarea{resize:vertical;min-height:100px;line-height:1.5}
-.modal-select{cursor:pointer}
-.modal-select option{background:#0a0a12;color:#e0e0e0}
-#status{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120%);z-index:9999;min-width:320px;max-width:90vw;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
-#status.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
-#status.info{background:linear-gradient(135deg,#1e3a8a,#1e40af);border:1px solid #3b82f6;color:#dbeafe}
-#status.success{background:linear-gradient(135deg,#14532d,#166534);border:1px solid #22c55e;color:#dcfce7}
-#status.error{background:linear-gradient(135deg,#7f1d1d,#991b1b);border:1px solid #ef4444;color:#fee2e2}
-#status.warn{background:linear-gradient(135deg,#78350f,#92400e);border:1px solid #f59e0b;color:#fef3c7}
-#status .status-icon{font-size:20px;flex-shrink:0}
-#loading-overlay{position:fixed;inset:0;background:rgba(10,10,18,.85);backdrop-filter:blur(6px);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-#loading-overlay.hidden{display:none}
-.spinner{width:64px;height:64px;border:4px solid rgba(255,106,193,.15);border-top-color:var(--neon);border-radius:50%;animation:spin .8s linear infinite}
-.loading-bar{width:280px;height:6px;background:rgba(255,106,193,.15);border-radius:4px;overflow:hidden}
-.loading-bar-fill{height:100%;background:linear-gradient(90deg,#ff6ac1,#c44dff,#ff6ac1);background-size:200% 100%;animation:shimmer 1.5s linear infinite}
-.loading-text{font-size:14px;font-weight:700;color:#ff6ac1;letter-spacing:.5px}
-.loading-sub{font-size:11px;color:#888;margin-top:-12px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(10,10,18,.85);backdrop-filter:blur(6px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .25s ease}
+    .modal-backdrop.hidden{display:none}
+    .modal-box{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:24px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 24px 64px rgba(0,0,0,.7)}
+    .modal-box h3{font-size:20px;font-weight:900;margin-bottom:16px;color:var(--neon)}
+    .modal-label{display:block;font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .modal-textarea,.modal-select,.modal-input{width:100%;padding:12px 14px;background:#0a0a12;border:1.5px solid var(--border);border-radius:10px;color:#e0e0e0;font-size:14px;font-family:inherit;transition:border-color .2s}
+    .modal-textarea:focus,.modal-select:focus,.modal-input:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(255,106,193,.15)}
+    .modal-textarea{resize:vertical;min-height:100px;line-height:1.5}
+    .modal-select{cursor:pointer}
+    .modal-select option{background:#0a0a12;color:#e0e0e0}
+    #status{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-120%);z-index:9999;min-width:320px;max-width:90vw;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
+    #status.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+    #status.info{background:linear-gradient(135deg,#1e3a8a,#1e40af);border:1px solid #3b82f6;color:#dbeafe}
+    #status.success{background:linear-gradient(135deg,#14532d,#166534);border:1px solid #22c55e;color:#dcfce7}
+    #status.error{background:linear-gradient(135deg,#7f1d1d,#991b1b);border:1px solid #ef4444;color:#fee2e2}
+    #status.warn{background:linear-gradient(135deg,#78350f,#92400e);border:1px solid #f59e0b;color:#fef3c7}
+    #status .status-icon{font-size:20px;flex-shrink:0}
+    #loading-overlay{position:fixed;inset:0;background:rgba(10,10,18,.85);backdrop-filter:blur(6px);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+    #loading-overlay.hidden{display:none}
+    .spinner{width:64px;height:64px;border:4px solid rgba(255,106,193,.15);border-top-color:var(--neon);border-radius:50%;animation:spin .8s linear infinite}
+    .loading-bar{width:280px;height:6px;background:rgba(255,106,193,.15);border-radius:4px;overflow:hidden}
+    .loading-bar-fill{height:100%;background:linear-gradient(90deg,#ff6ac1,#c44dff,#ff6ac1);background-size:200% 100%;animation:shimmer 1.5s linear infinite}
+    .loading-text{font-size:14px;font-weight:700;color:#ff6ac1;letter-spacing:.5px}
+    .loading-sub{font-size:11px;color:#888;margin-top:-12px}
 
-.fab{position:fixed;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:9000;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .25s;border:none;color:white}
-.fab:hover{transform:scale(1.12) rotate(5deg);box-shadow:0 12px 32px rgba(0,0,0,.6)}
-.fab:active{transform:scale(.95)}
-#fab-bug{bottom:24px;right:24px;background:linear-gradient(135deg,#ff4757,#c0392b)}
+    .fab{position:fixed;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:9000;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .25s;border:none;color:white}
+    .fab:hover{transform:scale(1.12) rotate(5deg);box-shadow:0 12px 32px rgba(0,0,0,.6)}
+    .fab:active{transform:scale(.95)}
+    #fab-bug{bottom:24px;right:24px;background:linear-gradient(135deg,#ff4757,#c0392b)}
 
-.lms-banner{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(139,195,74,.1));border:1.5px solid rgba(76,175,80,.4);border-radius:14px;padding:20px;margin-bottom:16px}
-.lms-banner h3{color:#8bc34a;font-weight:900;font-size:18px;margin-bottom:8px}
-.lms-banner p{font-size:13px;color:#a5d6a7;line-height:1.6;margin-bottom:12px}
-.lms-btn{background:linear-gradient(135deg,#4caf50,#8bc34a);color:#0a0a12;font-weight:800;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all .25s;font-family:inherit}
-.lms-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.5)}
+    .lms-banner{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(139,195,74,.1));border:1.5px solid rgba(76,175,80,.4);border-radius:14px;padding:20px;margin-bottom:16px}
+    .lms-banner h3{color:#8bc34a;font-weight:900;font-size:18px;margin-bottom:8px}
+    .lms-banner p{font-size:13px;color:#a5d6a7;line-height:1.6;margin-bottom:12px}
+    .lms-btn{background:linear-gradient(135deg,#4caf50,#8bc34a);color:#0a0a12;font-weight:800;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all .25s;font-family:inherit}
+    .lms-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.5)}
 
-#music-widget{position:fixed;bottom:24px;left:24px;z-index:9100;display:flex;align-items:center;gap:10px;background:rgba(20,20,31,.95);backdrop-filter:blur(12px);border:1.5px solid var(--border);border-radius:999px;padding:8px 8px 8px 16px;box-shadow:0 8px 32px rgba(0,0,0,.6);transition:all .3s cubic-bezier(.4,0,.2,1);user-select:none;max-width:calc(100vw - 48px)}
-#music-widget:hover{border-color:rgba(255,106,193,.5);transform:translateY(-2px)}
-#music-widget.playing{border-color:rgba(76,175,80,.6);background:rgba(20,31,20,.95)}
-#music-info{font-size:11px;font-weight:700;color:#aaa;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
-#music-widget.playing #music-info{color:#8bc34a}
-#music-title{display:block;font-size:12px;color:#fff}
-#music-artist{display:block;font-size:10px;color:#666;font-weight:500}
-.music-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
-.music-btn:hover{transform:scale(1.1);box-shadow:0 4px 16px rgba(255,106,193,.5)}
-#music-widget.playing .music-btn{background:linear-gradient(135deg,#4caf50,#8bc34a)}
-#music-settings-btn{background:var(--border);color:#aaa}
-#music-settings-btn:hover{background:#3a3a52;color:#fff}
+    #music-widget{position:fixed;bottom:24px;left:24px;z-index:9100;display:flex;align-items:center;gap:10px;background:rgba(20,20,31,.95);backdrop-filter:blur(12px);border:1.5px solid var(--border);border-radius:999px;padding:8px 8px 8px 16px;box-shadow:0 8px 32px rgba(0,0,0,.6);transition:all .3s cubic-bezier(.4,0,.2,1);user-select:none;max-width:calc(100vw - 48px)}
+    #music-widget:hover{border-color:rgba(255,106,193,.5);transform:translateY(-2px)}
+    #music-widget.playing{border-color:rgba(76,175,80,.6);background:rgba(20,31,20,.95)}
+    #music-info{font-size:11px;font-weight:700;color:#aaa;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+    #music-widget.playing #music-info{color:#8bc34a}
+    #music-title{display:block;font-size:12px;color:#fff}
+    #music-artist{display:block;font-size:10px;color:#666;font-weight:500}
+    .music-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
+    .music-btn:hover{transform:scale(1.1);box-shadow:0 4px 16px rgba(255,106,193,.5)}
+    #music-widget.playing .music-btn{background:linear-gradient(135deg,#4caf50,#8bc34a)}
+    #music-settings-btn{background:var(--border);color:#aaa}
+    #music-settings-btn:hover{background:#3a3a52;color:#fff}
 
-#music-settings{position:fixed;bottom:96px;left:24px;width:380px;max-width:calc(100vw - 48px);max-height:70vh;overflow-y:auto;background:var(--card);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.7);z-index:9200;padding:16px;animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both}
-#music-settings.hidden{display:none}
-#music-settings h3{font-size:16px;font-weight:900;color:var(--neon);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-#music-settings .close-btn{background:var(--border);border:none;color:#aaa;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s}
-#music-settings .close-btn:hover{background:#3a3a52;color:#fff}
-.music-playlist{display:grid;gap:8px;margin-bottom:16px}
-.playlist-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#1c1c26;border-radius:10px;cursor:pointer;transition:all .2s;border:1.5px solid transparent}
-.playlist-item:hover{background:#252535;border-color:rgba(255,106,193,.3);transform:translateX(4px)}
-.playlist-item.active{background:rgba(255,106,193,.15);border-color:var(--neon)}
-.playlist-item .play-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#ff6ac1,#c44dff);display:flex;align-items:center;justify-content:center;font-size:14px;color:#0a0a12;flex-shrink:0}
-.playlist-item.active .play-icon{background:linear-gradient(135deg,#4caf50,#8bc34a)}
-.playlist-item .info{flex:1;min-width:0}
-.playlist-item .title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.playlist-item .artist{font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.music-section-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:12px}
-.volume-slider{width:100%;height:6px;background:#1c1c26;border-radius:3px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;margin:8px 0}
-.volume-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#ff6ac1,#c44dff);cursor:pointer;box-shadow:0 2px 8px rgba(255,106,193,.5)}
-.volume-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#ff6ac1,#c44dff);cursor:pointer;border:none}
-.custom-url-input{display:flex;gap:6px;margin-top:8px}
-.custom-url-input input{flex:1;padding:8px 12px;background:#0a0a12;border:1.5px solid var(--border);border-radius:8px;color:#e0e0e0;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s}
-.custom-url-input input:focus{border-color:var(--neon)}
-.custom-url-input button{padding:8px 14px;background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.custom-url-input button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,106,193,.4)}
-.music-hint{font-size:11px;color:#666;line-height:1.5;padding:8px 12px;background:rgba(255,106,193,.05);border-radius:8px;border-left:2px solid rgba(255,106,193,.3);margin-top:12px}
+    #music-settings{position:fixed;bottom:96px;left:24px;width:380px;max-width:calc(100vw - 48px);max-height:70vh;overflow-y:auto;background:var(--card);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.7);z-index:9200;padding:16px;animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both}
+    #music-settings.hidden{display:none}
+    #music-settings h3{font-size:16px;font-weight:900;color:var(--neon);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    #music-settings .close-btn{background:var(--border);border:none;color:#aaa;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s}
+    #music-settings .close-btn:hover{background:#3a3a52;color:#fff}
+    .music-playlist{display:grid;gap:8px;margin-bottom:16px}
+    .playlist-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#1c1c26;border-radius:10px;cursor:pointer;transition:all .2s;border:1.5px solid transparent}
+    .playlist-item:hover{background:#252535;border-color:rgba(255,106,193,.3);transform:translateX(4px)}
+    .playlist-item.active{background:rgba(255,106,193,.15);border-color:var(--neon)}
+    .playlist-item .play-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#ff6ac1,#c44dff);display:flex;align-items:center;justify-content:center;font-size:14px;color:#0a0a12;flex-shrink:0}
+    .playlist-item.active .play-icon{background:linear-gradient(135deg,#4caf50,#8bc34a)}
+    .playlist-item .info{flex:1;min-width:0}
+    .playlist-item .title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .playlist-item .artist{font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .music-section-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:12px}
+    .volume-slider{width:100%;height:6px;background:#1c1c26;border-radius:3px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;margin:8px 0}
+    .volume-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#ff6ac1,#c44dff);cursor:pointer;box-shadow:0 2px 8px rgba(255,106,193,.5)}
+    .volume-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#ff6ac1,#c44dff);cursor:pointer;border:none}
+    .custom-url-input{display:flex;gap:6px;margin-top:8px}
+    .custom-url-input input{flex:1;padding:8px 12px;background:#0a0a12;border:1.5px solid var(--border);border-radius:8px;color:#e0e0e0;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s}
+    .custom-url-input input:focus{border-color:var(--neon)}
+    .custom-url-input button{padding:8px 14px;background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .custom-url-input button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,106,193,.4)}
+    .music-hint{font-size:11px;color:#666;line-height:1.5;padding:8px 12px;background:rgba(255,106,193,.05);border-radius:8px;border-left:2px solid rgba(255,106,193,.3);margin-top:12px}
 
-@media (max-width:640px){
-  #music-widget{bottom:90px;left:16px;padding:6px 6px 6px 12px}
-  #music-info{max-width:90px}
-  #music-settings{bottom:156px;left:16px;width:calc(100vw - 32px)}
-}
+    @media (max-width:640px){
+      #music-widget{bottom:90px;left:16px;padding:6px 6px 6px 12px}
+      #music-info{max-width:90px}
+      #music-settings{bottom:156px;left:16px;width:calc(100vw - 32px)}
+    }
 
-@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes popIn{0%{opacity:0;transform:scale(.8)}50%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes shimmer{0%{background-position:-500px 0}100%{background-position:500px 0}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.anim-fadeInUp{animation:fadeInUp .5s ease both}
-.anim-fadeIn{animation:fadeIn .4s ease both}
-.anim-slideDown{animation:slideDown .5s ease both}
-.anim-popIn{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both}
-.anim-float{animation:float 3s ease-in-out infinite}
+    /* ── MINIGAME MATH ── */
+    .game-card{background:linear-gradient(145deg,#14141f,#1a1a2e);border:2px solid rgba(255,106,193,.3);border-radius:20px;padding:28px;box-shadow:0 0 40px rgba(255,106,193,.1),inset 0 0 40px rgba(255,106,193,.03);position:relative;overflow:hidden}
+    .game-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(255,106,193,.05),transparent 30%);animation:rotateGlow 8s linear infinite;pointer-events:none}
+    .game-timer{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;transition:color .3s}
+    .game-timer.warning{color:#f1c40f;animation:pulseWarn .5s ease infinite alternate}
+    .game-timer.danger{color:#ff4757;animation:pulseDanger .3s ease infinite alternate}
+    .option-btn{background:#1c1c26;border:2px solid var(--border);border-radius:14px;padding:16px 20px;font-size:16px;font-weight:700;color:#e0e0e0;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);text-align:left;font-family:inherit;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
+    .option-btn:hover:not(:disabled){border-color:rgba(255,106,193,.6);background:#252535;transform:translateX(6px);box-shadow:0 0 20px rgba(255,106,193,.15)}
+    .option-btn:disabled{cursor:not-allowed;opacity:.85}
+    .option-btn .opt-letter{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2a2a3e,#3a3a52);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;transition:all .25s}
+    .option-btn:hover:not(:disabled) .opt-letter{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12}
+    .option-btn.correct{background:rgba(46,204,113,.15);border-color:#2ecc71;box-shadow:0 0 24px rgba(46,204,113,.25)}
+    .option-btn.correct .opt-letter{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff}
+    .option-btn.wrong{background:rgba(255,71,87,.15);border-color:#ff4757;box-shadow:0 0 24px rgba(255,71,87,.25)}
+    .option-btn.wrong .opt-letter{background:linear-gradient(135deg,#ff4757,#c0392b);color:#fff}
+    .streak-flame{font-size:20px;filter:drop-shadow(0 0 8px rgba(255,150,0,.7));animation:flameBounce .6s ease infinite alternate}
+    .score-badge{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;font-weight:900;padding:6px 16px;border-radius:999px;font-size:14px;box-shadow:0 4px 16px rgba(255,106,193,.4)}
+    .progress-ring{transform:rotate(-90deg)}
+    .progress-ring__circle{transition:stroke-dashoffset .3s linear;stroke-linecap:round}
+    .game-result{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+    .game-start-btn{background:linear-gradient(135deg,#ff6ac1,#c44dff,#3498db);background-size:200% 200%;animation:gradientShift 3s ease infinite;color:#0a0a12;font-weight:900;padding:16px 48px;border-radius:16px;border:none;font-size:18px;cursor:pointer;transition:all .3s;font-family:inherit;box-shadow:0 8px 32px rgba(255,106,193,.4)}
+    .game-start-btn:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 16px 48px rgba(255,106,193,.6)}
+    .game-start-btn:active{transform:scale(.97)}
+    .difficulty-pill{padding:10px 22px;border-radius:999px;border:2px solid var(--border);background:#1c1c26;color:#aaa;font-weight:700;font-size:14px;cursor:pointer;transition:all .25s;font-family:inherit}
+    .difficulty-pill:hover{border-color:rgba(255,106,193,.4);color:#fff;transform:translateY(-2px)}
+    .difficulty-pill.active{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;border-color:transparent;box-shadow:0 6px 20px rgba(255,106,193,.4)}
+    .math-graph{width:100%;height:160px;border-radius:12px;background:#0a0a12;border:1.5px solid var(--border);position:relative;overflow:hidden;margin-top:16px}
+    .math-graph canvas{width:100%;height:100%;display:block}
+    .topic-tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(52,152,219,.15);color:#3498db;border:1px solid rgba(52,152,219,.3)}
+    .topic-tag.algebra{background:rgba(255,106,193,.15);color:#ff6ac1;border-color:rgba(255,106,193,.3)}
+    .topic-tag.calculus{background:rgba(46,204,113,.15);color:#2ecc71;border-color:rgba(46,204,113,.3)}
+    .topic-tag.fraction{background:rgba(241,196,15,.15);color:#f1c40f;border-color:rgba(241,196,15,.3)}
+    .topic-tag.geometry{background:rgba(155,89,182,.15);color:#9b59b6;border-color:rgba(155,89,182,.3)}
+    .topic-tag.logic{background:rgba(230,126,34,.15);color:#e67e22;border-color:rgba(230,126,34,.3)}
+    .level-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(255,106,193,.15);color:#ff6ac1;border:1px solid rgba(255,106,193,.3);transition:all .3s}
+    .level-badge.up{animation:levelUp .6s ease}
+    .lives-display{display:flex;gap:4px}
+    .life{font-size:18px;transition:all .3s}
+    .life.lost{opacity:.25;filter:grayscale(1);transform:scale(.8)}
+    .tab-warning{position:fixed;inset:0;background:rgba(10,10,18,.95);backdrop-filter:blur(12px);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:fadeIn .3s ease}
+    .tab-warning.hidden{display:none}
 
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-track{background:var(--card)}
-::-webkit-scrollbar-thumb{background:#3a3a52;border-radius:4px}
-::-webkit-scrollbar-thumb:hover{background:var(--neon)}
-</style>
+    @keyframes rotateGlow{to{transform:rotate(360deg)}}
+    @keyframes pulseWarn{from{opacity:1}to{opacity:.6}}
+    @keyframes pulseDanger{from{transform:scale(1)}to{transform:scale(1.08)}}
+    @keyframes flameBounce{from{transform:scale(1) translateY(0)}to{transform:scale(1.15) translateY(-3px)}}
+    @keyframes levelUp{0%{transform:scale(1)}50%{transform:scale(1.3);box-shadow:0 0 30px rgba(255,106,193,.8)}100%{transform:scale(1)}}
+
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes popIn{0%{opacity:0;transform:scale(.8)}50%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes shimmer{0%{background-position:-500px 0}100%{background-position:500px 0}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .anim-fadeInUp{animation:fadeInUp .5s ease both}
+    .anim-fadeIn{animation:fadeIn .4s ease both}
+    .anim-slideDown{animation:slideDown .5s ease both}
+    .anim-popIn{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both}
+    .anim-float{animation:float 3s ease-in-out infinite}
+
+    ::-webkit-scrollbar{width:8px;height:8px}
+    ::-webkit-scrollbar-track{background:var(--card)}
+    ::-webkit-scrollbar-thumb{background:#3a3a52;border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--neon)}
+  </style>
 </head>
 <body class="min-h-screen">
 
@@ -186,11 +234,13 @@ body::before{content:'';position:fixed;inset:0;background:
     <div class="nav-menu">
       <button class="nav-item active" data-nav="home"><span class="nav-icon">🏠</span><span>Trang chủ</span></button>
       <button class="nav-item" data-nav="cheat"><span class="nav-icon">🐱</span><span>Cheat</span></button>
+      <button class="nav-item" data-nav="minigame"><span class="nav-icon">🧮</span><span>Minigame</span></button>
       <button class="nav-item" data-nav="guide"><span class="nav-icon">📚</span><span>Hướng dẫn</span></button>
     </div>
   </div>
 </nav>
 
+<!-- ═══════════════ PAGE HOME ═══════════════ -->
 <div class="page active" id="page-home">
   <div class="max-w-6xl mx-auto p-4 md:p-8 relative z-10">
     <section class="hero anim-slideDown">
@@ -199,6 +249,7 @@ body::before{content:'';position:fixed;inset:0;background:
       <p class="hero-sub">Dán link, chọn file, hoặc dán HTML bài quiz — nhận ngay toàn bộ đáp án. Made with 💖 by <b class="neon">Lilcat</b>.</p>
       <div class="hero-buttons">
         <button class="hero-btn hero-btn-primary" data-nav="cheat">🚀 Bắt đầu ngay</button>
+        <button class="hero-btn hero-btn-outline" data-nav="minigame">🧮 Minigame Toán</button>
         <button class="hero-btn hero-btn-outline" data-nav="guide">📚 Xem hướng dẫn</button>
       </div>
     </section>
@@ -206,8 +257,8 @@ body::before{content:'';position:fixed;inset:0;background:
       <div class="stats">
         <div class="stat"><div class="stat-number">3</div><div class="stat-label">Cách nhập liệu</div></div>
         <div class="stat"><div class="stat-number">∞</div><div class="stat-label">Đề parse</div></div>
+        <div class="stat"><div class="stat-number">🧮</div><div class="stat-label">Minigame Toán</div></div>
         <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Miễn phí</div></div>
-        <div class="stat"><div class="stat-number">0đ</div><div class="stat-label">Không quảng cáo</div></div>
       </div>
     </section>
     <section class="mt-12 anim-fadeInUp" style="animation-delay:.25s">
@@ -216,7 +267,7 @@ body::before{content:'';position:fixed;inset:0;background:
         <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Hỗ trợ LMS360</div><div class="feature-desc">Chuyển nhanh sang lms360hack.pages.dev để lấy đáp án LMS360.</div></div>
         <div class="feature-card"><div class="feature-icon">📁</div><div class="feature-title">Chọn file linh hoạt</div><div class="feature-desc">Kéo thả file HTML từ máy — parse ngay, không cần upload server.</div></div>
         <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">Dán link tự động</div><div class="feature-desc">Fetch HTML qua 4 proxy CORS fallback, tự động chuyển nếu proxy lỗi.</div></div>
-        <div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-title">Nhận diện 3 format</div><div class="feature-desc">Hỗ trợ quizData 2D, deckName.questions, allQuestions.de1/de2.</div></div>
+        <div class="feature-card"><div class="feature-icon">🧮</div><div class="feature-title">Minigame Toán học</div><div class="feature-desc">Giải toán từ cơ bản đến giải tích, phân số, đồ thị — streak system!</div></div>
         <div class="feature-card"><div class="feature-icon">🎵</div><div class="feature-title">Nhạc nền</div><div class="feature-desc">Playlist YouTube + SoundCloud, tùy chỉnh âm lượng, thêm link tùy ý.</div></div>
         <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Nhẹ và nhanh</div><div class="feature-desc">Không cần đăng ký, không quảng cáo, chạy ngay trên trình duyệt.</div></div>
       </div>
@@ -224,6 +275,7 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
+<!-- ═══════════════ PAGE CHEAT ═══════════════ -->
 <div class="page" id="page-cheat">
   <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
     <header class="text-center mb-8 anim-slideDown">
@@ -282,6 +334,125 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
+<!-- ═══════════════ PAGE MINIGAME ═══════════════ -->
+<div class="page" id="page-minigame">
+  <div class="max-w-3xl mx-auto p-4 md:p-8 relative z-10">
+    <header class="text-center mb-8 anim-slideDown">
+      <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">🧮 Minigame Toán Học</h1>
+      <p class="text-gray-400 text-sm">Sống còn — Mỗi câu đúng lên cấp — Sai là hết!</p>
+    </header>
+
+    <!-- START SCREEN -->
+    <div id="game-start" class="game-card text-center anim-popIn">
+      <div class="text-6xl mb-4 anim-float">🧮</div>
+      <h2 class="text-2xl font-black neon glow mb-3">Thử thách sinh tồn</h2>
+      <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto">Trả lời đúng để lên cấp — câu hỏi khó dần. Sai 1 câu là kết thúc! Bạn sống được bao lâu?</p>
+
+      <div class="mb-6 p-4 bg-[#1c1c26] rounded-lg text-left max-w-md mx-auto">
+        <div class="text-xs font-bold text-gray-500 uppercase mb-3">⚙️ Luật chơi</div>
+        <ul class="text-sm text-gray-400 space-y-2">
+          <li>• <b class="text-green-400">Đúng</b> → lên cấp, câu khó hơn, +điểm</li>
+          <li>• <b class="text-red-400">Sai / Hết giờ</b> → kết thúc ngay</li>
+          <li>• <b class="text-yellow-400">Rời tab</b> → mất lượt (chống cheat)</li>
+          <li>• <b class="text-blue-400">Streak</b> → điểm nhân lên</li>
+        </ul>
+      </div>
+
+      <button id="game-start-btn" class="game-start-btn">🚀 Bắt đầu sinh tồn</button>
+
+      <div class="mt-6 flex justify-center gap-8 text-center" id="highscores">
+        <div><div class="text-2xl font-black neon" id="best-score">0</div><div class="text-xs text-gray-500 uppercase">Điểm cao nhất</div></div>
+        <div><div class="text-2xl font-black neon" id="best-streak">0</div><div class="text-xs text-gray-500 uppercase">Streak cao nhất</div></div>
+        <div><div class="text-2xl font-black neon" id="best-level">1</div><div class="text-xs text-gray-500 uppercase">Cấp cao nhất</div></div>
+      </div>
+    </div>
+
+    <!-- GAME PLAY -->
+    <div id="game-play" class="game-card hidden">
+      <!-- HUD -->
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <div class="flex items-center gap-2">
+          <span class="level-badge" id="level-badge">⭐ Cấp 1</span>
+          <span class="topic-tag" id="q-topic">Đại số</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="score-badge" id="score-display">0 điểm</span>
+          <div class="flex items-center gap-1" id="streak-display" style="display:none!important">
+            <span class="streak-flame">🔥</span>
+            <span class="font-black text-orange-400" id="streak-count">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVES + STREAK INFO -->
+      <div class="flex justify-between items-center mb-4 text-xs text-gray-500">
+        <span>Câu hỏi: <b class="text-white" id="q-counter">1</b></span>
+        <div class="lives-display" id="lives-display">
+          <span class="life" title="Mạng">❤️</span>
+        </div>
+      </div>
+
+      <!-- TIMER -->
+      <div class="flex items-center gap-4 mb-6">
+        <div class="relative flex-shrink-0">
+          <svg width="64" height="64" class="progress-ring">
+            <circle class="progress-ring__circle" stroke="#2a2a3e" stroke-width="5" fill="transparent" r="26" cx="32" cy="32"/>
+            <circle class="progress-ring__circle" id="timer-ring" stroke="#ff6ac1" stroke-width="5" fill="transparent" r="26" cx="32" cy="32" stroke-dasharray="163.36" stroke-dashoffset="0"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="game-timer text-lg" id="timer-text">10</span>
+          </div>
+        </div>
+        <div class="flex-1">
+          <div class="text-xs text-gray-500 uppercase font-bold mb-1">Câu hỏi</div>
+          <div class="text-lg font-bold text-white leading-snug" id="question-text">Loading...</div>
+        </div>
+      </div>
+
+      <!-- GRAPH (if applicable) -->
+      <div id="graph-container" class="math-graph hidden">
+        <canvas id="math-canvas"></canvas>
+      </div>
+
+      <!-- OPTIONS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6" id="options-container">
+        <!-- filled dynamically -->
+      </div>
+
+      <!-- FEEDBACK -->
+      <div id="game-feedback" class="mt-4 text-center text-sm font-bold min-h-[24px]"></div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="game-result" class="game-card text-center hidden game-result">
+      <div class="text-5xl mb-3" id="result-emoji">💀</div>
+      <h2 class="text-2xl font-black neon glow mb-2" id="result-title">Game Over!</h2>
+      <p class="text-gray-400 text-sm mb-6" id="result-sub">Bạn đã trả lời đúng X câu</p>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="stat"><div class="stat-number" id="result-score">0</div><div class="stat-label">Điểm</div></div>
+        <div class="stat"><div class="stat-number" id="result-correct">0</div><div class="stat-label">Đúng</div></div>
+        <div class="stat"><div class="stat-number" id="result-level">1</div><div class="stat-label">Cấp đạt</div></div>
+        <div class="stat"><div class="stat-number" id="result-streak">0</div><div class="stat-label">Streak max</div></div>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-3">
+        <button id="game-restart" class="game-start-btn text-sm">🔄 Chơi lại</button>
+        <button id="game-home" class="btn-ghost px-6 py-3 rounded-xl text-sm">🏠 Về trang chủ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB SWITCH WARNING ═══════════════ -->
+<div id="tab-warning" class="tab-warning hidden">
+  <div class="text-6xl">⚠️</div>
+  <h2 class="text-2xl font-black text-red-400">Bạn đã rời tab!</h2>
+  <p class="text-gray-400 text-sm max-w-md text-center">Minigame yêu cầu bạn phải ở lại tab này. Rời tab = mất lượt.</p>
+  <button id="tab-warning-btn" class="game-start-btn text-sm">😅 Quay lại chơi</button>
+</div>
+
+<!-- ═══════════════ PAGE GUIDE ═══════════════ -->
 <div class="page" id="page-guide">
   <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
     <header class="text-center mb-8 anim-slideDown">
@@ -299,6 +470,21 @@ body::before{content:'';position:fixed;inset:0;background:
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.1s">
+      <h2 class="text-xl font-black neon mb-4">🧮 Minigame Sinh tồn</h2>
+      <p class="text-sm text-gray-400 mb-4">Chế độ sinh tồn — không chọn độ khó, tự động tăng cấp khi bạn trả lời đúng!</p>
+      <div class="space-y-3">
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Bắt đầu với <b>Cấp 1</b> — câu hỏi dễ. Trả lời đúng → lên cấp.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Mỗi cấp câu hỏi khó hơn, thời gian ít hơn. <b>Sai 1 câu là kết thúc!</b></div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div><b>Rời tab</b> trong lúc chơi → mất lượt ngay (chống cheat).</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">4</div><div>Streak càng cao, điểm càng lớn. Phá kỷ lục của chính mình!</div></div>
+      </div>
+      <div class="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+        <div class="font-black text-purple-400 mb-2">📊 Cách tính điểm</div>
+        <div class="text-sm text-gray-300">Điểm = (Cấp × 100) + Streak bonus + Thời gian còn lại × 5. Càng lên cao càng nhiều điểm!</div>
+      </div>
+    </div>
+
+    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
       <h2 class="text-xl font-black neon mb-4">🐱 3 cách đưa bài quiz vào web</h2>
       <div class="space-y-3">
         <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div><b>Chọn file</b> — giống mở file Word trên máy tính. Bạn có sẵn file bài quiz trên máy thì dùng cách này. Kéo thả file vào ô vuông là xong.</div></div>
@@ -307,53 +493,7 @@ body::before{content:'';position:fixed;inset:0;background:
       </div>
     </div>
 
-    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
-      <h2 class="text-xl font-black neon mb-4">📋 3 dạng bài quiz được hỗ trợ</h2>
-      <p class="text-sm text-gray-400 mb-4">Web tự động nhận diện 3 kiểu bài quiz khác nhau, bạn không cần làm gì cả:</p>
-      <div class="space-y-4">
-        <div class="p-4 bg-[#1c1c26] rounded-lg">
-          <div class="font-black text-yellow-400 mb-2">Kiểu A — Nhiều đề xếp chồng</div>
-          <div class="text-sm text-gray-400 mb-2">Giống 1 cuốn sách có nhiều chương. Mỗi chương là 1 đề thi riêng.</div>
-          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
-  [ câu hỏi đề 1 ],
-  [ câu hỏi đề 2 ]
-];</pre>
-        </div>
-        <div class="p-4 bg-[#1c1c26] rounded-lg">
-          <div class="font-black text-yellow-400 mb-2">Kiểu B — Có tên đề</div>
-          <div class="text-sm text-gray-400 mb-2">Giống 1 cuốn sách có mục lục ghi rõ tên từng chương.</div>
-          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
-  { deckName: 'Đề 1', questions: [ ... ] },
-  { deckName: 'Đề 2', questions: [ ... ] }
-];</pre>
-        </div>
-        <div class="p-4 bg-[#1c1c26] rounded-lg">
-          <div class="font-black text-yellow-400 mb-2">Kiểu C — Đặt tên de1, de2, de3</div>
-          <div class="text-sm text-gray-400 mb-2">Giống 1 cái tủ có nhiều ngăn, mỗi ngăn có nhãn riêng.</div>
-          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const allQuestions = {
-  de1: [ ... ],
-  de2: [ ... ],
-  de3: [ ... ]
-};</pre>
-        </div>
-      </div>
-    </div>
-
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.3s">
-      <h2 class="text-xl font-black neon mb-4">🎵 Cách dùng nhạc nền</h2>
-      <p class="text-sm text-gray-400 mb-4">Nhạc nền giúp bạn thư giãn khi học. Không bắt buộc, có thể tắt.</p>
-      <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Ở góc dưới bên trái có 1 cái khung nhỏ. Đó là <b>widget nhạc</b>.</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Bấm nút <b>🔇</b> để bật nhạc, bấm lại để tắt. Khi nhạc đang phát, nút đổi thành <b>⏸</b>.</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div>Bấm nút <b>⚙️</b> để mở cài đặt. Có thể: chọn bài, kéo âm lượng, hoặc dán link nhạc riêng.</div></div>
-      </div>
-      <div class="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-        <div class="font-black text-blue-400 mb-2">💡 Giải thích về âm lượng</div>
-        <div class="text-sm text-gray-300">Thanh kéo <b>âm lượng</b> giống như nút vặn volume trên tivi. Kéo sang phải = nghe to hơn, kéo sang trái = nghe nhỏ hơn. Khi bạn kéo, số % bên cạnh sẽ thay đổi để bạn biết đang ở mức nào.</div>
-      </div>
-    </div>
-
-    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.4s">
       <h2 class="text-xl font-black neon mb-4">❓ Câu hỏi thường gặp</h2>
       <div class="space-y-4">
         <div class="p-4 bg-[#1c1c26] rounded-lg">
@@ -365,8 +505,12 @@ body::before{content:'';position:fixed;inset:0;background:
           <div class="text-sm text-gray-400">Giống như nhà hàng không cho người lạ vào bếp. Một số trang web không cho web khác đọc nội dung. Cách chữa: tải file về máy rồi dùng tab "File", hoặc copy HTML dán vào tab "HTML".</div>
         </div>
         <div class="p-4 bg-[#1c1c26] rounded-lg">
-          <div class="font-black text-yellow-400 mb-2">🎵 Nhạc không phát?</div>
-          <div class="text-sm text-gray-400">Video YouTube đôi khi bị chặn phát trong web khác. Nếu vậy, web sẽ tự chuyển sang bài khác. Nếu vẫn lỗi, thử dán link SoundCloud hoặc file MP3.</div>
+          <div class="font-black text-yellow-400 mb-2">🎮 Minigame có lưu điểm không?</div>
+          <div class="text-sm text-gray-400">Có! Điểm cao nhất, streak và cấp cao nhất được lưu trong trình duyệt của bạn. Xóa dữ liệu trình duyệt sẽ reset.</div>
+        </div>
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">⚠️ Tại sao rời tab lại mất lượt?</div>
+          <div class="text-sm text-gray-400">Để chống cheat — nếu bạn rời tab để tra Google hay dùng công cụ khác, game sẽ tự động kết thúc. Hãy tập trung giải toán!</div>
         </div>
         <div class="p-4 bg-[#1c1c26] rounded-lg">
           <div class="font-black text-yellow-400 mb-2">💾 Web có lưu dữ liệu của tôi không?</div>
@@ -375,9 +519,9 @@ body::before{content:'';position:fixed;inset:0;background:
       </div>
     </div>
 
-    <div class="card p-6 anim-fadeInUp" style="animation-delay:.5s">
+    <div class="card p-6 anim-fadeInUp" style="animation-delay:.4s">
       <h2 class="text-xl font-black neon mb-3">💖 Về dự án</h2>
-      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v13.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.</p>
+      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v15.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.</p>
       <p class="text-xs text-gray-500 mb-4">Cảm hứng từ <a href="https://github.com/HiennNek/lms360hack" target="_blank" class="text-blue-400 hover:underline">LMS360 Hack</a>. Mã nguồn mở, miễn phí, không thu phí.</p>
       <button class="btn-neon px-6 py-2 rounded-lg text-sm" id="open-bug-from-guide">🐛 Báo lỗi / Góp ý</button>
     </div>
@@ -385,7 +529,7 @@ body::before{content:'';position:fixed;inset:0;background:
 </div>
 
 <footer class="text-center text-xs text-gray-600 py-8 relative z-10">
-  🐱 Answer Checker v13.0 — Made with 💖 by <b class="neon">Lilcat</b>
+  🐱 Answer Checker v15.0 — Made with 💖 by <b class="neon">Lilcat</b>
 </footer>
 
 <button id="fab-bug" class="fab" title="Báo lỗi">🐛</button>
@@ -436,6 +580,7 @@ body::before{content:'';position:fixed;inset:0;background:
         <option value="Nhạc không phát">Nhạc không phát</option>
         <option value="Âm lượng không hoạt động">Âm lượng không hoạt động</option>
         <option value="Giao diện lỗi">Giao diện lỗi/hiển thị sai</option>
+        <option value="Minigame lỗi">Minigame lỗi</option>
         <option value="Khác">Khác</option>
       </select>
     </div>
@@ -465,7 +610,7 @@ const CONFIG = {
   bugWebhook: 'https://discord.com/api/webhooks/1549784660043632792/_hVAUHbku6aMX8jsYczJT6PB6_8EZIefFhNN8c7wJVBuwLBJxfb_R1IeRyIgViMypNg5',
   lms360Url: 'https://lms360hack.pages.dev/',
   ui: { statusDuration: 4500 },
-  brand: { name: 'Answer Checker', author: 'Lilcat', version: '13.0.0' },
+  brand: { name: 'Answer Checker', author: 'Lilcat', version: '15.0.0' },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -502,7 +647,7 @@ const Modal = {
   closeAll() { $$('.modal-backdrop').forEach(m => m.classList.add('hidden')); },
 };
 
-const PAGES = ['home', 'cheat', 'guide'];
+const PAGES = ['home', 'cheat', 'minigame', 'guide'];
 function go(page) {
   if (!PAGES.includes(page)) page = 'home';
   $$('.page').forEach(p => p.classList.remove('active'));
@@ -517,6 +662,7 @@ function initNavbar() {
   try { const saved = localStorage.getItem('ac:page'); if (saved && PAGES.includes(saved)) go(saved); } catch {}
 }
 
+// ═══════════════ QUIZ PARSER ═══════════════
 const VAR_NAMES = ['quizData', 'allQuestions', 'questions', 'quizBank', 'QUIZ_DATA', 'data', 'quiz', 'questionsData'];
 function safeEval(code) { try { return eval('(' + code + ')'); } catch { try { return new Function('return (' + code + ')')(); } catch { return null; } } }
 function looksLikeQuiz(obj) {
@@ -741,6 +887,993 @@ function loadDemo() {
   showStatus('📋 Đã dán HTML mẫu', 'info');
 }
 
+// ═══════════════════════════════════════════════════════════
+// 🎵 MUSIC SYSTEM
+// ═══════════════════════════════════════════════════════════
+(function initMusicSystem(){
+  const MUSIC_KEY = 'ac:music_config';
+  const DEFAULT_PLAYLIST = [
+    { id: 'tam-su', title: 'Tâm Sự', artist: 'Solmee ft. Dyteller', type: 'youtube', videoId: 'blvOdCKkPOc' },
+    { id: 'vet-thuong', title: 'Vết Thương', artist: 'fishy', type: 'youtube', videoId: 'LIKOvbJ-DZg' },
+    { id: 'giac-mo', title: 'Giấc Mơ Từng Rất Thơ', artist: 'MER ft. QUANGHUY', type: 'youtube', videoId: 'w9qxn5Kw3-I' },
+  ];
+
+  let config = { currentIndex: 0, volume: 40, customTracks: [], enabled: false };
+  try { const raw = localStorage.getItem(MUSIC_KEY); if (raw) config = { ...config, ...JSON.parse(raw) }; } catch {}
+
+  function saveConfig() { try { localStorage.setItem(MUSIC_KEY, JSON.stringify(config)); } catch {} }
+  function getPlaylist() { return [...DEFAULT_PLAYLIST, ...(config.customTracks || [])]; }
+
+  let player = null, audioEl = null, scWidget = null;
+  let isPlaying = false, playerReady = false, pendingPlay = false, currentTrack = null, errorCount = 0;
+  const MAX_ERRORS = 3;
+
+  const widget = $('music-widget'), btnToggle = $('music-toggle'), btnSettings = $('music-settings-btn'), settingsPanel = $('music-settings'), btnSettingsClose = $('music-settings-close'), playlistEl = $('music-playlist'), customInput = $('music-custom-url'), btnCustomAdd = $('music-custom-add'), volumeSlider = $('music-volume'), volumeValue = $('music-volume-value'), titleEl = $('music-title'), artistEl = $('music-artist');
+  if (!widget || !btnToggle) return;
+
+  function applyVolume(vol) {
+    vol = Math.max(0, Math.min(100, parseInt(vol, 10) || 0));
+    config.volume = vol;
+    if (volumeValue) volumeValue.textContent = vol;
+    saveConfig();
+    if (player && playerReady && typeof player.setVolume === 'function') { try { player.setVolume(vol); } catch(e) {} }
+    if (audioEl) audioEl.volume = vol / 100;
+    if (scWidget && typeof scWidget.setVolume === 'function') { try { scWidget.setVolume(vol); } catch(e) {} }
+  }
+
+  function createPlayer() {
+    if (player) return;
+    const container = $('yt-player');
+    if (!container) return;
+    try {
+      player = new window.YT.Player('yt-player', {
+        height: '1', width: '1',
+        videoId: DEFAULT_PLAYLIST[0].videoId,
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
+        events: {
+          onReady: (e) => { playerReady = true; applyVolume(config.volume); if (pendingPlay && currentTrack?.type === 'youtube') { pendingPlay = false; playYouTube(currentTrack); } },
+          onStateChange: (e) => { if (e.data === 1) { isPlaying = true; errorCount = 0; updateWidgetUI(); renderPlaylist(); } else if (e.data === 2 || e.data === 0) { isPlaying = false; updateWidgetUI(); renderPlaylist(); } },
+          onError: (e) => { if ([100, 101, 150].includes(e.data)) nextTrackOnError(); },
+        },
+      });
+    } catch (err) {}
+  }
+
+  function waitForYT(retries = 100) {
+    if (window.YT && typeof window.YT.Player === 'function') { createPlayer(); return; }
+    if (retries <= 0) return;
+    setTimeout(() => waitForYT(retries - 1), 100);
+  }
+
+  if (window.YT && typeof window.YT.Player === 'function') { createPlayer(); }
+  else if (window.YT && window.YT.loaded) { waitForYT(); }
+  else {
+    const oldCb = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() { if (oldCb) try { oldCb(); } catch(e){} createPlayer(); };
+    setTimeout(() => { if (!window.YT || typeof window.YT.Player !== 'function') { if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) { const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s); } waitForYT(); } }, 500);
+  }
+
+  function ensureSoundCloudAPI(cb) {
+    if (window.SC && window.SC.Widget) { cb(); return; }
+    if (window.__scLoading) { const oldReady = window.__scReady || []; oldReady.push(cb); return; }
+    window.__scLoading = true;
+    window.__scReady = [cb];
+    const s = document.createElement('script');
+    s.src = 'https://w.soundcloud.com/player/api.js';
+    s.onload = () => { (window.__scReady || []).forEach(fn => { try { fn(); } catch(e){} }); window.__scReady = []; };
+    document.head.appendChild(s);
+  }
+
+  function playSoundCloud(track) {
+    const old = $('sc-player');
+    if (old) old.remove();
+    scWidget = null;
+    const container = document.createElement('div');
+    container.id = 'sc-container';
+    container.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;overflow:hidden;';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'sc-player';
+    iframe.width = '100%';
+    iframe.height = '166';
+    iframe.allow = 'autoplay';
+    iframe.frameBorder = 'no';
+    iframe.scrolling = 'no';
+    iframe.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false&show_artwork=false&buying=false&sharing=false&download=false&liking=false`;
+    container.appendChild(iframe);
+    document.body.appendChild(container);
+    ensureSoundCloudAPI(() => {
+      try {
+        scWidget = window.SC.Widget(iframe);
+        scWidget.bind(window.SC.Widget.Events.READY, () => { scWidget.setVolume(config.volume); scWidget.play(); isPlaying = true; updateWidgetUI(); renderPlaylist(); });
+        scWidget.bind(window.SC.Widget.Events.PLAY, () => { isPlaying = true; errorCount = 0; updateWidgetUI(); renderPlaylist(); });
+        scWidget.bind(window.SC.Widget.Events.PAUSE, () => { isPlaying = false; updateWidgetUI(); renderPlaylist(); });
+        scWidget.bind(window.SC.Widget.Events.FINISH, () => { isPlaying = false; updateWidgetUI(); renderPlaylist(); nextTrackOnError(); });
+        scWidget.bind(window.SC.Widget.Events.ERROR, () => { nextTrackOnError(); });
+      } catch(e) {}
+    });
+  }
+
+  function stopAll() {
+    if (player && typeof player.stopVideo === 'function') { try { player.stopVideo(); } catch(e){} }
+    if (audioEl) { audioEl.pause(); audioEl.src = ''; }
+    if (scWidget && typeof scWidget.pause === 'function') { try { scWidget.pause(); } catch(e){} }
+    const sc = $('sc-container'); if (sc) sc.remove();
+    scWidget = null;
+  }
+
+  function playTrackAtIndex(index) {
+    const playlist = getPlaylist();
+    if (index < 0 || index >= playlist.length) return;
+    config.currentIndex = index; saveConfig();
+    const track = playlist[index]; currentTrack = track;
+    stopAll();
+    if (track.type === 'youtube') { if (!playerReady) { pendingPlay = true; return; } playYouTube(track); }
+    else if (track.type === 'audio') { playAudio(track); }
+    else if (track.type === 'soundcloud') { playSoundCloud(track); }
+    renderPlaylist(); updateWidgetUI();
+  }
+
+  function playYouTube(track) {
+    if (!player || typeof player.loadVideoById !== 'function') return;
+    try { player.loadVideoById({ videoId: track.videoId, startSeconds: 0 }); player.setVolume(config.volume); player.playVideo(); } catch(e) { nextTrackOnError(); }
+  }
+
+  function playAudio(track) {
+    if (!audioEl) return;
+    try { audioEl.src = track.url; audioEl.volume = config.volume / 100; audioEl.play().then(() => { isPlaying = true; updateWidgetUI(); }).catch(() => nextTrackOnError()); } catch(e) {}
+  }
+
+  function nextTrackOnError() {
+    errorCount++;
+    if (errorCount >= MAX_ERRORS) { isPlaying = false; updateWidgetUI(); return; }
+    const playlist = getPlaylist();
+    if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; setTimeout(() => playTrackAtIndex(nextIdx), 800); }
+  }
+
+  function togglePlay() { if (!currentTrack) { errorCount = 0; playTrackAtIndex(config.currentIndex || 0); return; } isPlaying ? pauseMusic() : resumeMusic(); }
+
+  function pauseMusic() {
+    if (currentTrack?.type === 'youtube' && player && typeof player.pauseVideo === 'function') { try { player.pauseVideo(); } catch(e){} }
+    if (currentTrack?.type === 'audio' && audioEl) audioEl.pause();
+    if (currentTrack?.type === 'soundcloud' && scWidget && typeof scWidget.pause === 'function') { try { scWidget.pause(); } catch(e){} }
+    isPlaying = false; updateWidgetUI(); renderPlaylist();
+  }
+
+  function resumeMusic() {
+    if (currentTrack?.type === 'youtube' && player && typeof player.playVideo === 'function') { try { player.playVideo(); } catch(e){} }
+    if (currentTrack?.type === 'audio' && audioEl) audioEl.play().catch(() => {});
+    if (currentTrack?.type === 'soundcloud' && scWidget && typeof scWidget.play === 'function') { try { scWidget.play(); } catch(e){} }
+    isPlaying = true; updateWidgetUI(); renderPlaylist();
+  }
+
+  function renderPlaylist() {
+    if (!playlistEl) return;
+    const playlist = getPlaylist(); const currentId = currentTrack?.id;
+    playlistEl.innerHTML = playlist.map((track, i) => `<div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}"><div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div><div class="info"><div class="title">${esc(track.title)}</div><div class="artist">${esc(track.artist)}</div></div></div>`).join('');
+    playlistEl.querySelectorAll('[data-track-index]').forEach(el => { el.addEventListener('click', () => { const idx = parseInt(el.dataset.trackIndex, 10); errorCount = 0; playTrackAtIndex(idx); }); });
+  }
+
+  function updateWidgetUI() {
+    if (isPlaying) { widget.classList.add('playing'); btnToggle.textContent = '⏸'; btnToggle.title = 'Tắt nhạc'; }
+    else { widget.classList.remove('playing'); btnToggle.textContent = '🔇'; btnToggle.title = 'Bật nhạc'; }
+    if (currentTrack) { if (titleEl) titleEl.textContent = currentTrack.title; if (artistEl) artistEl.textContent = currentTrack.artist; }
+  }
+
+  function parseMusicUrl(url) {
+    url = url.trim(); if (!url) return null;
+    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+    if (ytMatch) return { id: 'yt-' + ytMatch[1], title: 'YouTube Video', artist: ytMatch[1], type: 'youtube', videoId: ytMatch[1] };
+    if (url.includes('soundcloud.com')) {
+      const parts = url.split('/').filter(Boolean);
+      const slug = parts[parts.length - 1] || 'SoundCloud Track';
+      return { id: 'sc-' + Date.now(), title: slug.replace(/-/g, ' '), artist: 'SoundCloud', type: 'soundcloud', url };
+    }
+    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(url) || url.startsWith('data:audio')) return { id: 'audio-' + Date.now(), title: 'Audio File', artist: 'Custom', type: 'audio', url };
+    return { id: 'audio-' + Date.now(), title: 'Custom Audio', artist: 'Custom', type: 'audio', url };
+  }
+
+  btnToggle.addEventListener('click', togglePlay);
+  btnSettings?.addEventListener('click', () => { settingsPanel.classList.toggle('hidden'); if (!settingsPanel.classList.contains('hidden')) renderPlaylist(); });
+  btnSettingsClose?.addEventListener('click', () => { settingsPanel.classList.add('hidden'); });
+  btnCustomAdd?.addEventListener('click', () => {
+    const url = customInput?.value.trim();
+    if (!url) { showStatus('⚠️ Chưa nhập link', 'warn'); return; }
+    const track = parseMusicUrl(url);
+    if (!track || track.error) { showStatus('❌ Link không hợp lệ', 'error'); return; }
+    if (!config.customTracks) config.customTracks = [];
+    config.customTracks.push(track); saveConfig(); customInput.value = ''; renderPlaylist();
+    showStatus('✅ Đã thêm: ' + track.title, 'success');
+  });
+
+  if (volumeSlider) {
+    volumeSlider.value = config.volume;
+    if (volumeValue) volumeValue.textContent = config.volume;
+    const handler = (e) => applyVolume(e.target.value);
+    volumeSlider.addEventListener('input', handler);
+    volumeSlider.addEventListener('change', handler);
+  }
+
+  document.addEventListener('click', (e) => { if (!settingsPanel || settingsPanel.classList.contains('hidden')) return; if (settingsPanel.contains(e.target)) return; if (btnSettings?.contains(e.target)) return; settingsPanel.classList.add('hidden'); });
+
+  audioEl = $('audio-player');
+  if (audioEl) { audioEl.addEventListener('ended', () => { isPlaying = false; updateWidgetUI(); nextTrackOnError(); }); }
+
+  renderPlaylist();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// 🧮 MINIGAME MATH ENGINE v2 — SINH TỒN + CHỐNG CHEAT
+// ═══════════════════════════════════════════════════════════
+const MathGame = (function(){
+  const STORAGE_KEY = 'ac:mathgame_v2';
+  let state = {
+    playing: false,
+    level: 1,
+    maxLevel: 1,
+    score: 0,
+    correct: 0,
+    streak: 0,
+    maxStreak: 0,
+    timeLeft: 0,
+    timerInterval: null,
+    question: null,
+    answered: false,
+    tabSwitchPenalty: false,
+    lives: 1,
+  };
+
+  let tabHiddenTime = 0;
+
+  // ── HELPERS ──
+  function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+  function simplify(num, den) { const g = gcd(num, den); return [num / g, den / g]; }
+  function fracStr(num, den) { if (den === 1) return String(num); const s = simplify(num, den); return s[1] === 1 ? String(s[0]) : `${s[0]}/${s[1]}`; }
+  function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function buildOptionsFromPool(correct, pool) {
+    const opts = new Set([String(correct)]);
+    for (const p of shuffle(pool)) { if (opts.size >= 4) break; if (String(p) !== String(correct)) opts.add(String(p)); }
+    return shuffle([...opts]);
+  }
+
+  // ── LEVEL → DIFFICULTY MAPPING ──
+  // Level 1-2 = easy, 3-4 = medium, 5-6 = hard, 7+ = insane
+  function getDifficulty() {
+    if (state.level <= 2) return 'easy';
+    if (state.level <= 4) return 'medium';
+    if (state.level <= 6) return 'hard';
+    return 'insane';
+  }
+  function getTimeForLevel() {
+    const base = { easy: 20, medium: 15, hard: 12, insane: 8 };
+    const diff = getDifficulty();
+    return Math.max(5, base[diff] - Math.floor((state.level - 1) / 3));
+  }
+
+  // ── QUESTION GENERATORS (với level parameter) ──
+  function genAlgebra(diff) {
+    const levels = { easy: 1, medium: 2, hard: 3, insane: 4 };
+    const lv = levels[diff] || 1;
+    const type = randInt(1, lv >= 3 ? 5 : 3);
+
+    if (type === 1) {
+      const a = randInt(2, 5 + lv * 3), b = randInt(1, 10 + lv * 5), c = randInt(1, 20 + lv * 10);
+      const x = (c - b) / a;
+      if (!Number.isInteger(x)) return genAlgebra(diff);
+      const q = `${a}x + ${b} = ${c}. Tìm x?`;
+      const opts = buildOptionsFromPool(x, [x + 1, x - 1, x + 2, x - 2, x + 3, -x, x * 2]);
+      return { question: q, options: opts, correct: String(x), topic: 'algebra' };
+    }
+    if (type === 2) {
+      const r1 = randInt(-5, 5), r2 = randInt(-5, 5);
+      if (r1 === r2) return genAlgebra(diff);
+      const b = -(r1 + r2), c = r1 * r2;
+      const sign = b >= 0 ? `+${b}` : `${b}`;
+      const q = `x² ${sign}x ${c >= 0 ? '+' + c : c} = 0. Nghiệm nào đúng?`;
+      const opts = buildOptionsFromPool(`x = ${r1} hoặc x = ${r2}`, [`x = ${r1 + 1} hoặc x = ${r2}`, `x = ${r1} hoặc x = ${r2 + 1}`, `x = ${-r1} hoặc x = ${-r2}`, `x = ${r1 * 2} hoặc x = ${r2}`]);
+      return { question: q, options: opts, correct: `x = ${r1} hoặc x = ${r2}`, topic: 'algebra' };
+    }
+    if (type === 3) {
+      const x = randInt(-5, 5), y = randInt(-5, 5);
+      const a1 = randInt(1, 4), b1 = randInt(1, 4), c1 = a1 * x + b1 * y;
+      const a2 = randInt(1, 4), b2 = randInt(1, 4), c2 = a2 * x + b2 * y;
+      if (a1 * b2 === a2 * b1) return genAlgebra(diff);
+      const q = `Hệ: ${a1}x + ${b1}y = ${c1}; ${a2}x + ${b2}y = ${c2}. Nghiệm (x,y)?`;
+      const opts = buildOptionsFromPool(`(${x}, ${y})`, [`(${y}, ${x})`, `(${x + 1}, ${y})`, `(${x}, ${y + 1})`, `(${-x}, ${-y})`, `(${x + 2}, ${y - 1})`]);
+      return { question: q, options: opts, correct: `(${x}, ${y})`, topic: 'algebra' };
+    }
+    if (type === 4) {
+      const base = [2, 3, 5][randInt(0, 2)];
+      const exp = randInt(1, 4 + lv);
+      const val = Math.pow(base, exp);
+      const q = `log_${base}(${val}) = ?`;
+      const opts = buildOptionsFromPool(exp, [exp + 1, exp - 1, exp + 2, exp * 2, val, val / base]);
+      return { question: q, options: opts, correct: String(exp), topic: 'calculus' };
+    }
+    if (type === 5) {
+      const a = randInt(1, 5 + lv), n = randInt(2, 4 + lv);
+      const q = `Đạo hàm của f(x) = ${a}x^${n}?`;
+      const correct = `${a * n}x^${n - 1}`;
+      const opts = buildOptionsFromPool(correct, [`${a * n}x^${n}`, `${a}x^${n - 1}`, `${a * n}x^${n + 1}`, `${a + n}x^${n - 1}`, `${a * n * n}x^${n - 1}`]);
+      return { question: q, options: opts, correct, topic: 'calculus' };
+    }
+    return genAlgebra(diff);
+  }
+
+  function genFraction(diff) {
+    const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
+    const type = randInt(1, lv >= 3 ? 4 : 3);
+
+    if (type === 1) {
+      const d1 = randInt(2, 4 + lv * 2), d2 = randInt(2, 4 + lv * 2);
+      const n1 = randInt(1, d1 - 1), n2 = randInt(1, d2 - 1);
+      const num = n1 * d2 + n2 * d1, den = d1 * d2;
+      const correct = fracStr(num, den);
+      const q = `${n1}/${d1} + ${n2}/${d2} = ?`;
+      const wrongs = [fracStr(num + 1, den), fracStr(num, den + 1), fracStr(num - 1, den), fracStr(n1 + n2, d1 + d2)];
+      return { question: q, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' };
+    }
+    if (type === 2) {
+      const n1 = randInt(1, 6 + lv), d1 = randInt(2, 6 + lv), n2 = randInt(1, 6 + lv), d2 = randInt(2, 6 + lv);
+      const correct = fracStr(n1 * n2, d1 * d2);
+      const q = `${n1}/${d1} × ${n2}/${d2} = ?`;
+      const wrongs = [fracStr(n1 + n2, d1 + d2), fracStr(n1 * d2, d1 * n2), fracStr(n1 + n2, d1 * d2), fracStr(n1 * n2, d1 + d2)];
+      return { question: q, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' };
+    }
+    if (type === 3) {
+      const d1 = randInt(2, 8), n1 = randInt(1, d1 - 1), d2 = randInt(2, 8), n2 = randInt(1, d2 - 1);
+      const v1 = n1 / d1, v2 = n2 / d2;
+      const correct = v1 > v2 ? '>' : v1 < v2 ? '<' : '=';
+      const q = `${n1}/${d1} ... ${n2}/${d2} (điền dấu)`;
+      return { question: q, options: shuffle(['>', '<', '=', '≥']), correct, topic: 'fraction' };
+    }
+    if (type === 4) {
+      const n1 = randInt(1, 5), d1 = randInt(2, 6), n2 = randInt(1, 5), d2 = randInt(2, 6);
+      const correct = fracStr(n1 * d2, d1 * n2);
+      const q = `${n1}/${d1} ÷ ${n2}/${d2} = ?`;
+      const wrongs = [fracStr(n1 * n2, d1 * d2), fracStr(d1 * n2, n1 * d2), fracStr(n1 + d2, d1 + n2), fracStr(n1 * d2, d1 + n2)];
+      return { question: q, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' };
+    }
+    return genFraction(diff);
+  }
+
+  function genCalculus(diff) {
+    const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
+    const type = randInt(1, 3);
+
+    if (type === 1) {
+      const a = randInt(1, 5), b = randInt(1, 5);
+      const q = `lim(x→${a}) (x² - ${a * a})/(x - ${a}) = ?`;
+      const correct = String(2 * a);
+      const opts = buildOptionsFromPool(correct, [String(a), String(a * a), String(2 * a + 1), String(2 * a - 1), '0', '∞']);
+      return { question: q, options: opts, correct, topic: 'calculus' };
+    }
+    if (type === 2) {
+      const n = randInt(2, 4 + lv);
+      const q = `∫ ${n}x^${n - 1} dx = ?`;
+      const correct = `x^${n} + C`;
+      const opts = buildOptionsFromPool(correct, [`x^${n + 1} + C`, `${n}x^${n} + C`, `x^${n - 1} + C`, `${n * n}x^${n - 1} + C`]);
+      return { question: q, options: opts, correct, topic: 'calculus' };
+    }
+    if (type === 3) {
+      const a = randInt(2, 5), b = randInt(1, 5);
+      const q = `Đạo hàm f(x) = (${a}x + ${b})²?`;
+      const correct = `${2 * a}(${a}x + ${b})`;
+      const opts = buildOptionsFromPool(correct, [`2(${a}x + ${b})`, `${a}(${a}x + ${b})`, `${2 * a}x`, `2${a}x + ${b}`, `${a * a}x + ${b}`]);
+      return { question: q, options: opts, correct, topic: 'calculus' };
+    }
+    return genCalculus(diff);
+  }
+
+  function genGeometry(diff) {
+    const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
+    const type = randInt(1, 4);
+
+    if (type === 1) {
+      const r = randInt(1, 3 + lv * 2);
+      const q = `Diện tích hình tròn bán kính r = ${r}? (π ≈ 3.14)`;
+      const correct = (Math.PI * r * r).toFixed(2);
+      const opts = buildOptionsFromPool(correct, [(2 * Math.PI * r).toFixed(2), (Math.PI * r).toFixed(2), (Math.PI * r * r * 2).toFixed(2), (Math.PI * r * r / 2).toFixed(2)]);
+      return { question: q, options: opts, correct, topic: 'geometry', graphType: 'circle', graphData: { r } };
+    }
+    if (type === 2) {
+      const a = randInt(3, 6 + lv), b = randInt(4, 8 + lv);
+      const c = Math.sqrt(a * a + b * b);
+      if (!Number.isInteger(c)) return genGeometry(diff);
+      const q = `Tam giác vuông: a=${a}, b=${b}. Cạnh huyền c?`;
+      const opts = buildOptionsFromPool(String(c), [String(a + b), String(c + 1), String(c - 1), String(Math.round(c * 1.5))]);
+      return { question: q, options: opts, correct: String(c), topic: 'geometry', graphType: 'triangle', graphData: { a, b, c } };
+    }
+    if (type === 3) {
+      const r = randInt(1, 3 + lv);
+      const q = `Thể tích hình cầu bán kính r = ${r}? (π ≈ 3.14)`;
+      const correct = ((4 / 3) * Math.PI * r * r * r).toFixed(2);
+      const opts = buildOptionsFromPool(correct, [(Math.PI * r * r * r).toFixed(2), ((4 / 3) * Math.PI * r * r).toFixed(2), (4 * Math.PI * r * r).toFixed(2), ((2 / 3) * Math.PI * r * r * r).toFixed(2)]);
+      return { question: q, options: opts, correct, topic: 'geometry', graphType: 'sphere', graphData: { r } };
+    }
+    if (type === 4) {
+      const b = randInt(3, 10 + lv * 2), h = randInt(2, 8 + lv * 2);
+      const q = `Tam giác có đáy = ${b}, chiều cao = ${h}. Diện tích?`;
+      const correct = String((b * h) / 2);
+      const opts = buildOptionsFromPool(correct, [String(b * h), String(b + h), String(b * h / 4), String(b * h * 2)]);
+      return { question: q, options: opts, correct, topic: 'geometry', graphType: 'triangleArea', graphData: { b, h } };
+    }
+    return genGeometry(diff);
+  }
+
+  function genLogic(diff) {
+    const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
+    const type = randInt(1, 3);
+
+    if (type === 1) {
+      const start = randInt(1, 5 + lv), step = randInt(2, 5 + lv);
+      const seq = [start, start + step, start + 2 * step, start + 3 * step];
+      const correct = start + 4 * step;
+      const q = `Dãy số: ${seq.join(', ')}, ... Số tiếp theo?`;
+      const opts = buildOptionsFromPool(String(correct), [String(correct + step), String(correct - step), String(correct + 1), String(correct * 2)]);
+      return { question: q, options: opts, correct: String(correct), topic: 'logic' };
+    }
+    if (type === 2) {
+      const p = randInt(10, 90), val = randInt(50, 500 + lv * 100);
+      const correct = Math.round(val * p / 100);
+      const q = `${p}% của ${val} = ?`;
+      const opts = buildOptionsFromPool(String(correct), [String(Math.round(val * (p + 10) / 100)), String(Math.round(val * (p - 10) / 100)), String(Math.round(val * p / 200)), String(val - p)]);
+      return { question: q, options: opts, correct: String(correct), topic: 'logic' };
+    }
+    if (type === 3) {
+      const a = randInt(10, 100), m = randInt(3, 9);
+      const correct = a % m;
+      const q = `${a} mod ${m} = ?`;
+      const opts = buildOptionsFromPool(String(correct), [String((correct + 1) % m), String((correct + 2) % m), String((correct + 3) % m), String(a - m)]);
+      return { question: q, options: opts, correct: String(correct), topic: 'logic' };
+    }
+    return genLogic(diff);
+  }
+
+  const GENERATORS = { algebra: genAlgebra, fraction: genFraction, calculus: genCalculus, geometry: genGeometry, logic: genLogic };
+
+  function generateQuestion() {
+    const diff = getDifficulty();
+    const keys = Object.keys(GENERATORS);
+    // Mix: at low levels focus on easier topics, at high levels include all
+    let topicKeys;
+    if (state.level <= 2) topicKeys = ['algebra', 'fraction', 'logic'];
+    else if (state.level <= 4) topicKeys = ['algebra', 'fraction', 'geometry', 'logic'];
+    else topicKeys = keys;
+    const gen = GENERATORS[topicKeys[randInt(0, topicKeys.length - 1)]];
+    let q;
+    let attempts = 0;
+    do { q = gen(diff); attempts++; } while ((!q || !q.options || q.options.length < 4) && attempts < 30);
+    return q;
+  }
+
+  // ── GRAPH RENDERING v2 — ACTUAL SHAPES ──
+  function drawGraph(question) {
+    const canvas = $('math-canvas');
+    const container = $('graph-container');
+    if (!canvas || !container) return;
+    const type = question.graphType;
+    const qText = question.question || '';
+    const isGraphable = type || /x²|Đạo hàm|∫|lim|f\(x\)|parabol/.test(qText);
+    if (!isGraphable) { container.classList.add('hidden'); return; }
+    container.classList.remove('hidden');
+
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * (window.devicePixelRatio || 1);
+    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+    const w = rect.width, h = rect.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background grid
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 12; i++) {
+      ctx.beginPath(); ctx.moveTo(i * w / 12, 0); ctx.lineTo(i * w / 12, h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i * h / 12); ctx.lineTo(w, i * h / 12); ctx.stroke();
+    }
+
+    const cx = w / 2, cy = h / 2;
+
+    // ── Circle (area) ──
+    if (type === 'circle') {
+      const r = question.graphData.r;
+      const pxR = Math.min(w, h) * 0.32;
+      // Fill
+      ctx.fillStyle = 'rgba(255,106,193,.12)';
+      ctx.beginPath(); ctx.arc(cx, cy, pxR, 0, Math.PI * 2); ctx.fill();
+      // Stroke
+      ctx.strokeStyle = '#ff6ac1';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#ff6ac1';
+      ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(cx, cy, pxR, 0, Math.PI * 2); ctx.stroke();
+      // Radius line
+      ctx.strokeStyle = '#3498db';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = '#3498db';
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + pxR, cy); ctx.stroke();
+      // Label
+      ctx.fillStyle = '#3498db';
+      ctx.font = 'bold 13px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`r = ${r}`, cx + pxR / 2, cy - 8);
+      // Center dot
+      ctx.fillStyle = '#3498db';
+      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      return;
+    }
+
+    // ── Triangle (Pythagoras) ──
+    if (type === 'triangle') {
+      const { a, b, c } = question.graphData;
+      const maxSide = Math.max(a, b);
+      const scale = Math.min(w, h) * 0.55 / maxSide;
+      const pxA = a * scale, pxB = b * scale;
+      const startX = cx - pxB / 2, startY = cy + pxA / 2;
+      // Fill
+      ctx.fillStyle = 'rgba(155,89,182,.12)';
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(startX + pxB, startY);
+      ctx.lineTo(startX, startY - pxA);
+      ctx.closePath();
+      ctx.fill();
+      // Stroke
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#9b59b6';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(startX + pxB, startY);
+      ctx.lineTo(startX, startY - pxA);
+      ctx.closePath();
+      ctx.stroke();
+      // Right angle marker
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 0;
+      ctx.strokeRect(startX, startY - 12, 12, 12);
+      // Labels
+      ctx.fillStyle = '#e0e0e0';
+      ctx.font = 'bold 12px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`a=${a}`, startX + pxB / 2, startY + 18);
+      ctx.fillText(`b=${b}`, startX - 22, startY - pxA / 2);
+      ctx.fillStyle = '#2ecc71';
+      ctx.font = 'bold 13px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(`c=${c}`, startX + pxB / 2 + 18, startY - pxA / 2 - 8);
+      ctx.shadowBlur = 0;
+      return;
+    }
+
+    // ── Sphere (volume) ──
+    if (type === 'sphere') {
+      const r = question.graphData.r;
+      const pxR = Math.min(w, h) * 0.3;
+      // Outer sphere fill
+      const grad = ctx.createRadialGradient(cx - pxR * 0.3, cy - pxR * 0.3, pxR * 0.1, cx, cy, pxR);
+      grad.addColorStop(0, 'rgba(155,89,182,.4)');
+      grad.addColorStop(1, 'rgba(155,89,182,.08)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(cx, cy, pxR, 0, Math.PI * 2); ctx.fill();
+      // Stroke outer
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#9b59b6';
+      ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(cx, cy, pxR, 0, Math.PI * 2); ctx.stroke();
+      // Ellipse for 3D effect (equator)
+      ctx.strokeStyle = 'rgba(155,89,182,.5)';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 4;
+      ctx.beginPath(); ctx.ellipse(cx, cy, pxR, pxR * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
+      // Meridian
+      ctx.beginPath(); ctx.ellipse(cx, cy, pxR * 0.35, pxR, 0, 0, Math.PI * 2); ctx.stroke();
+      // Radius line
+      ctx.strokeStyle = '#3498db';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = '#3498db';
+      ctx.shadowBlur = 6;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + pxR, cy); ctx.stroke();
+      // Label
+      ctx.fillStyle = '#3498db';
+      ctx.font = 'bold 13px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`r = ${r}`, cx + pxR / 2, cy - 8);
+      // Center dot
+      ctx.fillStyle = '#3498db';
+      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      return;
+    }
+
+    // ── Triangle area ──
+    if (type === 'triangleArea') {
+      const { b, h } = question.graphData;
+      const scale = Math.min(w, h) * 0.55 / Math.max(b, h);
+      const pxB = b * scale, pxH = h * scale;
+      const startX = cx - pxB / 2, startY = cy + pxH / 2;
+      // Fill
+      ctx.fillStyle = 'rgba(155,89,182,.12)';
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(startX + pxB, startY);
+      ctx.lineTo(startX + pxB / 2, startY - pxH);
+      ctx.closePath();
+      ctx.fill();
+      // Stroke
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#9b59b6';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(startX + pxB, startY);
+      ctx.lineTo(startX + pxB / 2, startY - pxH);
+      ctx.closePath();
+      ctx.stroke();
+      // Height dashed line
+      ctx.strokeStyle = '#f1c40f';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = '#f1c40f';
+      ctx.beginPath();
+      ctx.moveTo(startX + pxB / 2, startY);
+      ctx.lineTo(startX + pxB / 2, startY - pxH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // Right angle marker at base
+      ctx.strokeStyle = '#f1c40f';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 0;
+      ctx.strokeRect(startX + pxB / 2, startY - 12, 12, 12);
+      // Labels
+      ctx.fillStyle = '#e0e0e0';
+      ctx.font = 'bold 12px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`đáy = ${b}`, startX + pxB / 2, startY + 18);
+      ctx.fillStyle = '#f1c40f';
+      ctx.fillText(`h = ${h}`, startX + pxB / 2 + 30, startY - pxH / 2);
+      ctx.shadowBlur = 0;
+      return;
+    }
+
+    // ── Function graph (parabola, sine, etc.) ──
+    // Axes
+    ctx.strokeStyle = '#3a3a52';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+    // Arrow heads
+    ctx.fillStyle = '#3a3a52';
+    ctx.beginPath(); ctx.moveTo(w - 2, cy); ctx.lineTo(w - 10, cy - 4); ctx.lineTo(w - 10, cy + 4); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx, 2); ctx.lineTo(cx - 4, 10); ctx.lineTo(cx + 4, 10); ctx.fill();
+
+    // Curve
+    ctx.strokeStyle = '#ff6ac1';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#ff6ac1';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+
+    if (qText.includes('x²') || qText.includes('parabol')) {
+      for (let px = 0; px <= w; px += 2) {
+        const x = (px - cx) / (w / 10);
+        const y = x * x * 0.8;
+        const py = cy - y * (h / 10);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+    } else if (qText.includes('Đạo hàm')) {
+      for (let px = 0; px <= w; px += 2) {
+        const x = (px - cx) / (w / 10);
+        const y = x * 1.2;
+        const py = cy - y * (h / 10);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+    } else if (qText.includes('lim')) {
+      for (let px = 0; px <= w; px += 2) {
+        const x = (px - cx) / (w / 10);
+        const y = x !== 0 ? Math.sin(x) / x * 2 : 2;
+        const py = cy - y * (h / 10);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+    } else if (qText.includes('∫')) {
+      for (let px = 0; px <= w; px += 2) {
+        const x = (px - cx) / (w / 10);
+        const y = x * x * x / 4;
+        const py = cy - y * (h / 8);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+    } else {
+      for (let px = 0; px <= w; px += 2) {
+        const x = (px - cx) / (w / 10);
+        const y = Math.sin(x) * 2;
+        const py = cy - y * (h / 10);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Axis labels
+    ctx.fillStyle = '#666';
+    ctx.font = '10px "Be Vietnam Pro", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('x', w - 8, cy - 8);
+    ctx.fillText('y', cx + 12, 12);
+  }
+
+  // ── UI ──
+  function updateHUD() {
+    const lb = $('level-badge'); if (lb) lb.textContent = `⭐ Cấp ${state.level}`;
+    const sd = $('score-display'); if (sd) sd.textContent = `${state.score} điểm`;
+    const streakDisplay = $('streak-display');
+    const streakCount = $('streak-count');
+    if (streakDisplay && streakCount) {
+      if (state.streak >= 2) { streakDisplay.style.display = 'flex'; streakCount.textContent = state.streak; }
+      else { streakDisplay.style.display = 'none'; }
+    }
+    const qt = $('q-topic'); if (qt && state.question) {
+      const topicLabels = { algebra: '📐 Đại số', fraction: '🍕 Phân số', calculus: '∫ Giải tích', geometry: '📏 Hình học', logic: '🧠 Logic' };
+      qt.textContent = topicLabels[state.question.topic] || '🎲 Tổng hợp';
+      qt.className = 'topic-tag ' + (state.question.topic || 'algebra');
+    }
+    const qc = $('q-counter'); if (qc) qc.textContent = state.correct + 1;
+    // Lives
+    const livesDisplay = $('lives-display');
+    if (livesDisplay) {
+      livesDisplay.innerHTML = `<span class="life">❤️</span>`;
+    }
+  }
+
+  function updateTimer() {
+    const timeText = $('timer-text');
+    const ring = $('timer-ring');
+    if (!timeText || !ring) return;
+    const maxTime = getTimeForLevel();
+    const fraction = state.timeLeft / maxTime;
+    const circumference = 163.36;
+    ring.style.strokeDashoffset = circumference * (1 - fraction);
+    timeText.textContent = Math.ceil(state.timeLeft);
+    timeText.className = 'game-timer text-lg';
+    if (state.timeLeft <= 3) { timeText.classList.add('danger'); ring.setAttribute('stroke', '#ff4757'); }
+    else if (state.timeLeft <= maxTime * 0.4) { timeText.classList.add('warning'); ring.setAttribute('stroke', '#f1c40f'); }
+    else { ring.setAttribute('stroke', '#ff6ac1'); }
+  }
+
+  function renderQuestion() {
+    if (!state.question) return;
+    const qText = $('question-text');
+    const container = $('options-container');
+    const feedback = $('game-feedback');
+    if (qText) qText.textContent = state.question.question;
+    if (feedback) feedback.textContent = '';
+    if (container) {
+      container.innerHTML = '';
+      state.question.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span class="opt-letter">${String.fromCharCode(65 + i)}</span><span>${esc(opt)}</span>`;
+        btn.addEventListener('click', () => handleAnswer(opt, btn));
+        container.appendChild(btn);
+      });
+    }
+    updateHUD();
+    drawGraph(state.question);
+
+    // Start timer
+    state.timeLeft = getTimeForLevel();
+    updateTimer();
+    clearInterval(state.timerInterval);
+    state.timerInterval = setInterval(() => {
+      state.timeLeft -= 0.1;
+      if (state.timeLeft <= 0) { clearInterval(state.timerInterval); state.timeLeft = 0; updateTimer(); handleTimeout(); }
+      else { updateTimer(); }
+    }, 100);
+  }
+
+  function handleAnswer(selected, btn) {
+    if (state.answered) return;
+    state.answered = true;
+    clearInterval(state.timerInterval);
+
+    const correct = state.question.correct;
+    const isCorrect = selected === correct;
+    const allBtns = document.querySelectorAll('#options-container .option-btn');
+
+    allBtns.forEach(b => {
+      b.disabled = true;
+      const text = b.querySelector('span:last-child')?.textContent || '';
+      if (text === correct) b.classList.add('correct');
+      else if (text === selected && !isCorrect) b.classList.add('wrong');
+    });
+
+    const feedback = $('game-feedback');
+    const timeBonus = Math.round(state.timeLeft * 5);
+    const basePoints = state.level * 100;
+    const streakBonus = state.streak * 50;
+    const points = basePoints + streakBonus + timeBonus;
+
+    if (isCorrect) {
+      state.correct++;
+      state.streak++;
+      state.maxStreak = Math.max(state.maxStreak, state.streak);
+      state.score += points;
+      state.level++;
+      state.maxLevel = Math.max(state.maxLevel, state.level);
+      if (feedback) feedback.innerHTML = `<span class="text-green-400">✅ Chính xác! +${points} điểm — Lên cấp ${state.level}! ${state.streak >= 2 ? `🔥 Streak x${state.streak}` : ''} ${timeBonus > 0 ? `(⚡ +${timeBonus} nhanh)` : ''}</span>`;
+      // Level up animation
+      const lb = $('level-badge');
+      if (lb) { lb.classList.remove('up'); void lb.offsetWidth; lb.classList.add('up'); }
+      // Next question after delay
+      setTimeout(() => {
+        state.answered = false;
+        state.question = generateQuestion();
+        renderQuestion();
+      }, 1200);
+    } else {
+      state.streak = 0;
+      if (feedback) feedback.innerHTML = `<span class="text-red-400">❌ Sai! Đáp án đúng: <b>${esc(correct)}</b> — Game Over!</span>`;
+      updateHUD();
+      setTimeout(() => { endGame(); }, 1800);
+    }
+  }
+
+  function handleTimeout() {
+    if (state.answered) return;
+    state.answered = true;
+    state.streak = 0;
+    const allBtns = document.querySelectorAll('#options-container .option-btn');
+    allBtns.forEach(b => {
+      b.disabled = true;
+      const text = b.querySelector('span:last-child')?.textContent || '';
+      if (text === state.question.correct) b.classList.add('correct');
+    });
+    const feedback = $('game-feedback');
+    if (feedback) feedback.innerHTML = `<span class="text-yellow-400">⏰ Hết giờ! Đáp án: <b>${esc(state.question.correct)}</b> — Game Over!</span>`;
+    updateHUD();
+    setTimeout(() => { endGame(); }, 1800);
+  }
+
+  // ── TAB SWITCH DETECTION (ANTI-CHEAT) ──
+  function initTabDetection() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (state.playing) {
+          tabHiddenTime = Date.now();
+          // Immediately end the game
+          state.tabSwitchPenalty = true;
+          clearInterval(state.timerInterval);
+          $('tab-warning').classList.remove('hidden');
+          state.playing = false;
+        }
+      } else {
+        // User returned — show warning, then end game
+        if (state.tabSwitchPenalty) {
+          // Keep warning visible until user clicks
+        }
+      }
+    });
+
+    $('tab-warning-btn')?.addEventListener('click', () => {
+      $('tab-warning').classList.add('hidden');
+      if (state.tabSwitchPenalty) {
+        state.tabSwitchPenalty = false;
+        state.playing = false;
+        clearInterval(state.timerInterval);
+        $('game-play').classList.add('hidden');
+        $('game-result').classList.remove('hidden');
+        const re = $('result-emoji'), rt = $('result-title'), rsub = $('result-sub');
+        if (re) re.textContent = '⚠️';
+        if (rt) rt.textContent = 'Mất lượt!';
+        if (rsub) rsub.textContent = `Bạn đã rời tab khi đang chơi. Cấp đạt: ${state.level}`;
+        const rs = $('result-score'), rc = $('result-correct'), rl = $('result-level'), rst = $('result-streak');
+        if (rs) rs.textContent = state.score;
+        if (rc) rc.textContent = state.correct;
+        if (rl) rl.textContent = state.level;
+        if (rst) rst.textContent = state.maxStreak;
+        saveHighscores();
+        loadHighscores();
+      }
+    });
+  }
+
+  function endGame() {
+    clearInterval(state.timerInterval);
+    state.playing = false;
+    $('game-play').classList.add('hidden');
+    $('game-result').classList.remove('hidden');
+
+    const rs = $('result-score'), rc = $('result-correct'), rl = $('result-level'), rst = $('result-streak'), re = $('result-emoji'), rt = $('result-title'), rsub = $('result-sub');
+    if (rs) rs.textContent = state.score;
+    if (rc) rc.textContent = state.correct;
+    if (rl) rl.textContent = state.level;
+    if (rst) rst.textContent = state.maxStreak;
+    if (re) re.textContent = state.correct >= 10 ? '🏆' : state.correct >= 5 ? '🎉' : state.correct >= 2 ? '👍' : '💪';
+    if (rt) rt.textContent = state.correct >= 10 ? 'Huyền thoại!' : state.correct >= 5 ? 'Xuất sắc!' : state.correct >= 2 ? 'Khá tốt!' : 'Cố gắng thêm!';
+    if (rsub) rsub.textContent = `Bạn sống sót ${state.correct} câu — Cấp ${state.level}`;
+
+    saveHighscores();
+    loadHighscores();
+  }
+
+  function saveHighscores() {
+    try {
+      const hs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (!hs.bestScore || state.score > hs.bestScore) hs.bestScore = state.score;
+      if (!hs.bestStreak || state.maxStreak > hs.bestStreak) hs.bestStreak = state.maxStreak;
+      if (!hs.bestLevel || state.maxLevel > hs.bestLevel) hs.bestLevel = state.maxLevel;
+      hs.gamesPlayed = (hs.gamesPlayed || 0) + 1;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(hs));
+    } catch {}
+  }
+
+  function loadHighscores() {
+    try {
+      const hs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const bs = $('best-score'), bst = $('best-streak'), bl = $('best-level');
+      if (bs) bs.textContent = hs.bestScore || 0;
+      if (bst) bst.textContent = hs.bestStreak || 0;
+      if (bl) bl.textContent = hs.bestLevel || 1;
+    } catch {}
+  }
+
+  function startGame() {
+    state = {
+      playing: true,
+      level: 1,
+      maxLevel: 1,
+      score: 0,
+      correct: 0,
+      streak: 0,
+      maxStreak: 0,
+      timeLeft: 0,
+      timerInterval: null,
+      question: null,
+      answered: false,
+      tabSwitchPenalty: false,
+      lives: 1,
+    };
+    $('game-start').classList.add('hidden');
+    $('game-result').classList.add('hidden');
+    $('game-play').classList.remove('hidden');
+    $('tab-warning').classList.add('hidden');
+    state.question = generateQuestion();
+    renderQuestion();
+    updateHUD();
+  }
+
+  function init() {
+    const startBtn = $('game-start-btn');
+    const restartBtn = $('game-restart');
+    const homeBtn = $('game-home');
+
+    startBtn?.addEventListener('click', startGame);
+    restartBtn?.addEventListener('click', startGame);
+    homeBtn?.addEventListener('click', () => { go('home'); });
+
+    initTabDetection();
+    loadHighscores();
+  }
+
+  return { init, state };
+})();
+
+// ═══════════════════════════════════════════════════════════
+// BUG REPORT
+// ═══════════════════════════════════════════════════════════
 function openBugModal() { Modal.open('bug-modal'); setTimeout(() => $('bug-name')?.focus(), 100); }
 function closeBugModal() { Modal.close('bug-modal'); const s = $('bug-status'); if (s) s.style.display = 'none'; }
 async function submitBugReport() {
@@ -759,11 +1892,11 @@ async function submitBugReport() {
   let success = false;
   if (CONFIG.bugWebhook && CONFIG.bugWebhook.includes('/api/webhooks/') && !CONFIG.bugWebhook.includes('CHANGE_ME')) {
     try {
-      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Âm lượng không hoạt động': 0x9b59b6, 'Giao diện lỗi': 0x3498db, 'Khác': 0x95a5a6 };
+      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Âm lượng không hoạt động': 0x9b59b6, 'Giao diện lỗi': 0x3498db, 'Minigame lỗi': 0xe67e22, 'Khác': 0x95a5a6 };
       const embed = { title: `🐛 Báo lỗi mới — ${type}`, color: colorMap[type] || 0xff6ac1, fields: [{ name: '👤 Người báo', value: escMd(name), inline: true }, { name: '📁 Context', value: escMd(ctx).substring(0, 200), inline: true }, { name: '📝 Mô tả', value: escMd(desc).substring(0, 1000) }], footer: { text: `${CONFIG.brand.name} v${CONFIG.brand.version}` }, timestamp: payload.timestamp };
       const res = await fetch(CONFIG.bugWebhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'Answer Checker 🐱', embeds: [embed] }) });
       if (res.ok || res.status === 204) { success = true; statusEl.innerHTML = '<span style="color:#22c55e">✅ Đã gửi!</span>'; }
-    } catch (err) { console.warn('Discord failed:', err); statusEl.innerHTML = '<span style="color:#f1c40f">⚠️ Lưu cục bộ</span>'; }
+    } catch (err) { statusEl.innerHTML = '<span style="color:#f1c40f">⚠️ Lưu cục bộ</span>'; }
   } else { statusEl.innerHTML = '<span style="color:#f1c40f">ℹ️ Chưa cấu hình webhook, lưu cục bộ</span>'; }
   try { const arr = JSON.parse(localStorage.getItem('ac:bug_reports') || '[]'); arr.push(payload); if (arr.length > 50) arr.splice(0, arr.length - 50); localStorage.setItem('ac:bug_reports', JSON.stringify(arr)); } catch {}
   setTimeout(() => {
@@ -774,215 +1907,15 @@ async function submitBugReport() {
   }, 1500);
 }
 
-// ============================================================
-// [14] 🎵 MUSIC SYSTEM v13 — Volume fixed
-// ============================================================
-(function initMusicSystem(){
-  const MUSIC_KEY = 'ac:music_config';
-  const DEFAULT_PLAYLIST = [
-    { id: 'tam-su', title: 'Tâm Sự', artist: 'Solmee ft. Dyteller', type: 'youtube', videoId: 'blvOdCKkPOc' },
-    { id: 'vet-thuong', title: 'Vết Thương', artist: 'fishy', type: 'youtube', videoId: 'LIKOvbJ-DZg' },
-    { id: 'giac-mo', title: 'Giấc Mơ Từng Rất Thơ', artist: 'MER ft. QUANGHUY', type: 'youtube', videoId: 'w9qxn5Kw3-I' },
-  ];
-
-  // Đọc config từ localStorage
-  let config = { currentIndex: 0, volume: 40, customTracks: [], enabled: false };
-  try { const raw = localStorage.getItem(MUSIC_KEY); if (raw) config = { ...config, ...JSON.parse(raw) }; } catch {}
-
-  function saveConfig() { try { localStorage.setItem(MUSIC_KEY, JSON.stringify(config)); } catch {} }
-  function getPlaylist() { return [...DEFAULT_PLAYLIST, ...(config.customTracks || [])]; }
-
-  let player = null, audioEl = null, isPlaying = false, playerReady = false, pendingPlay = false, currentTrack = null, errorCount = 0;
-  const MAX_ERRORS = 3;
-
-  const widget = $('music-widget'), btnToggle = $('music-toggle'), btnSettings = $('music-settings-btn'), settingsPanel = $('music-settings'), btnSettingsClose = $('music-settings-close'), playlistEl = $('music-playlist'), customInput = $('music-custom-url'), btnCustomAdd = $('music-custom-add'), volumeSlider = $('music-volume'), volumeValue = $('music-volume-value'), titleEl = $('music-title'), artistEl = $('music-artist');
-  if (!widget || !btnToggle) return;
-
-  // ═══ HÀM SET VOLUME — DÙNG CHUNG CHO PLAYER + AUDIO ═══
-  function applyVolume(vol) {
-    vol = Math.max(0, Math.min(100, parseInt(vol, 10) || 0));
-    config.volume = vol;
-    if (volumeValue) volumeValue.textContent = vol;
-    // Set cho YouTube player
-    if (player && playerReady && typeof player.setVolume === 'function') {
-      try { player.setVolume(vol); } catch(e) { console.warn('Set YT volume failed:', e); }
-    }
-    // Set cho audio element
-    if (audioEl) {
-      audioEl.volume = vol / 100;
-    }
-    saveConfig();
-  }
-
-  function createPlayer() {
-    if (player) return;
-    const container = $('yt-player');
-    if (!container) return;
-    console.log('🎬 Creating YouTube player...');
-    try {
-      player = new window.YT.Player('yt-player', {
-        height: '1', width: '1',
-        videoId: DEFAULT_PLAYLIST[0].videoId,
-        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
-        events: {
-          onReady: (e) => {
-            playerReady = true;
-            // Áp dụng volume NGAY khi player ready
-            applyVolume(config.volume);
-            console.log('✅ YouTube player READY — volume:', config.volume);
-            if (pendingPlay) { pendingPlay = false; playTrackAtIndex(config.currentIndex); }
-          },
-          onStateChange: (e) => {
-            if (e.data === 1) { isPlaying = true; errorCount = 0; updateWidgetUI(); renderPlaylist(); }
-            else if (e.data === 2 || e.data === 0) { isPlaying = false; updateWidgetUI(); renderPlaylist(); }
-          },
-          onError: (e) => {
-            const errMap = { 2: 'ID không hợp lệ', 5: 'Lỗi HTML5', 100: 'Video không tồn tại', 101: 'Chủ video chặn embed', 150: 'Chủ video chặn embed' };
-            console.warn(`❌ YouTube error ${e.data}: ${errMap[e.data] || 'không rõ'}`);
-            if ([100, 101, 150].includes(e.data)) nextTrackOnError();
-          },
-        },
-      });
-    } catch (err) { console.error('❌ Lỗi tạo player:', err); }
-  }
-
-  function waitForYT(retries = 100) {
-    if (window.YT && typeof window.YT.Player === 'function') { console.log('✅ YT.Player sẵn sàng'); createPlayer(); return; }
-    if (retries <= 0) { console.error('❌ YT.Player không load sau 10 giây'); showStatus('❌ Không load được YouTube. Kiểm tra mạng/adblock.', 'error'); return; }
-    setTimeout(() => waitForYT(retries - 1), 100);
-  }
-
-  if (window.YT && typeof window.YT.Player === 'function') { console.log('✅ YT đã có sẵn'); createPlayer(); }
-  else if (window.YT && window.YT.loaded) { console.log('⏳ YT API loaded, đợi Player...'); waitForYT(); }
-  else {
-    console.log('⏳ Đợi YT API...');
-    const oldCb = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = function() { if (oldCb) try { oldCb(); } catch(e){} console.log('🎵 onYouTubeIframeAPIReady fired'); createPlayer(); };
-    setTimeout(() => { if (!window.YT || typeof window.YT.Player !== 'function') { if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) { const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s); } waitForYT(); } }, 500);
-  }
-
-  function playTrackAtIndex(index) {
-    const playlist = getPlaylist();
-    if (index < 0 || index >= playlist.length) return;
-    config.currentIndex = index; saveConfig();
-    const track = playlist[index]; currentTrack = track;
-    console.log(`🎵 Play [${index}]: ${track.title}`);
-    if (player && typeof player.stopVideo === 'function') { try { player.stopVideo(); } catch(e){} }
-    if (audioEl) { audioEl.pause(); audioEl.src = ''; }
-    if (track.type === 'youtube' && !playerReady) { pendingPlay = true; return; }
-    if (track.type === 'youtube') playYouTube(track);
-    else if (track.type === 'audio') playAudio(track);
-    else if (track.type === 'soundcloud') playSoundCloud(track);
-    renderPlaylist(); updateWidgetUI();
-  }
-  function playYouTube(track) {
-    if (!player || typeof player.loadVideoById !== 'function') return;
-    try {
-      player.loadVideoById({ videoId: track.videoId, startSeconds: 0 });
-      player.setVolume(config.volume);  // ⭐ Set volume khi đổi bài
-      player.playVideo();
-      console.log('▶️ Play sent:', track.videoId, '| volume:', config.volume);
-    } catch(e) { console.error('❌ playYouTube error:', e); nextTrackOnError(); }
-  }
-  function playAudio(track) {
-    if (!audioEl) return;
-    try {
-      audioEl.src = track.url;
-      audioEl.volume = config.volume / 100;  // ⭐ Set volume
-      audioEl.play().then(() => { isPlaying = true; updateWidgetUI(); }).catch(e => { console.error('❌ Audio error:', e); nextTrackOnError(); });
-    } catch(e) { console.error(e); }
-  }
-  function playSoundCloud(track) {
-    const scUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&auto_play=true`;
-    const iframe = document.createElement('iframe');
-    iframe.src = scUrl;
-    iframe.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;';
-    iframe.allow = 'autoplay';
-    document.body.appendChild(iframe);
-    isPlaying = true; updateWidgetUI();
-    setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 10 * 60 * 1000);
-  }
-  function nextTrackOnError() {
-    errorCount++;
-    if (errorCount >= MAX_ERRORS) { showStatus('❌ Không phát được bài nào. Thử link khác.', 'error'); isPlaying = false; updateWidgetUI(); return; }
-    const playlist = getPlaylist();
-    if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; setTimeout(() => playTrackAtIndex(nextIdx), 800); }
-  }
-  function togglePlay() { if (!currentTrack) { errorCount = 0; playTrackAtIndex(config.currentIndex || 0); return; } isPlaying ? pauseMusic() : resumeMusic(); }
-  function pauseMusic() {
-    if (currentTrack?.type === 'youtube' && player && typeof player.pauseVideo === 'function') { try { player.pauseVideo(); } catch(e){} }
-    if (currentTrack?.type === 'audio' && audioEl) audioEl.pause();
-    isPlaying = false; updateWidgetUI(); renderPlaylist();
-  }
-  function resumeMusic() {
-    if (currentTrack?.type === 'youtube' && player && typeof player.playVideo === 'function') { try { player.playVideo(); } catch(e){} }
-    if (currentTrack?.type === 'audio' && audioEl) audioEl.play().catch(e => console.warn(e));
-    isPlaying = true; updateWidgetUI(); renderPlaylist();
-  }
-  function renderPlaylist() {
-    if (!playlistEl) return;
-    const playlist = getPlaylist(); const currentId = currentTrack?.id;
-    playlistEl.innerHTML = playlist.map((track, i) => `<div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}"><div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div><div class="info"><div class="title">${esc(track.title)}</div><div class="artist">${esc(track.artist)}</div></div></div>`).join('');
-    playlistEl.querySelectorAll('[data-track-index]').forEach(el => { el.addEventListener('click', () => { const idx = parseInt(el.dataset.trackIndex, 10); errorCount = 0; playTrackAtIndex(idx); }); });
-  }
-  function updateWidgetUI() {
-    if (isPlaying) { widget.classList.add('playing'); btnToggle.textContent = '⏸'; btnToggle.title = 'Tắt nhạc'; }
-    else { widget.classList.remove('playing'); btnToggle.textContent = '🔇'; btnToggle.title = 'Bật nhạc'; }
-    if (currentTrack) { if (titleEl) titleEl.textContent = currentTrack.title; if (artistEl) artistEl.textContent = currentTrack.artist; }
-  }
-  function parseMusicUrl(url) {
-    url = url.trim(); if (!url) return null;
-    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
-    if (ytMatch) return { id: 'yt-' + ytMatch[1], title: 'YouTube Video', artist: ytMatch[1], type: 'youtube', videoId: ytMatch[1] };
-    if (url.includes('soundcloud.com')) return { id: 'sc-' + Date.now(), title: 'SoundCloud', artist: 'SC', type: 'soundcloud', url };
-    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(url) || url.startsWith('data:audio')) return { id: 'audio-' + Date.now(), title: 'Audio File', artist: 'Custom', type: 'audio', url };
-    if (url.includes('youtube.com') || url.includes('youtu.be')) return { error: 'Link YouTube không hợp lệ' };
-    return { id: 'audio-' + Date.now(), title: 'Custom Audio', artist: 'Custom', type: 'audio', url };
-  }
-
-  // ═══ EVENTS ═══
-  btnToggle.addEventListener('click', togglePlay);
-  btnSettings?.addEventListener('click', () => { settingsPanel.classList.toggle('hidden'); if (!settingsPanel.classList.contains('hidden')) renderPlaylist(); });
-  btnSettingsClose?.addEventListener('click', () => { settingsPanel.classList.add('hidden'); });
-  btnCustomAdd?.addEventListener('click', () => {
-    const url = customInput?.value.trim();
-    if (!url) { showStatus('⚠️ Chưa nhập link', 'warn'); return; }
-    const track = parseMusicUrl(url);
-    if (!track) { showStatus('❌ Link không hợp lệ', 'error'); return; }
-    if (track.error) { showStatus('❌ ' + track.error, 'error'); return; }
-    if (!config.customTracks) config.customTracks = [];
-    config.customTracks.push(track); saveConfig(); customInput.value = ''; renderPlaylist();
-    showStatus('✅ Đã thêm: ' + track.title, 'success');
-  });
-
-  // ⭐ VOLUME SLIDER — XỬ LÝ CẢ 'input' VÀ 'change'
-  if (volumeSlider) {
-    volumeSlider.value = config.volume;
-    if (volumeValue) volumeValue.textContent = config.volume;
-
-    const onVolumeChange = (e) => {
-      const vol = parseInt(e.target.value, 10);
-      console.log('🔊 Volume changed:', vol);
-      applyVolume(vol);
-    };
-    volumeSlider.addEventListener('input', onVolumeChange);
-    volumeSlider.addEventListener('change', onVolumeChange);
-  }
-
-  document.addEventListener('click', (e) => { if (!settingsPanel || settingsPanel.classList.contains('hidden')) return; if (settingsPanel.contains(e.target)) return; if (btnSettings?.contains(e.target)) return; settingsPanel.classList.add('hidden'); });
-
-  audioEl = $('audio-player');
-  if (audioEl) { audioEl.addEventListener('ended', () => { isPlaying = false; updateWidgetUI(); const playlist = getPlaylist(); if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; playTrackAtIndex(nextIdx); } }); }
-
-  renderPlaylist();
-  console.log('🎵 Music system v13 ready — volume fixed');
-})();
-
+// ═══════════════════════════════════════════════════════════
+// INIT ALL
+// ═══════════════════════════════════════════════════════════
 function initAll() {
   console.log(`%c🐱 ${CONFIG.brand.name} v${CONFIG.brand.version}`, 'color:#fff;background:#5865F2;padding:4px 10px;border-radius:4px;font-weight:bold');
   console.log(`%c✨ Made with 💖 by ${CONFIG.brand.author}`, 'color:#ff6ac1;font-weight:bold');
   initNavbar();
   initCheatPage();
+  MathGame.init();
   $('fab-bug')?.addEventListener('click', openBugModal);
   $('bug-submit')?.addEventListener('click', submitBugReport);
   $('bug-desc')?.addEventListener('input', e => { const c = $('bug-count'); if (c) c.textContent = e.target.value.length; });
