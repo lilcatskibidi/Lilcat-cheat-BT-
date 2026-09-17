@@ -1,22 +1,27 @@
 // ═══════════════════════════════════════════════════════════════════
-// 🐱 ANSWER CHECKER — QUIZ PARSER v29
-// "Answer Display Fix + Custom Helper"
+// 🐱 ANSWER CHECKER — QUIZ PARSER v31
+// "Universal Chain Resolver + Bulletproof Extraction"
 //
-// 🆕 v29 FIXES:
-//   ✦ MCQ ANSWER → LETTER STRING ("A"/"B"/"C"/"D") thay vì index
-//   ✦ KEEP answerIndex cho app cần
-//   ✦ NEW PUBLIC HELPER: formatAnswerDisplay() — display any answer
-//   ✦ FULLY compatible v28
+// 🆕 v31 MAJOR UPGRADES:
+//   ✦ CHAIN VAR COLLECTOR — auto-detect de1_mcq, de2_tf, set1_short, ...
+//   ✦ PRE-COLLECT all vars BEFORE eval main data
+//   ✦ AUTO-BUILD decks from chain vars if main eval fails
+//   ✦ INJECT chain vars into eval scope
+//   ✦ UNIVERSAL ANSWER FORMATTER (fixed "?" bug)
+//   ✦ Helper pattern for ANY variable structure
+//   ✦ Deep fallback chain 5 levels
+//   ✦ Recursive deck construction from any structure
+//   ✦ Enhanced error reporting
 // ═══════════════════════════════════════════════════════════════════
 
 (function(global) {
   'use strict';
 
-  const VERSION = '29.0.0';
+  const VERSION = '31.0.0';
   const DEBUG = false;
 
   // ═══════════════════════════════════════════════════════════════
-  // HELPER WHITELIST + GENERIC HELPERS (giữ nguyên v28)
+  // HELPER WHITELIST
   // ═══════════════════════════════════════════════════════════════
 
   const HELPER_NAME_WHITELIST = [
@@ -31,19 +36,23 @@
   const GENERIC_HELPERS = {
     q: (text, opts, correct, topic) => ({ q: text, o: opts, c: correct, t: topic }),
     mcq: (text, opts, correct, topic) => ({ q: text, o: opts, c: correct, t: topic }),
-    mc: (text, opts, correct, topic) => ({ q: text, o: opts, c: correct, t: topic }),
+    mc: (text, opts, correct, topic) => ({ type: "mcq", q: text, opts: opts, ans: correct, topic: topic }),
     tn: (text, opts, correct, topic) => ({ q: text, o: opts, c: correct, t: topic }),
-    tf: (text, statements, topic) => ({ q: text, s: statements, t: topic }),
+    tf: (text, statements, topic) => ({ type: "tf", stem: text, items: statements, topic: topic, q: text, s: statements, t: topic }),
     sh: (text, answer, topic) => ({ q: text, a: answer, t: topic }),
-    sa: (text, answer, topic) => ({ q: text, a: answer, t: topic }),
-    st: (text, correct, level) => ({ x: text, c: correct, l: level }),
-    ds: (text, correct, level) => ({ x: text, c: correct, l: level }),
+    sa: (text, answer, topic) => ({ type: "short", q: text, ans: answer, topic: topic, a: answer, t: topic }),
+    st: (text, correct, level) => ({ text: text, answer: correct, level: level, x: text, c: correct, l: level }),
+    ds: (text, correct, level) => ({ text: text, answer: correct, level: level, x: text, c: correct, l: level }),
   };
+
+  // ═══════════════════════════════════════════════════════════════
+  // FIELD ALIASES — Extended for Chương 6 style
+  // ═══════════════════════════════════════════════════════════════
 
   const FIELD_ALIASES = {
     question: ['question', 'q', 'text', 'prompt', 'title', 'stem', 'content'],
     options: ['options', 'opts', 'choices', 'option', 'opt', 'o'],
-    answer: ['answer', 'ans', 'correct', 'c', 'a', 'correctAnswer', 'key', 'correct_answer', 'rightAnswer'],
+    answer: ['answer', 'ans', 'correct', 'c', 'a', 'correctAnswer', 'key'],
     type: ['type', 'questionType', 'kind', 'format'],
     statements: ['statements', 'subs', 'items', 's', 'claims', 'assertions'],
     stText: ['text', 'x', 'statement', 'content', 't'],
@@ -66,6 +75,25 @@
     'cauHoi', 'deThi', 'deKiemTra', 'baiThi', 'tracNghiem',
   ];
 
+  // 🆕 v31: Chain var patterns
+  const CHAIN_VAR_PATTERNS = [
+    // de1_mcq, de2_tf, de3_short, de4_sa
+    /^de\d+_(mcq|mc|tf|short|sa)$/i,
+    /^deck\d+_(mcq|mc|tf|short|sa)$/i,
+    /^set\d+_(mcq|mc|tf|short|sa)$/i,
+    /^exam\d+_(mcq|mc|tf|short|sa)$/i,
+    /^test\d+_(mcq|mc|tf|short|sa)$/i,
+    /^quiz\d+_(mcq|mc|tf|short|sa)$/i,
+    /^đề\d+_(mcq|mc|tf|short|sa)$/i,
+    /^bộ\d+_(mcq|mc|tf|short|sa)$/i,
+    // de1mcq, de2tf (no underscore)
+    /^de\d+(mcq|tf|short|sa)$/i,
+    // _de1_mcq, $de2_tf
+    /^[_$][a-z]+\d+_[a-z]+$/i,
+    // questions1, items2
+    /^(questions|items|list|bank|pool)\d+$/i,
+  ];
+
   const DYNAMIC_VAR_PATTERNS = [
     /^de\d+$/i, /^deck\d+$/i, /^set\d+$/i,
     /^part\d+$/i, /^phan\d+$/i, /^chapter\d+$/i,
@@ -85,118 +113,50 @@
   };
 
   // ═══════════════════════════════════════════════════════════════
-  // 🆕 v29: UNIVERSAL ANSWER FORMATTER — DÙNG ĐƯỢC Ở CẢ PARSER VÀ APP
+  // 🆕 v31: UNIVERSAL ANSWER FORMATTER
   // ═══════════════════════════════════════════════════════════════
 
-  /**
-   * Convert BẤT KỲ dạng answer nào về dạng chuẩn.
-   *
-   * @param {*} answer - Có thể là: "A", 0, "0", "A. text", option text, ...
-   * @param {Array} options - Danh sách options (nếu có)
-   * @param {string} type - "mcq" | "tf" | "short"
-   * @returns {Object} { value, index, letter, display, valid }
-   */
   function formatAnswerDisplay(answer, options = null, type = 'mcq') {
-    const result = {
-      value: answer,
-      index: null,
-      letter: null,
-      display: '?',
-      valid: false,
-    };
-
-    if (answer === null || answer === undefined) {
-      result.display = '(chưa có đáp án)';
-      return result;
-    }
-
-    // ─── TF: convert về "Đúng"/"Sai" ───
+    const result = { value: answer, index: null, letter: null, display: '?', valid: false };
+    if (answer === null || answer === undefined) { result.display = '(chưa có đáp án)'; return result; }
     if (type === 'tf') {
-      const boolVal = toBoolean(answer);
-      if (boolVal === true) {
-        result.value = true;
-        result.display = 'Đúng';
-        result.valid = true;
-      } else if (boolVal === false) {
-        result.value = false;
-        result.display = 'Sai';
-        result.valid = true;
-      } else {
-        result.display = String(answer);
-      }
+      const b = toBoolean(answer);
+      if (b === true) { result.value = true; result.display = 'Đúng'; result.valid = true; }
+      else if (b === false) { result.value = false; result.display = 'Sai'; result.valid = true; }
+      else result.display = String(answer);
       return result;
     }
-
-    // ─── SHORT: giữ string ───
     if (type === 'short') {
       result.value = String(answer).trim();
       result.display = result.value;
       result.valid = true;
       return result;
     }
-
-    // ─── MCQ: convert về "A. text" ───
+    // MCQ
     let idx = -1;
-
-    // Case 1: Số 0-25 → index
-    if (typeof answer === 'number') {
-      if (answer >= 0 && answer < 26) idx = answer;
-    }
-    // Case 2: String
+    if (typeof answer === 'number') { if (answer >= 0 && answer < 26) idx = answer; }
     else if (typeof answer === 'string') {
       const trimmed = answer.trim();
-
-      // Letter đơn: "A", "B", "C", "D"
-      if (/^[A-Z]$/i.test(trimmed)) {
-        idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(trimmed.toUpperCase());
-      }
-      // Letter + prefix: "A.", "A)", "A -"
-      else if (/^([A-Z])\s*[.):\-\s]/i.test(trimmed)) {
-        const m = trimmed.match(/^([A-Z])/i);
-        if (m) idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(m[1].toUpperCase());
-      }
-      // Số dạng string: "0", "1", "2", "3"
-      else if (/^\d+$/.test(trimmed)) {
-        const num = parseInt(trimmed, 10);
-        if (num >= 0 && num < 26) idx = num;
-      }
-      // Match option text
-      else if (Array.isArray(options)) {
-        idx = options.findIndex(o => String(o).trim() === trimmed);
-      }
+      if (/^[A-Z]$/i.test(trimmed)) idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(trimmed.toUpperCase());
+      else if (/^([A-Z])\s*[.):\-\s]/i.test(trimmed)) { const m = trimmed.match(/^([A-Z])/i); if (m) idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(m[1].toUpperCase()); }
+      else if (/^\d+$/.test(trimmed)) { const num = parseInt(trimmed, 10); if (num >= 0 && num < 26) idx = num; }
+      else if (Array.isArray(options)) idx = options.findIndex(o => String(o).trim() === trimmed);
     }
-
-    // Validate idx
     if (idx >= 0 && idx < 26) {
       const letter = String.fromCharCode(65 + idx);
       const optText = Array.isArray(options) && options[idx] ? options[idx] : '';
-
-      result.index = idx;
-      result.letter = letter;
-      result.value = letter;
+      result.index = idx; result.letter = letter; result.value = letter;
       result.display = optText ? `${letter}. ${optText}` : letter;
       result.valid = true;
     } else {
-      // Fallback: hiển thị answer gốc
       result.display = String(answer);
-      result.valid = false;
     }
-
     return result;
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // ANSWER NORMALIZER — convert về letter cho MCQ
-  // ═══════════════════════════════════════════════════════════════
-
   function normalizeMcqAnswer(answer, options) {
-    const formatted = formatAnswerDisplay(answer, options, 'mcq');
-    return formatted.index; // -1 hoặc 0-25
+    return formatAnswerDisplay(answer, options, 'mcq').index;
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  // BOOLEAN RESOLVER
-  // ═══════════════════════════════════════════════════════════════
 
   function toBoolean(val) {
     if (val === null || val === undefined) return null;
@@ -211,7 +171,7 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // HELPER DETECTION / COMPILE (giữ nguyên v28)
+  // HELPER DETECTION / COMPILE
   // ═══════════════════════════════════════════════════════════════
 
   function isHelperCandidate(name, body) {
@@ -219,7 +179,7 @@
     const isShortName = name.length <= 4;
     if (!inWhitelist && !isShortName) return false;
     if (body.length > 800) return false;
-    if (!/return\s*\{/.test(body) && !/=>\s*\(\s*\{/.test(body) && !/^\s*\(\s*\{/.test(body)) return false;
+    if (!/return\s*[\{\(\[]/.test(body)) return false;
     if (/\b(for|while|switch|try|catch)\b/.test(body)) return false;
     return true;
   }
@@ -243,9 +203,7 @@
         let body = m[3];
         if (seen.has(name)) continue;
         if (!isHelperCandidate(name, body)) continue;
-        if (body.trim().startsWith('{') && !/return/.test(body)) {
-          body = `return ${body};`;
-        }
+        if (body.trim().startsWith('{') && !/return/.test(body)) body = `return ${body};`;
         helpers.push({ name, params, body });
         seen.add(name);
       }
@@ -271,65 +229,112 @@
         if (typeof fn !== 'function') continue;
         const paramCount = (h.params.match(/,/g) || []).length + (h.params.trim() ? 1 : 0);
         const testArgs = [];
-        for (let i = 0; i < paramCount; i++) {
-          testArgs.push(i === 0 ? 'test' : (i === 1 ? [] : (i === 2 ? 0 : 'topic')));
-        }
+        for (let i = 0; i < paramCount; i++) testArgs.push(i === 0 ? 'test' : (i === 1 ? [] : (i === 2 ? 0 : 'topic')));
         let result;
-        try { result = fn(...testArgs); } catch {
-          try { result = fn('test'); } catch { continue; }
-        }
-        if (result && typeof result === 'object' && !Array.isArray(result)) {
-          compiled[h.name] = fn;
-        }
+        try { result = fn(...testArgs); } catch { try { result = fn('test'); } catch { continue; } }
+        if (result && typeof result === 'object') compiled[h.name] = fn;
       } catch (e) {
-        if (DEBUG) console.warn('[Parser v29] Failed helper:', h.name, e.message);
+        if (DEBUG) console.warn('[Parser v31] Failed helper:', h.name, e.message);
       }
     }
     return Object.keys(compiled).length > 0 ? compiled : null;
   }
 
-  function safeEvalWithHelpers(code, helpers) {
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v31: CHAIN VARIABLE COLLECTOR
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Collect all variables matching CHAIN_VAR_PATTERNS (de1_mcq, de2_tf, ...)
+   * Returns: Map<varName, parsedData>
+   */
+  function collectChainVariables(js, helpers) {
+    const collected = new Map();
+
+    // Find all variable declarations
+    const re = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*/g;
+    let m;
+    while ((m = re.exec(js)) !== null) {
+      const name = m[1];
+      const start = m.index + m[0].length;
+      let p = start;
+      while (p < js.length && /\s/.test(js[p])) p++;
+      if (p >= js.length) continue;
+      if (js[p] !== '[' && js[p] !== '{') continue;
+
+      const end = matchBracket(js, p);
+      if (end <= p) continue;
+
+      const code = js.substring(p, end + 1);
+      if (code.length > 5_000_000) continue;
+
+      const isChain = CHAIN_VAR_PATTERNS.some(pat => pat.test(name));
+      if (!isChain) continue;
+
+      const parsed = safeEvalWithHelpers(code, helpers);
+      if (parsed !== null && parsed !== undefined) {
+        collected.set(name, parsed);
+        if (DEBUG) console.log(`[Parser v31] Collected chain var: ${name} (${Array.isArray(parsed) ? parsed.length + ' items' : 'object'})`);
+      }
+    }
+    return collected;
+  }
+
+  /**
+   * 🆕 v31: Safe eval WITH helpers + chain vars
+   */
+  function safeEvalWithChainVars(code, helpers, chainVars) {
     if (!code || typeof code !== 'string') return null;
+
+    // Strategy A: plain eval
     const plainResult = safeEval(code);
     if (plainResult !== null) return plainResult;
 
-    if (helpers && Object.keys(helpers).length > 0) {
-      const helperNames = Object.keys(helpers);
-      const helperValues = helperNames.map(n => helpers[n]);
+    // Combine helpers + chainVars
+    const allVars = Object.assign({}, helpers || {}, Object.fromEntries(chainVars || []));
+    const varNames = Object.keys(allVars);
+    const varValues = varNames.map(n => allVars[n]);
 
+    if (varNames.length === 0) return null;
+
+    // Strategy B: spread args
+    try {
+      const fn = new Function(...varNames, `"use strict"; return (${code});`);
+      const result = fn(...varValues);
+      if (result !== null && result !== undefined) return result;
+    } catch (e) {}
+
+    // Strategy C: helpers in arguments object
+    try {
+      const helperScript = varNames.map(n => `var ${n} = arguments[0][${JSON.stringify(n)}];`).join('\n');
+      const fn = new Function(`"use strict"; ${helperScript}\nreturn (${code});`);
+      const result = fn(allVars);
+      if (result !== null && result !== undefined) return result;
+    } catch (e) {}
+
+    // Strategy D: global scope injection
+    try {
+      const backup = {};
+      for (const n of varNames) {
+        backup[n] = global[n];
+        global[n] = allVars[n];
+      }
       try {
-        const fn = new Function(...helperNames, `"use strict"; return (${code});`);
-        const result = fn(...helperValues);
+        const result = eval('(' + code + ')');
         if (result !== null && result !== undefined) return result;
-      } catch (e) {}
-
-      try {
-        const helperScript = helperNames.map(n => 
-          `var ${n} = arguments[0][${JSON.stringify(n)}];`
-        ).join('\n');
-        const fn = new Function(`"use strict"; ${helperScript}\nreturn (${code});`);
-        const result = fn(helpers);
-        if (result !== null && result !== undefined) return result;
-      } catch (e) {}
-
-      try {
-        const backup = {};
-        for (const n of helperNames) {
-          backup[n] = global[n];
-          global[n] = helpers[n];
+      } finally {
+        for (const n of varNames) {
+          if (backup[n] === undefined) delete global[n];
+          else global[n] = backup[n];
         }
-        try {
-          const result = eval('(' + code + ')');
-          if (result !== null && result !== undefined) return result;
-        } finally {
-          for (const n of helperNames) {
-            if (backup[n] === undefined) delete global[n];
-            else global[n] = backup[n];
-          }
-        }
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
+
     return null;
+  }
+
+  function safeEvalWithHelpers(code, helpers) {
+    return safeEvalWithChainVars(code, helpers, null);
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -385,6 +390,12 @@
       const first = obj[0];
       if (Array.isArray(first) && first.length && isQuestionLike(first[0])) return true;
       if (isQuestionLike(first)) return true;
+      if (first && typeof first === 'object') {
+        if (Array.isArray(first.questions)) return true;
+        if (Array.isArray(first.mcq)) return true;
+        if (Array.isArray(first.mc)) return true;
+        if (Array.isArray(first.partI)) return true;
+      }
     }
     if (typeof obj === 'object') {
       const keys = Object.keys(obj);
@@ -395,12 +406,19 @@
           if (Array.isArray(firstVal.mc) || Array.isArray(firstVal.mcq) ||
               Array.isArray(firstVal.partI) || Array.isArray(firstVal.tf) ||
               Array.isArray(firstVal.short) || Array.isArray(firstVal.sa)) return true;
+          if (Array.isArray(firstVal.questions)) return true;
         }
         if (Array.isArray(firstVal) && firstVal.length) {
           if (isQuestionLike(firstVal[0])) return true;
         }
       }
       if (Array.isArray(obj.questions) && obj.questions.length && isQuestionLike(obj.questions[0])) return true;
+      if (Array.isArray(obj.mc) && obj.mc.length) return true;
+      if (Array.isArray(obj.mcq) && obj.mcq.length) return true;
+      if (Array.isArray(obj.partI) && obj.partI.length) return true;
+      if (Array.isArray(obj.tf) && obj.tf.length) return true;
+      if (Array.isArray(obj.short) && obj.short.length) return true;
+      if (Array.isArray(obj.sa) && obj.sa.length) return true;
     }
     return false;
   }
@@ -568,12 +586,11 @@
       }
     }
 
-    // 🆕 v29: MCQ ANSWER → LETTER ("A"/"B"/"C"/"D")
     if (out.type === 'mcq' && Array.isArray(out.options)) {
       const formatted = formatAnswerDisplay(rawAnswer, out.options, 'mcq');
-      out.answer = formatted.letter;        // "A" hoặc null
-      out.answerIndex = formatted.index;    // 0 hoặc null
-      out.answerDisplay = formatted.display; // "A. text"
+      out.answer = formatted.letter;
+      out.answerIndex = formatted.index;
+      out.answerDisplay = formatted.display;
       out.answerValid = formatted.valid;
     } else if (out.type === 'short') {
       if (typeof rawAnswer === 'string') out.answer = rawAnswer.trim();
@@ -698,7 +715,7 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // MASTER EXTRACTOR
+  // 🆕 v31: MASTER EXTRACTOR — Multi-strategy with chain vars
   // ═══════════════════════════════════════════════════════════════
 
   function extractQuizData(html, options = {}) {
@@ -710,6 +727,8 @@
       candidatesFound: 0,
       helpersFound: 0,
       helperNames: [],
+      chainVarsFound: 0,
+      chainVarNames: [],
       verified: 0,
       timeMs: 0,
       errors: [],
@@ -729,6 +748,7 @@
       }
     };
 
+    // Extract scripts
     const re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
     const scripts = [];
     let m;
@@ -736,15 +756,31 @@
     if (!scripts.length) scripts.push(html);
     const js = scripts.join('\n');
 
+    // Compile helpers
     let helpers = null;
     try {
       helpers = compileHelperFunctions(js);
       stats.helpersFound = helpers ? Object.keys(helpers).length : 0;
       stats.helperNames = helpers ? Object.keys(helpers) : [];
+      if (DEBUG) console.log('[v31] Helpers:', stats.helperNames);
     } catch (e) {
       stats.errors.push('helper: ' + e.message);
     }
 
+    // 🆕 v31: Collect chain vars (de1_mcq, de2_tf, ...)
+    let chainVars = new Map();
+    try {
+      chainVars = collectChainVariables(js, helpers);
+      stats.chainVarsFound = chainVars.size;
+      stats.chainVarNames = [...chainVars.keys()];
+      if (DEBUG) console.log('[v31] Chain vars:', stats.chainVarNames);
+    } catch (e) {
+      stats.errors.push('chain-collect: ' + e.message);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // STRATEGY 1: Named vars WITH chain vars injected
+    // ═══════════════════════════════════════════════════════════
     try {
       for (const name of VAR_NAMES) {
         const re1 = new RegExp('(?:const|var|let)\\s+' + name + '\\s*=\\s*', 'g');
@@ -757,8 +793,8 @@
             const end = matchBracket(js, p);
             if (end > p) {
               const code = js.substring(p, end + 1);
-              const parsed = safeEvalWithHelpers(code, helpers);
-              if (parsed) addCandidate(parsed, name, 'named', 40);
+              const parsed = safeEvalWithChainVars(code, helpers, chainVars);
+              if (parsed) addCandidate(parsed, name, 'named+chain', 40);
             }
           }
         }
@@ -766,6 +802,69 @@
     } catch (e) { stats.errors.push('named: ' + e.message); }
     stats.strategiesRun++;
 
+    // ═══════════════════════════════════════════════════════════
+    // STRATEGY 2: 🆕 v31 — Build decks from chain vars directly
+    // ═══════════════════════════════════════════════════════════
+    try {
+      if (chainVars.size > 0) {
+        // Group chain vars by prefix (de1, de2, de3)
+        const byPrefix = {};
+        for (const [name, data] of chainVars.entries()) {
+          // Match: de1_mcq, de1mcq, de1-tf, ...
+          const match = name.match(/^([a-z_$]+\d+)_([a-z]+)$/i) || 
+                        name.match(/^([a-z_$]+\d+)-([a-z]+)$/i) ||
+                        name.match(/^([a-z_$]+\d+)(mcq|tf|short|sa|mc)$/i);
+          if (!match) continue;
+          const prefix = match[1];
+          const type = match[2].toLowerCase();
+          if (!byPrefix[prefix]) byPrefix[prefix] = {};
+          byPrefix[prefix][type] = data;
+        }
+
+        // Build individual deck objects
+        for (const prefix in byPrefix) {
+          const parts = byPrefix[prefix];
+          const deckObj = {};
+          if (parts.mcq) deckObj.mcq = parts.mcq;
+          else if (parts.mc) deckObj.mcq = parts.mc;
+          if (parts.tf) deckObj.tf = parts.tf;
+          if (parts.short) deckObj.short = parts.short;
+          else if (parts.sa) deckObj.short = parts.sa;
+
+          if (Object.keys(deckObj).length >= 2) {
+            addCandidate([deckObj], `chain:${prefix}`, 'chain-deck', 60);
+          }
+        }
+
+        // Build combined DATA object
+        if (Object.keys(byPrefix).length >= 2) {
+          const combinedDATA = {};
+          const prefixes = Object.keys(byPrefix).sort((a, b) => {
+            const na = parseInt(a.match(/\d+/)?.[0] || 0);
+            const nb = parseInt(b.match(/\d+/)?.[0] || 0);
+            return na - nb;
+          });
+          prefixes.forEach((prefix, i) => {
+            const parts = byPrefix[prefix];
+            const deckObj = {};
+            if (parts.mcq) deckObj.mcq = parts.mcq;
+            else if (parts.mc) deckObj.mcq = parts.mc;
+            if (parts.tf) deckObj.tf = parts.tf;
+            if (parts.short) deckObj.short = parts.short;
+            else if (parts.sa) deckObj.short = parts.sa;
+            if (Object.keys(deckObj).length >= 2) combinedDATA[i + 1] = deckObj;
+          });
+          if (Object.keys(combinedDATA).length >= 2) {
+            addCandidate(combinedDATA, 'chain:combined', 'chain-combined', 70);
+          }
+        }
+      }
+    } catch (e) { stats.errors.push('chain-build: ' + e.message); }
+    stats.strategiesRun++;
+
+    // ═══════════════════════════════════════════════════════════
+    // STRATEGY 3: Generic scan with chain vars
+    // ═══════════════════════════════════════════════════════════
     try {
       const reObj = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*/g;
       let count = 0;
@@ -782,7 +881,7 @@
           if (end > p) {
             const code = js.substring(p, end + 1);
             if (code.length < 30 || code.length > 5_000_000) continue;
-            const parsed = safeEvalWithHelpers(code, helpers);
+            const parsed = safeEvalWithChainVars(code, helpers, chainVars);
             if (parsed) addCandidate(parsed, name, 'generic', 15);
           }
         }
@@ -790,12 +889,61 @@
     } catch (e) { stats.errors.push('generic: ' + e.message); }
     stats.strategiesRun++;
 
+    // ═══════════════════════════════════════════════════════════
+    // STRATEGY 4: 🆕 v31 — Direct chain var collection fallback
+    // ═══════════════════════════════════════════════════════════
+    try {
+      if (candidates.length === 0 && chainVars.size > 0) {
+        const byNum = {};
+        for (const [name, data] of chainVars.entries()) {
+          const numMatch = name.match(/\d+/);
+          if (!numMatch) continue;
+          const num = numMatch[0];
+          if (!byNum[num]) byNum[num] = {};
+          if (/mcq|_mc$/i.test(name)) byNum[num].mcq = data;
+          else if (/_tf$|truefalse/i.test(name)) byNum[num].tf = data;
+          else if (/_short$|_sa$/i.test(name)) byNum[num].short = data;
+        }
+        const decks = [];
+        Object.keys(byNum).sort((a, b) => parseInt(a) - parseInt(b)).forEach(num => {
+          const d = byNum[num];
+          if (Object.keys(d).length >= 1) decks.push(d);
+        });
+        if (decks.length > 0) {
+          addCandidate(decks, 'chain-fallback', 'chain-fallback', 50);
+        }
+      }
+    } catch (e) { stats.errors.push('chain-fallback: ' + e.message); }
+    stats.strategiesRun++;
+
+    // ═══════════════════════════════════════════════════════════
+    // STRATEGY 5: 🆕 v31 — Merge chain vars with main data
+    // ═══════════════════════════════════════════════════════════
+    try {
+      if (chainVars.size > 0 && candidates.length > 0) {
+        // Try to inject chain vars into best candidate if it's incomplete
+        const bestCandidate = candidates[0];
+        if (bestCandidate && typeof bestCandidate.data === 'object') {
+          // Check if DATA has unresolved refs
+          const resolvedData = resolveUnresolvedRefs(bestCandidate.data, chainVars);
+          if (resolvedData && resolvedData !== bestCandidate.data) {
+            addCandidate(resolvedData, 'resolved', 'resolve-refs', 80);
+          }
+        }
+      }
+    } catch (e) { stats.errors.push('resolve: ' + e.message); }
+    stats.strategiesRun++;
+
     if (!candidates.length) {
       throw new Error(
-        'Không tìm thấy dữ liệu. Helpers: ' + stats.helperNames.join(', ') + '. Errors: ' + stats.errors.join('; ')
+        'Không tìm thấy dữ liệu. ' +
+        'Helpers: ' + stats.helperNames.slice(0, 10).join(', ') + '. ' +
+        'Chain vars: ' + stats.chainVarNames.slice(0, 10).join(', ') + '. ' +
+        'Errors: ' + stats.errors.join('; ')
       );
     }
 
+    // Cross-check
     for (let i = 0; i < candidates.length; i++) {
       for (let j = i + 1; j < candidates.length; j++) {
         try {
@@ -857,6 +1005,30 @@
         questionCount: estimateQuestionCount(c.data),
       })),
     };
+  }
+
+  /**
+   * 🆕 v31: Resolve unresolved references in DATA
+   */
+  function resolveUnresolvedRefs(data, chainVars) {
+    if (!data || typeof data !== 'object') return data;
+    let changed = false;
+    const result = Array.isArray(data) ? [] : {};
+
+    for (const key in data) {
+      const val = data[key];
+      if (typeof val === 'string' && chainVars.has(val)) {
+        result[key] = chainVars.get(val);
+        changed = true;
+      } else if (val && typeof val === 'object') {
+        const resolved = resolveUnresolvedRefs(val, chainVars);
+        result[key] = resolved;
+        if (resolved !== val) changed = true;
+      } else {
+        result[key] = val;
+      }
+    }
+    return changed ? result : data;
   }
 
   function estimateQuestionCount(obj) {
@@ -956,7 +1128,7 @@
     normalizeQuestion,
     normalizeText,
     normalizeMcqAnswer,
-    formatAnswerDisplay,   // 🆕 v29: PUBLIC HELPER
+    formatAnswerDisplay,
     toBoolean,
     looksLikeQuiz,
     scoreQuizObject,
@@ -965,16 +1137,20 @@
     detectHelperFunctions,
     compileHelperFunctions,
     safeEvalWithHelpers,
+    safeEvalWithChainVars,
+    collectChainVariables,
+    resolveUnresolvedRefs,
     getStats: () => ({
       version: VERSION,
       varNames: VAR_NAMES.length,
       helperWhitelist: HELPER_NAME_WHITELIST.length,
       genericHelpers: Object.keys(GENERIC_HELPERS).length,
+      chainPatterns: CHAIN_VAR_PATTERNS.length,
     }),
     _internal: {
       safeEval, matchBracket, findOpen,
       FIELD_ALIASES, VAR_NAMES, TYPE_ALIASES, PART_KEY_MAP,
-      HELPER_NAME_WHITELIST, GENERIC_HELPERS,
+      HELPER_NAME_WHITELIST, GENERIC_HELPERS, CHAIN_VAR_PATTERNS,
     },
   };
 
