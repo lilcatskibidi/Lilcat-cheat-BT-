@@ -7,10 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
-
-<!-- ⬇️ LOAD YOUTUBE API TRƯỚC SCRIPT CHÍNH — FIX no-sound bug -->
 <script src="https://www.youtube.com/iframe_api"></script>
-
 <style>
 :root{--neon:#ff6ac1;--bg:#0a0a12;--card:#14141f;--border:#2a2a3e}
 *{box-sizing:border-box}
@@ -43,17 +40,6 @@ body::before{content:'';position:fixed;inset:0;background:
 .drop-zone{padding:32px;text-align:center;margin-bottom:12px;border-radius:12px;border:2px dashed #3a3a52;cursor:pointer;transition:all .25s}
 .drop-zone:hover,.drop-zone.dragover{border-color:#ff6ac1;background:rgba(255,106,193,.05)}
 .file-info-card{background:#1c1c26;border-radius:8px;padding:12px;margin-bottom:12px}
-.file-list{display:grid;gap:12px}
-.file-item{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:all .25s}
-.file-item:hover{border-color:rgba(255,106,193,.4);transform:translateX(4px)}
-.file-name{font-weight:800;color:#fff;font-size:14px;word-break:break-all}
-.file-meta{font-size:11px;color:#888;margin-top:4px;display:flex;gap:12px;flex-wrap:wrap}
-.file-actions{display:flex;gap:6px;flex-shrink:0}
-.file-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all .2s}
-.file-btn-view{background:#3498db;color:white}
-.file-btn-view:hover{background:#2980b9}
-.file-btn-del{background:#e74c3c;color:white}
-.file-btn-del:hover{background:#c0392b}
 .q-box{background:#1c1c26;border-left:3px solid var(--neon);border-radius:8px;padding:12px 14px;margin-bottom:10px;transition:transform .2s;animation:fadeInUp .35s ease both}
 .q-box:hover{transform:translateX(3px);box-shadow:-4px 0 16px rgba(255,106,193,.15)}
 .ans-green{color:#2ecc71;font-weight:700}
@@ -121,17 +107,6 @@ body::before{content:'';position:fixed;inset:0;background:
 .fab:hover{transform:scale(1.12) rotate(5deg);box-shadow:0 12px 32px rgba(0,0,0,.6)}
 .fab:active{transform:scale(.95)}
 #fab-bug{bottom:24px;right:24px;background:linear-gradient(135deg,#ff4757,#c0392b)}
-#fab-bell{bottom:24px;right:96px;background:linear-gradient(135deg,#5865F2,#4752c4)}
-.fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:#ff4757;color:white;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)}
-#notif-panel{position:fixed;bottom:96px;right:24px;width:360px;max-width:calc(100vw - 48px);max-height:70vh;overflow-y:auto;background:var(--card);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.7);z-index:9500;padding:16px;animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both}
-#notif-panel.hidden{display:none}
-.notif-item{background:#1c1c26;border-left:3px solid var(--neon);border-radius:8px;padding:12px 14px;margin-bottom:10px;animation:fadeInUp .35s ease both}
-.notif-item.level-success{border-left-color:#22c55e}
-.notif-item.level-error{border-left-color:#ef4444}
-.notif-item.level-warn{border-left-color:#f59e0b}
-.notif-item h4{font-size:14px;font-weight:900;color:#f1c40f;margin-bottom:4px}
-.notif-item p{font-size:13px;color:#ccc;line-height:1.5}
-.notif-item time{font-size:10px;color:#666;display:block;margin-top:6px}
 
 .lms-banner{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(139,195,74,.1));border:1.5px solid rgba(76,175,80,.4);border-radius:14px;padding:20px;margin-bottom:16px}
 .lms-banner h3{color:#8bc34a;font-weight:900;font-size:18px;margin-bottom:8px}
@@ -188,18 +163,14 @@ body::before{content:'';position:fixed;inset:0;background:
 @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes popIn{0%{opacity:0;transform:scale(.8)}50%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(255,106,193,.3)}50%{box-shadow:0 0 40px rgba(255,106,193,.6)}}
 @keyframes shimmer{0%{background-position:-500px 0}100%{background-position:500px 0}}
-@keyframes bounceIn{0%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.05)}70%{transform:scale(.95)}100%{transform:scale(1)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .anim-fadeInUp{animation:fadeInUp .5s ease both}
 .anim-fadeIn{animation:fadeIn .4s ease both}
 .anim-slideDown{animation:slideDown .5s ease both}
 .anim-popIn{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both}
-.anim-bounceIn{animation:bounceIn .6s cubic-bezier(.34,1.56,.64,1) both}
 .anim-float{animation:float 3s ease-in-out infinite}
-.anim-pulseGlow{animation:pulseGlow 2s ease-in-out infinite}
 
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:var(--card)}
@@ -209,45 +180,36 @@ body::before{content:'';position:fixed;inset:0;background:
 </head>
 <body class="min-h-screen">
 
-<!-- NAVBAR -->
 <nav class="navbar" id="navbar">
   <div class="nav-inner">
     <div class="nav-logo" data-nav="home">🐱 Answer Checker</div>
     <div class="nav-menu">
       <button class="nav-item active" data-nav="home"><span class="nav-icon">🏠</span><span>Trang chủ</span></button>
       <button class="nav-item" data-nav="cheat"><span class="nav-icon">🐱</span><span>Cheat</span></button>
-      <button class="nav-item" data-nav="share"><span class="nav-icon">📤</span><span>Chia sẻ</span></button>
       <button class="nav-item" data-nav="guide"><span class="nav-icon">📚</span><span>Hướng dẫn</span></button>
-      <button class="nav-item" data-nav="account" id="nav-account"><span class="nav-icon">🔑</span><span>Đăng nhập</span></button>
     </div>
   </div>
 </nav>
 
-<!-- PAGE: HOME -->
 <div class="page active" id="page-home">
   <div class="max-w-6xl mx-auto p-4 md:p-8 relative z-10">
     <section class="hero anim-slideDown">
       <div class="text-6xl mb-4 anim-float">🐱</div>
       <h1 class="hero-title">Answer Checker<br>Siêu công cụ học tập</h1>
-      <p class="hero-sub">
-        Dán link, chọn file, hoặc dán HTML bài quiz — nhận ngay toàn bộ đáp án.
-        Made with 💖 by <b class="neon">Lilcat</b>.
-      </p>
+      <p class="hero-sub">Dán link, chọn file, hoặc dán HTML bài quiz — nhận ngay toàn bộ đáp án. Made with 💖 by <b class="neon">Lilcat</b>.</p>
       <div class="hero-buttons">
         <button class="hero-btn hero-btn-primary" data-nav="cheat">🚀 Bắt đầu ngay</button>
         <button class="hero-btn hero-btn-outline" data-nav="guide">📚 Xem hướng dẫn</button>
       </div>
     </section>
-
     <section class="anim-fadeInUp" style="animation-delay:.15s">
       <div class="stats">
-        <div class="stat"><div class="stat-number">4+</div><div class="stat-label">Nguồn hỗ trợ</div></div>
+        <div class="stat"><div class="stat-number">3</div><div class="stat-label">Cách nhập liệu</div></div>
         <div class="stat"><div class="stat-number">∞</div><div class="stat-label">Đề parse</div></div>
-        <div class="stat"><div class="stat-number">1M+</div><div class="stat-label">User hỗ trợ</div></div>
-        <div class="stat"><div class="stat-number">0đ</div><div class="stat-label">Miễn phí</div></div>
+        <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Miễn phí</div></div>
+        <div class="stat"><div class="stat-number">0đ</div><div class="stat-label">Không quảng cáo</div></div>
       </div>
     </section>
-
     <section class="mt-12 anim-fadeInUp" style="animation-delay:.25s">
       <h2 class="text-2xl font-black neon glow mb-6">✨ Tính năng nổi bật</h2>
       <div class="feature-grid">
@@ -256,33 +218,29 @@ body::before{content:'';position:fixed;inset:0;background:
         <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">Dán link tự động</div><div class="feature-desc">Fetch HTML qua 4 proxy CORS fallback, tự động chuyển nếu proxy lỗi.</div></div>
         <div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-title">Nhận diện 3 format</div><div class="feature-desc">Hỗ trợ quizData 2D, deckName.questions, allQuestions.de1/de2.</div></div>
         <div class="feature-card"><div class="feature-icon">🎵</div><div class="feature-title">Nhạc nền</div><div class="feature-desc">Playlist YouTube + SoundCloud, tùy chỉnh âm lượng, thêm link tùy ý.</div></div>
-        <div class="feature-card"><div class="feature-icon">🚀</div><div class="feature-title">1M+ users</div><div class="feature-desc">IndexedDB + lazy loading, không giật lag kể cả dữ liệu lớn.</div></div>
+        <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Nhẹ và nhanh</div><div class="feature-desc">Không cần đăng ký, không quảng cáo, chạy ngay trên trình duyệt.</div></div>
       </div>
     </section>
   </div>
 </div>
 
-<!-- PAGE: CHEAT -->
 <div class="page" id="page-cheat">
   <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
     <header class="text-center mb-8 anim-slideDown">
       <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">🐱 Cheat bài tập</h1>
       <p class="text-gray-400 text-sm">Chọn nguồn → Nhận đáp án</p>
     </header>
-
     <div class="lms-banner anim-fadeInUp">
       <h3>🎯 Có link LMS360?</h3>
       <p>Dùng công cụ chuyên dụng <b>LMS360 Hack</b> để lấy đáp án nhanh hơn. Click nút bên dưới để mở trong tab mới.</p>
       <button class="lms-btn" id="open-lms360">🚀 Mở LMS360 Hack</button>
     </div>
-
     <div class="card p-6 mb-6 anim-fadeInUp">
-      <div class="flex flex-wrap gap-2 mb-5 border-b border-[#2a2a3e] pb-4">
-        <button data-m="f" class="tab active">📁 File</button>
-        <button data-m="u" class="tab">🔗 Link</button>
-        <button data-m="h" class="tab">📋 HTML</button>
+      <div class="flex flex-wrap gap-2 mb-5 border-b border-[#2a2a3e] pb-4" id="cheat-tabs">
+        <button data-m="f" class="tab active" type="button">📁 File</button>
+        <button data-m="u" class="tab" type="button">🔗 Link</button>
+        <button data-m="h" class="tab" type="button">📋 HTML</button>
       </div>
-
       <div data-p="f">
         <div id="dz" class="drop-zone">
           <input type="file" id="fi" accept=".html,.htm,.txt" class="hidden">
@@ -292,9 +250,8 @@ body::before{content:'';position:fixed;inset:0;background:
           <p class="text-gray-600 text-[10px] mt-2">.html • .htm • .txt</p>
         </div>
         <div id="finfo" class="file-info-card hidden"></div>
-        <button id="bf" class="btn-neon w-full py-3 rounded-xl anim-pulseGlow">🔍 Kiểm tra file</button>
+        <button id="bf" class="btn-neon w-full py-3 rounded-xl">🔍 Kiểm tra file</button>
       </div>
-
       <div data-p="u" class="hidden">
         <label class="block text-sm font-bold mb-2 text-gray-300">🔗 Link web quiz:</label>
         <div class="flex flex-col md:flex-row gap-3">
@@ -303,7 +260,6 @@ body::before{content:'';position:fixed;inset:0;background:
         </div>
         <p class="text-xs text-gray-500 mt-3">⚠️ Trang phải cho phép <code>CORS</code>. Nếu không → dùng tab "File" hoặc "HTML".</p>
       </div>
-
       <div data-p="h" class="hidden">
         <label class="block text-sm font-bold mb-2 text-gray-300">📋 Dán mã HTML:</label>
         <textarea id="hi" rows="6" placeholder="Dán toàn bộ HTML của trang quiz..." class="input-field font-mono"></textarea>
@@ -313,7 +269,6 @@ body::before{content:'';position:fixed;inset:0;background:
         </div>
       </div>
     </div>
-
     <div id="rs" class="hidden">
       <div class="card p-6 anim-fadeInUp">
         <div class="flex justify-between items-center mb-4">
@@ -327,53 +282,11 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
-<!-- PAGE: SHARE -->
-<div class="page" id="page-share">
-  <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
-    <header class="text-center mb-8 anim-slideDown">
-      <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">📤 Chia sẻ file</h1>
-      <p class="text-gray-400 text-sm">Upload file quiz cho cộng đồng</p>
-    </header>
-
-    <div id="share-auth-notice" class="card p-6 mb-6 text-center anim-fadeInUp">
-      <p class="text-yellow-400 mb-3">🔒 Bạn cần đăng nhập để upload file</p>
-      <button class="btn-neon px-6 py-2 rounded-lg" data-nav="account">👤 Đăng nhập ngay</button>
-      <p class="text-xs text-gray-500 mt-3">Chưa có tài khoản? Bấm "Đăng nhập" → chuyển tab "Đăng ký"</p>
-    </div>
-
-    <div id="share-panel" class="hidden">
-      <div class="card p-6 mb-6">
-        <h3 class="text-lg font-black neon mb-3">📤 Upload file mới</h3>
-        <div id="share-drop" class="drop-zone">
-          <input type="file" id="share-file" accept=".html,.htm,.txt,.json" class="hidden">
-          <div class="text-5xl mb-2 anim-float">📎</div>
-          <p class="text-gray-300 font-bold">Kéo thả file vào đây</p>
-          <p class="text-gray-500 text-xs mt-1">hoặc bấm để chọn</p>
-          <p class="text-gray-600 text-[10px] mt-2">.html • .htm • .txt • .json (tối đa 5MB)</p>
-        </div>
-        <div id="share-info" class="file-info-card hidden"></div>
-        <button id="share-upload" class="btn-neon w-full py-3 rounded-xl">📤 Upload file</button>
-      </div>
-
-      <div class="card p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-black neon">📚 File đã chia sẻ (<span id="share-count">0</span>)</h3>
-          <button id="share-refresh" class="btn-ghost px-3 py-1 rounded text-xs">🔄 Làm mới</button>
-        </div>
-        <div id="share-list" class="file-list">
-          <p class="text-center text-gray-500 text-sm py-8">Chưa có file nào</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE: GUIDE -->
 <div class="page" id="page-guide">
   <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
     <header class="text-center mb-8 anim-slideDown">
       <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">📚 Hướng dẫn</h1>
-      <p class="text-gray-400 text-sm">Mọi thứ bạn cần biết</p>
+      <p class="text-gray-400 text-sm">Mọi thứ bạn cần biết — giải thích đơn giản</p>
     </header>
 
     <div class="card p-6 mb-6 anim-fadeInUp">
@@ -386,78 +299,97 @@ body::before{content:'';position:fixed;inset:0;background:
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.1s">
-      <h2 class="text-xl font-black neon mb-4">🐱 Cách dùng Cheat (file/link/HTML)</h2>
+      <h2 class="text-xl font-black neon mb-4">🐱 3 cách đưa bài quiz vào web</h2>
       <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div><b>Chọn nguồn</b> — file HTML, dán link web quiz, hoặc dán HTML trực tiếp.</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div><b>Bấm "Kiểm tra"</b> — tool tự tìm biến chứa câu hỏi.</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div><b>Xem đáp án</b> — chuyển tab Đề 1/2/3, bấm Copy để lấy toàn bộ.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div><b>Chọn file</b> — giống mở file Word trên máy tính. Bạn có sẵn file bài quiz trên máy thì dùng cách này. Kéo thả file vào ô vuông là xong.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div><b>Dán link</b> — giống copy link YouTube dán vào Zalo. Copy đường link của trang bài quiz rồi dán vào ô trống.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div><b>Dán HTML</b> — giống copy toàn bộ văn bản của 1 trang web. Nhấn <b>Ctrl+U</b> trên trang quiz, chọn hết (<b>Ctrl+A</b>), copy (<b>Ctrl+C</b>) rồi dán vào ô to.</div></div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
-      <h2 class="text-xl font-black neon mb-4">📋 3 format được hỗ trợ</h2>
+      <h2 class="text-xl font-black neon mb-4">📋 3 dạng bài quiz được hỗ trợ</h2>
+      <p class="text-sm text-gray-400 mb-4">Web tự động nhận diện 3 kiểu bài quiz khác nhau, bạn không cần làm gì cả:</p>
       <div class="space-y-4">
-        <div><div class="font-black text-yellow-400 mb-1">Format A — quizData 2D</div><pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
-  [ {type:'mcq', question, options, answer}, ... ],
-  [ ... ]
-];</pre></div>
-        <div><div class="font-black text-yellow-400 mb-1">Format B — deckName</div><pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">Kiểu A — Nhiều đề xếp chồng</div>
+          <div class="text-sm text-gray-400 mb-2">Giống 1 cuốn sách có nhiều chương. Mỗi chương là 1 đề thi riêng.</div>
+          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
+  [ câu hỏi đề 1 ],
+  [ câu hỏi đề 2 ]
+];</pre>
+        </div>
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">Kiểu B — Có tên đề</div>
+          <div class="text-sm text-gray-400 mb-2">Giống 1 cuốn sách có mục lục ghi rõ tên từng chương.</div>
+          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
   { deckName: 'Đề 1', questions: [ ... ] },
   { deckName: 'Đề 2', questions: [ ... ] }
-];</pre></div>
-        <div><div class="font-black text-yellow-400 mb-1">Format C — de1/de2/de3</div><pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const allQuestions = {
-  de1: [ { type:'mc', answer:'A' }, ... ],
+];</pre>
+        </div>
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">Kiểu C — Đặt tên de1, de2, de3</div>
+          <div class="text-sm text-gray-400 mb-2">Giống 1 cái tủ có nhiều ngăn, mỗi ngăn có nhãn riêng.</div>
+          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const allQuestions = {
+  de1: [ ... ],
   de2: [ ... ],
   de3: [ ... ]
-};</pre></div>
+};</pre>
+        </div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.3s">
       <h2 class="text-xl font-black neon mb-4">🎵 Cách dùng nhạc nền</h2>
+      <p class="text-sm text-gray-400 mb-4">Nhạc nền giúp bạn thư giãn khi học. Không bắt buộc, có thể tắt.</p>
       <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Click nút <b>⚙️</b> trên widget nhạc (góc dưới trái) để mở cài đặt</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Chọn bài trong playlist hoặc dán link YouTube/SoundCloud/MP3 vào ô custom</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div>Click <b>▶</b> trên widget để bật/tắt nhạc, kéo slider để chỉnh âm lượng</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Ở góc dưới bên trái có 1 cái khung nhỏ. Đó là <b>widget nhạc</b>.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Bấm nút <b>🔇</b> để bật nhạc, bấm lại để tắt. Khi nhạc đang phát, nút đổi thành <b>⏸</b>.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div>Bấm nút <b>⚙️</b> để mở cài đặt. Có thể: chọn bài, kéo âm lượng, hoặc dán link nhạc riêng.</div></div>
+      </div>
+      <div class="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+        <div class="font-black text-blue-400 mb-2">💡 Giải thích về âm lượng</div>
+        <div class="text-sm text-gray-300">Thanh kéo <b>âm lượng</b> giống như nút vặn volume trên tivi. Kéo sang phải = nghe to hơn, kéo sang trái = nghe nhỏ hơn. Khi bạn kéo, số % bên cạnh sẽ thay đổi để bạn biết đang ở mức nào.</div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.4s">
-      <h2 class="text-xl font-black neon mb-4">❓ FAQ</h2>
-      <div class="space-y-3">
-        <div><div class="font-black text-yellow-400">Không tìm thấy đáp án?</div><div class="text-sm text-gray-400">→ Thử copy toàn bộ source (Ctrl+U → Ctrl+A → Ctrl+C) → dán vào tab HTML.</div></div>
-        <div><div class="font-black text-yellow-400">Lỗi CORS?</div><div class="text-sm text-gray-400">→ Trang chặn fetch. Dùng tab File hoặc HTML thay thế.</div></div>
-        <div><div class="font-black text-yellow-400">Nhạc không phát?</div><div class="text-sm text-gray-400">→ Video YouTube có thể chặn embed. Thử SoundCloud hoặc MP3.</div></div>
-        <div><div class="font-black text-yellow-400">Chia sẻ file thế nào?</div><div class="text-sm text-gray-400">→ Đăng nhập → tab Chia sẻ → upload. File lưu cục bộ (IndexedDB).</div></div>
+      <h2 class="text-xl font-black neon mb-4">❓ Câu hỏi thường gặp</h2>
+      <div class="space-y-4">
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">🤔 Không tìm thấy đáp án?</div>
+          <div class="text-sm text-gray-400">Có thể trang đó chặn web khác đọc nội dung. Cách chữa: Nhấn <b>Ctrl+U</b> để xem mã nguồn trang, chọn hết <b>Ctrl+A</b>, copy <b>Ctrl+C</b>, rồi dán vào tab "HTML".</div>
+        </div>
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">🔒 Lỗi CORS là gì?</div>
+          <div class="text-sm text-gray-400">Giống như nhà hàng không cho người lạ vào bếp. Một số trang web không cho web khác đọc nội dung. Cách chữa: tải file về máy rồi dùng tab "File", hoặc copy HTML dán vào tab "HTML".</div>
+        </div>
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">🎵 Nhạc không phát?</div>
+          <div class="text-sm text-gray-400">Video YouTube đôi khi bị chặn phát trong web khác. Nếu vậy, web sẽ tự chuyển sang bài khác. Nếu vẫn lỗi, thử dán link SoundCloud hoặc file MP3.</div>
+        </div>
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">💾 Web có lưu dữ liệu của tôi không?</div>
+          <div class="text-sm text-gray-400">Không. Mọi thứ chạy ngay trong trình duyệt của bạn. Web không gửi bài quiz của bạn lên máy chủ nào. Bạn có thể tắt mạng vẫn dùng được (trừ nhạc).</div>
+        </div>
       </div>
     </div>
 
     <div class="card p-6 anim-fadeInUp" style="animation-delay:.5s">
       <h2 class="text-xl font-black neon mb-3">💖 Về dự án</h2>
-      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v11.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.</p>
+      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v13.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.</p>
       <p class="text-xs text-gray-500 mb-4">Cảm hứng từ <a href="https://github.com/HiennNek/lms360hack" target="_blank" class="text-blue-400 hover:underline">LMS360 Hack</a>. Mã nguồn mở, miễn phí, không thu phí.</p>
       <button class="btn-neon px-6 py-2 rounded-lg text-sm" id="open-bug-from-guide">🐛 Báo lỗi / Góp ý</button>
     </div>
   </div>
 </div>
 
-<!-- PAGE: ACCOUNT -->
-<div class="page" id="page-account">
-  <div class="max-w-md mx-auto p-4 md:p-8 relative z-10">
-    <div id="account-content" class="anim-fadeInUp"></div>
-  </div>
-</div>
-
-<!-- FOOTER -->
 <footer class="text-center text-xs text-gray-600 py-8 relative z-10">
-  🐱 Answer Checker v11.0 — Made with 💖 by <b class="neon">Lilcat</b>
+  🐱 Answer Checker v13.0 — Made with 💖 by <b class="neon">Lilcat</b>
 </footer>
 
-<!-- FABs -->
-<button id="fab-bell" class="fab" title="Thông báo">🔔<span id="bell-badge" class="fab-badge hidden">0</span></button>
 <button id="fab-bug" class="fab" title="Báo lỗi">🐛</button>
 
-<!-- MUSIC WIDGET -->
 <div id="music-widget">
   <div id="music-info">
     <span id="music-title">Tâm Sự</span>
@@ -476,30 +408,16 @@ body::before{content:'';position:fixed;inset:0;background:
     <input type="text" id="music-custom-url" placeholder="Dán link YouTube, SoundCloud, MP3...">
     <button id="music-custom-add">Thêm</button>
   </div>
-  <div class="music-section-label">🔊 Âm lượng</div>
+  <div class="music-section-label">🔊 Âm lượng — <span id="music-volume-value">40</span>%</div>
   <input type="range" id="music-volume" class="volume-slider" min="0" max="100" value="40">
-  <div style="text-align:right;font-size:11px;color:#888"><span id="music-volume-value">40</span>%</div>
   <div class="music-hint">💡 <b>Mẹo:</b> Nhạc từ YouTube có thể không phát được nếu video chặn embed. Thử SoundCloud hoặc MP3 nếu gặp lỗi.</div>
 </div>
 
-<!-- Hidden YouTube iframe -->
 <div id="yt-player-container" style="position:fixed;left:-9999px;width:1px;height:1px;overflow:hidden">
   <div id="yt-player"></div>
 </div>
 <audio id="audio-player" loop style="display:none"></audio>
 
-<!-- NOTIFICATION PANEL -->
-<div id="notif-panel" class="hidden">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:10px">
-    <h3 style="font-size:16px;font-weight:900;color:var(--neon)">🔔 Thông báo</h3>
-    <button class="btn-ghost" style="padding:4px 10px;border-radius:6px;font-size:12px" data-action="close-notif">✕</button>
-  </div>
-  <div id="notif-list">
-    <p style="text-align:center;color:#666;font-size:13px;padding:20px">Đang tải...</p>
-  </div>
-</div>
-
-<!-- BUG MODAL -->
 <div id="bug-modal" class="modal-backdrop hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
@@ -516,8 +434,8 @@ body::before{content:'';position:fixed;inset:0;background:
         <option value="Không đọc được file">Không đọc được file</option>
         <option value="Lỗi CORS khi dán link">Lỗi CORS khi dán link</option>
         <option value="Nhạc không phát">Nhạc không phát</option>
+        <option value="Âm lượng không hoạt động">Âm lượng không hoạt động</option>
         <option value="Giao diện lỗi">Giao diện lỗi/hiển thị sai</option>
-        <option value="Trang bị treo">Trang bị treo/đơ</option>
         <option value="Khác">Khác</option>
       </select>
     </div>
@@ -531,7 +449,6 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
-<!-- LOADING & STATUS -->
 <div id="loading-overlay" class="hidden">
   <div class="spinner"></div>
   <div class="loading-text" id="lt">Đang xử lý...</div>
@@ -544,132 +461,24 @@ body::before{content:'';position:fixed;inset:0;background:
 (function(){
 'use strict';
 
-// ============================================================
-// [1] CONFIG
-// ============================================================
 const CONFIG = {
   bugWebhook: 'https://discord.com/api/webhooks/1549784660043632792/_hVAUHbku6aMX8jsYczJT6PB6_8EZIefFhNN8c7wJVBuwLBJxfb_R1IeRyIgViMypNg5',
-  notifWebhook: 'https://discord.com/api/webhooks/1549784660043632792/_hVAUHbku6aMX8jsYczJT6PB6_8EZIefFhNN8c7wJVBuwLBJxfb_R1IeRyIgViMypNg5',
   lms360Url: 'https://lms360hack.pages.dev/',
-  features: {
-    enableAuth: true,
-    enableShare: true,
-    enableNotifications: true,
-    enableBugReport: true,
-    enableMusic: true,
-  },
-  storage: { maxFileSize: 5 * 1024 * 1024 },
   ui: { statusDuration: 4500 },
-  brand: { name: 'Answer Checker', author: 'Lilcat', version: '11.0.0' },
+  brand: { name: 'Answer Checker', author: 'Lilcat', version: '13.0.0' },
 };
 
-// ============================================================
-// [2] UTILS
-// ============================================================
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
-  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 const escMd = (s) => String(s || '').replace(/([*_`~|\\])/g, '\\$1');
 const isHtml = (t) => /<!DOCTYPE html|<html|<script|<body/i.test(t);
 const isUrl = (t) => { try { const u = new URL(t); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } };
 const fmtBytes = (b) => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
-const fmtDate = (d) => new Date(d).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-  const r = Math.random() * 16 | 0;
-  return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-});
-async function sha256(str) {
-  const buf = new TextEncoder().encode(str);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
-// ============================================================
-// [3] STORAGE
-// ============================================================
-const NS = 'ac:';
-const LS = {
-  get(key, fallback = null) {
-    try { const raw = localStorage.getItem(NS + key); return raw ? JSON.parse(raw) : fallback; }
-    catch { return fallback; }
-  },
-  set(key, value) {
-    try { localStorage.setItem(NS + key, JSON.stringify(value)); return true; }
-    catch { return false; }
-  },
-  remove(key) { try { localStorage.removeItem(NS + key); } catch {} },
-};
-
-const DB_NAME = 'answer-checker';
-const DB_VERSION = 1;
-let _dbPromise = null;
-function openDB() {
-  if (_dbPromise) return _dbPromise;
-  _dbPromise = new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onerror = () => reject(req.error);
-    req.onsuccess = () => resolve(req.result);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('files')) {
-        const store = db.createObjectStore('files', { keyPath: 'id' });
-        store.createIndex('userId', 'userId', { unique: false });
-        store.createIndex('uploadedAt', 'uploadedAt', { unique: false });
-      }
-    };
-  });
-  return _dbPromise;
-}
-const FilesDB = {
-  async add(file) { const db = await openDB(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').put(file); tx.oncomplete = () => res(file); tx.onerror = () => rej(tx.error); }); },
-  async get(id) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').get(id); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
-  async listByUser(userId) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').index('userId').getAll(userId); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); }); },
-  async listPublic(limit = 50) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').getAll(); r.onsuccess = () => { const all = r.result || []; all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)); res(all.slice(0, limit)); }; r.onerror = () => rej(r.error); }); },
-  async delete(id) { const db = await openDB(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').delete(id); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
-};
-
-// ============================================================
-// [4] AUTH
-// ============================================================
-const USER_KEY = 'current_user';
-const USERS_KEY = 'users_db';
-function getCurrentUser() { return LS.get(USER_KEY); }
-function isLoggedIn() { return !!getCurrentUser(); }
-async function register({ username, password, email }) {
-  if (!username || !password) throw new Error('Thiếu thông tin');
-  if (username.length < 3) throw new Error('Tên đăng nhập >= 3 ký tự');
-  if (password.length < 6) throw new Error('Mật khẩu >= 6 ký tự');
-  const users = LS.get(USERS_KEY, {});
-  if (users[username]) throw new Error('Tên đăng nhập đã tồn tại');
-  const hash = await sha256(password + '::' + username);
-  const user = { id: uuid(), username, email: email || '', hash, createdAt: new Date().toISOString() };
-  users[username] = user;
-  LS.set(USERS_KEY, users);
-  const { hash: _, ...publicUser } = user;
-  LS.set(USER_KEY, publicUser);
-  return publicUser;
-}
-async function login({ username, password }) {
-  if (!username || !password) throw new Error('Thiếu thông tin');
-  const users = LS.get(USERS_KEY, {});
-  const user = users[username];
-  if (!user) throw new Error('Tài khoản không tồn tại');
-  const hash = await sha256(password + '::' + username);
-  if (hash !== user.hash) throw new Error('Sai mật khẩu');
-  const { hash: _, ...publicUser } = user;
-  LS.set(USER_KEY, publicUser);
-  return publicUser;
-}
-function logout() { LS.remove(USER_KEY); }
-
-// ============================================================
-// [5] UI
-// ============================================================
 let _loadTimer = null;
 function showStatus(msg, type = 'info') {
-  const el = $('status');
-  if (!el) return;
+  const el = $('status'); if (!el) return;
   const icons = { info:'ℹ️', success:'✅', error:'❌', warn:'⚠️' };
   const si = $('si'); if (si) si.textContent = icons[type] || 'ℹ️';
   const st = $('st'); if (st) st.innerHTML = msg;
@@ -679,18 +488,13 @@ function showStatus(msg, type = 'info') {
 }
 const LOAD_MSGS = [['Đang xử lý', 'Vui lòng chờ...'],['Đang đọc dữ liệu', 'Phân tích cấu trúc...'],['Đang tìm kiếm', 'Trích xuất câu hỏi...'],['Đang parse', 'Chuẩn bị hiển thị...']];
 function showLoading(show, msg, sub) {
-  const el = $('loading-overlay');
-  if (!el) return;
+  const el = $('loading-overlay'); if (!el) return;
   if (!show) { clearInterval(_loadTimer); el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
   const lt = $('lt'); if (msg && lt) lt.textContent = msg;
   const ls = $('lsub'); if (sub && ls) ls.textContent = sub;
   let i = 0;
-  _loadTimer = setInterval(() => {
-    i = (i + 1) % LOAD_MSGS.length;
-    if (lt) lt.textContent = LOAD_MSGS[i][0];
-    if (ls) ls.textContent = LOAD_MSGS[i][1];
-  }, 900);
+  _loadTimer = setInterval(() => { i = (i + 1) % LOAD_MSGS.length; if (lt) lt.textContent = LOAD_MSGS[i][0]; if (ls) ls.textContent = LOAD_MSGS[i][1]; }, 900);
 }
 const Modal = {
   open(id) { $(id)?.classList.remove('hidden'); },
@@ -698,27 +502,21 @@ const Modal = {
   closeAll() { $$('.modal-backdrop').forEach(m => m.classList.add('hidden')); },
 };
 
-// ============================================================
-// [6] ROUTER
-// ============================================================
-const PAGES = ['home', 'cheat', 'share', 'guide', 'account'];
+const PAGES = ['home', 'cheat', 'guide'];
 function go(page) {
   if (!PAGES.includes(page)) page = 'home';
   $$('.page').forEach(p => p.classList.remove('active'));
   $('page-' + page)?.classList.add('active');
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.nav === page));
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  try { localStorage.setItem(NS + 'page', page); } catch {}
+  try { localStorage.setItem('ac:page', page); } catch {}
 }
 function initNavbar() {
   $$('[data-nav]').forEach(b => b.addEventListener('click', () => go(b.dataset.nav)));
   window.addEventListener('scroll', () => { $('navbar')?.classList.toggle('scrolled', window.scrollY > 20); }, { passive: true });
-  try { const saved = localStorage.getItem(NS + 'page'); if (saved && PAGES.includes(saved)) go(saved); } catch {}
+  try { const saved = localStorage.getItem('ac:page'); if (saved && PAGES.includes(saved)) go(saved); } catch {}
 }
 
-// ============================================================
-// [7] PARSER
-// ============================================================
 const VAR_NAMES = ['quizData', 'allQuestions', 'questions', 'quizBank', 'QUIZ_DATA', 'data', 'quiz', 'questionsData'];
 function safeEval(code) { try { return eval('(' + code + ')'); } catch { try { return new Function('return (' + code + ')')(); } catch { return null; } } }
 function looksLikeQuiz(obj) {
@@ -790,9 +588,6 @@ function normalizeDecks(raw) {
   return [];
 }
 
-// ============================================================
-// [8] RENDER
-// ============================================================
 let _decks = null;
 function renderOneQuestion(q, i) {
   let h = `<div class="q-box" style="animation-delay:${i * 0.03}s">`;
@@ -838,14 +633,9 @@ function copyAllText() {
     d.questions.forEach((q, i) => {
       t += `Câu ${i + 1}: `;
       const T = q.type; const opts = q.options || []; const stmts = q.statements || []; const ansArr = q.answers || [];
-      if (T === 'mcq' || T === 'mc') {
-        const a = q.answer;
-        if (typeof a === 'string' && a.length === 1 && /[A-D]/i.test(a)) { const idx = 'ABCD'.indexOf(a.toUpperCase()); t += `${a.toUpperCase()}. ${opts[idx] || ''}\n`; }
-        else { const idx = opts.indexOf(a); t += `${String.fromCharCode(65 + idx)}. ${a}\n`; }
-      } else if (T === 'true-false' || T === 'tf') {
-        stmts.forEach((s, j) => { let a; if (typeof s === 'object' && 'answer' in s) a = s.answer; else a = ansArr[j]; t += `${String.fromCharCode(97 + j)}) ${a ? 'Đ' : 'S'} `; });
-        t += '\n';
-      } else if (T === 'short-answer' || T === 'short') { t += q.answer + '\n'; }
+      if (T === 'mcq' || T === 'mc') { const a = q.answer; if (typeof a === 'string' && a.length === 1 && /[A-D]/i.test(a)) { const idx = 'ABCD'.indexOf(a.toUpperCase()); t += `${a.toUpperCase()}. ${opts[idx] || ''}\n`; } else { const idx = opts.indexOf(a); t += `${String.fromCharCode(65 + idx)}. ${a}\n`; } }
+      else if (T === 'true-false' || T === 'tf') { stmts.forEach((s, j) => { let a; if (typeof s === 'object' && 'answer' in s) a = s.answer; else a = ansArr[j]; t += `${String.fromCharCode(97 + j)}) ${a ? 'Đ' : 'S'} `; }); t += '\n'; }
+      else if (T === 'short-answer' || T === 'short') { t += q.answer + '\n'; }
     });
   });
   return t;
@@ -861,20 +651,20 @@ function showResults(decks, sourceLabel) {
   setTimeout(() => $('rs').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-// ============================================================
-// [9] CHEAT PAGE
-// ============================================================
 let _file = null;
 function initCheatPage() {
   if (!$('bf')) return;
-  $$('[data-m]').forEach(b => {
-    b.addEventListener('click', () => {
-      ['f','u','h'].forEach(k => {
-        $(`[data-p="${k}"]`)?.classList.toggle('hidden', k !== b.dataset.m);
-        $(`[data-m="${k}"]`)?.classList.toggle('active', k === b.dataset.m);
-      });
+  const tabContainer = $('cheat-tabs');
+  if (tabContainer) {
+    tabContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-m]');
+      if (!btn) return;
+      e.preventDefault();
+      const mode = btn.dataset.m;
+      document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('active', b.dataset.m === mode));
+      document.querySelectorAll('[data-p]').forEach(p => p.classList.toggle('hidden', p.dataset.p !== mode));
     });
-  });
+  }
   const dz = $('dz'), fi = $('fi');
   dz?.addEventListener('click', () => fi.click());
   fi?.addEventListener('change', e => { if (e.target.files[0]) pickFile(e.target.files[0]); });
@@ -886,7 +676,8 @@ function initCheatPage() {
   $('bh')?.addEventListener('click', handleHtml);
   $('bc')?.addEventListener('click', copyAll);
   $('bd')?.addEventListener('click', loadDemo);
-  $('open-lms360')?.addEventListener('click', () => {
+  $('open-lms360')?.addEventListener('click', (e) => {
+    e.preventDefault();
     window.open(CONFIG.lms360Url, '_blank', 'noopener,noreferrer');
     showStatus('🚀 Đang mở LMS360 Hack...', 'info');
   });
@@ -945,184 +736,11 @@ function copyAll() { if (!_decks) return; const text = copyAllText(); navigator.
 function loadDemo() {
   const d = '<!DOCTYPE html>\n<html><head><title>Demo</title></head>\n<body>\n<script>\nconst allQuestions = {\n  de1: [\n    { type: \'mcq\', question: \'Câu 1?\', options: [\'A\',\'B\',\'C\',\'D\'], answer: \'B\' },\n    { type: \'tf\', question: \'Xét:\', statements: [\'Đúng?\',\'Sai?\'], answers: [true, false] },\n    { type: \'short\', question: \'K_C = ?\', answer: \'36\' }\n  ],\n  de2: [ { type: \'mcq\', question: \'Câu 2?\', options: [\'A\',\'B\'], answer: \'A\' } ]\n};\n<\/script>\n</body></html>';
   $('hi').value = d;
-  $$('[data-m]').forEach(b => b.classList.toggle('active', b.dataset.m === 'h'));
-  ['f','u','h'].forEach(k => $(`[data-p="${k}"]`)?.classList.toggle('hidden', k !== 'h'));
+  document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('active', b.dataset.m === 'h'));
+  document.querySelectorAll('[data-p]').forEach(p => p.classList.toggle('hidden', p.dataset.p !== 'h'));
   showStatus('📋 Đã dán HTML mẫu', 'info');
 }
 
-// ============================================================
-// [10] SHARE PAGE
-// ============================================================
-let _shareFile = null;
-function initSharePage() {
-  if (!$('share-drop')) return;
-  updateShareAuthState();
-  const dz = $('share-drop'), fi = $('share-file');
-  dz?.addEventListener('click', () => fi.click());
-  fi?.addEventListener('change', e => { if (e.target.files[0]) pickShare(e.target.files[0]); });
-  ['dragenter','dragover'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
-  ['dragleave','drop'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
-  dz?.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) pickShare(f); });
-  $('share-upload')?.addEventListener('click', handleShareUpload);
-  $('share-refresh')?.addEventListener('click', refreshShareList);
-  refreshShareList();
-}
-function updateShareAuthState() {
-  const notice = $('share-auth-notice'); const panel = $('share-panel');
-  if (isLoggedIn()) { notice?.classList.add('hidden'); panel?.classList.remove('hidden'); }
-  else { notice?.classList.remove('hidden'); panel?.classList.add('hidden'); }
-}
-function pickShare(file) {
-  if (!/\.(html?|txt|json)$/i.test(file.name)) { showStatus('❌ Chỉ hỗ trợ .html/.htm/.txt/.json', 'error'); return; }
-  if (file.size > CONFIG.storage.maxFileSize) { showStatus(`❌ File quá lớn (tối đa ${fmtBytes(CONFIG.storage.maxFileSize)})`, 'error'); return; }
-  _shareFile = file;
-  const info = $('share-info');
-  if (info) {
-    info.classList.remove('hidden');
-    info.innerHTML = `<div class="mb-2"><b>${esc(file.name)}</b> (${fmtBytes(file.size)})</div><input type="text" id="share-title" placeholder="Tên hiển thị" class="input-field mb-2" maxlength="80" value="${esc(file.name.replace(/\.[^.]+$/, ''))}"><input type="text" id="share-desc" placeholder="Mô tả (tuỳ chọn)" class="input-field" maxlength="200">`;
-  }
-}
-async function handleShareUpload() {
-  if (!_shareFile) { showStatus('⚠️ Chưa chọn file', 'warn'); return; }
-  const user = getCurrentUser();
-  if (!user) { showStatus('⚠️ Cần đăng nhập', 'warn'); return; }
-  showLoading(true, 'Đang upload...');
-  try {
-    const content = await _shareFile.text();
-    const item = { id: uuid(), name: _shareFile.name, title: $('share-title')?.value.trim() || _shareFile.name, desc: $('share-desc')?.value.trim() || '', size: _shareFile.size, type: _shareFile.type || 'text/html', content, userId: user.id, username: user.username, uploadedAt: new Date().toISOString() };
-    await FilesDB.add(item);
-    showLoading(false);
-    _shareFile = null;
-    $('share-info')?.classList.add('hidden');
-    $('share-file').value = '';
-    refreshShareList();
-    showStatus('✅ Upload thành công!', 'success');
-  } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
-}
-async function refreshShareList() {
-  const list = $('share-list'); if (!list) return;
-  const items = await FilesDB.listPublic(50);
-  const count = $('share-count'); if (count) count.textContent = items.length;
-  if (!items.length) { list.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Chưa có file nào</p>'; return; }
-  const user = getCurrentUser();
-  list.innerHTML = items.map(item => `
-    <div class="file-item">
-      <div class="flex-1 min-w-0">
-        <div class="file-name">📄 ${esc(item.title || item.name)}</div>
-        <div class="file-meta"><span>📎 ${esc(item.name)}</span><span>💾 ${fmtBytes(item.size)}</span><span>👤 ${esc(item.username || 'Ẩn danh')}</span><span>🕐 ${fmtDate(item.uploadedAt)}</span></div>
-        ${item.desc ? `<div class="text-xs text-gray-400 mt-1">${esc(item.desc)}</div>` : ''}
-      </div>
-      <div class="file-actions">
-        <button class="file-btn file-btn-view" data-download="${item.id}">⬇️ Tải</button>
-        ${user?.id === item.userId ? `<button class="file-btn file-btn-del" data-delete="${item.id}">🗑️</button>` : ''}
-      </div>
-    </div>
-  `).join('');
-  list.querySelectorAll('[data-download]').forEach(b => b.addEventListener('click', () => downloadShareFile(b.dataset.download)));
-  list.querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', () => deleteShareFile(b.dataset.delete)));
-}
-async function downloadShareFile(id) {
-  const item = await FilesDB.get(id);
-  if (!item) { showStatus('❌ Không tìm thấy', 'error'); return; }
-  const blob = new Blob([item.content], { type: item.type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = item.name; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showStatus('✅ Đang tải', 'success');
-}
-async function deleteShareFile(id) {
-  if (!confirm('Xoá file này?')) return;
-  await FilesDB.delete(id);
-  refreshShareList();
-  showStatus('🗑️ Đã xoá', 'info');
-}
-
-// ============================================================
-// [11] ACCOUNT PAGE
-// ============================================================
-function initAccountPage() { renderAccount(); }
-function renderAccount() {
-  const el = $('account-content'); if (!el) return;
-  if (isLoggedIn()) {
-    const user = getCurrentUser();
-    el.innerHTML = `
-      <div class="card p-8 text-center">
-        <div class="text-6xl mb-4">👤</div>
-        <h1 class="text-2xl font-black neon glow mb-2">${esc(user.username)}</h1>
-        <p class="text-gray-400 text-sm mb-6">${user.email ? `📧 ${esc(user.email)}<br>` : ''}🕐 Tham gia: ${fmtDate(user.createdAt)}</p>
-        <div class="grid grid-cols-2 gap-3 mb-6">
-          <div class="stat"><div class="stat-number" id="user-file-count">—</div><div class="stat-label">File đã share</div></div>
-          <div class="stat"><div class="stat-number">∞</div><div class="stat-label">Đề đã parse</div></div>
-        </div>
-        <button class="btn-ghost px-6 py-2 rounded-lg" id="logout-btn">🚪 Đăng xuất</button>
-      </div>`;
-    FilesDB.listByUser(user.id).then(files => { const fc = $('user-file-count'); if (fc) fc.textContent = files.length; });
-    $('logout-btn')?.addEventListener('click', () => {
-      logout();
-      showStatus('👋 Đã đăng xuất', 'info');
-      updateNavbarUser();
-      renderAccount();
-      updateShareAuthState();
-    });
-  } else {
-    el.innerHTML = `
-      <div class="card p-8">
-        <h1 class="text-2xl font-black neon glow text-center mb-6">👤 Tài khoản</h1>
-        <div class="flex gap-2 mb-6">
-          <button class="tab active" data-auth-tab="login">Đăng nhập</button>
-          <button class="tab" data-auth-tab="register">Đăng ký</button>
-        </div>
-        <div id="auth-form"></div>
-      </div>`;
-    renderAuthForm('login');
-    el.querySelectorAll('[data-auth-tab]').forEach(b => {
-      b.addEventListener('click', () => {
-        el.querySelectorAll('[data-auth-tab]').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-        renderAuthForm(b.dataset.authTab);
-      });
-    });
-  }
-}
-function renderAuthForm(mode) {
-  const el = $('auth-form'); if (!el) return;
-  el.innerHTML = `
-    <div class="space-y-3">
-      <input type="text" id="auth-username" placeholder="Tên đăng nhập" class="input-field" autocomplete="username">
-      ${mode === 'register' ? '<input type="email" id="auth-email" placeholder="Email (tuỳ chọn)" class="input-field" autocomplete="email">' : ''}
-      <input type="password" id="auth-password" placeholder="Mật khẩu" class="input-field" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}">
-      <button class="btn-neon w-full py-3 rounded-xl" id="auth-submit">${mode === 'login' ? '🔓 Đăng nhập' : '✨ Tạo tài khoản'}</button>
-    </div>
-    <p class="text-xs text-gray-500 mt-4 text-center">${mode === 'login' ? 'Chưa có tài khoản? Chuyển tab Đăng ký.' : 'Đã có tài khoản? Chuyển tab Đăng nhập.'}</p>`;
-  $('auth-submit')?.addEventListener('click', async () => {
-    const username = $('auth-username').value.trim();
-    const password = $('auth-password').value;
-    const email = $('auth-email')?.value.trim();
-    showLoading(true, mode === 'login' ? 'Đang đăng nhập...' : 'Đang tạo tài khoản...');
-    try {
-      if (mode === 'login') await login({ username, password });
-      else await register({ username, password, email });
-      showLoading(false);
-      showStatus('✅ Thành công!', 'success');
-      updateNavbarUser();
-      renderAccount();
-      updateShareAuthState();
-    } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
-  });
-}
-function updateNavbarUser() {
-  const nav = $('nav-account'); if (!nav) return;
-  const user = getCurrentUser();
-  const label = nav.querySelector('span:last-child');
-  const icon = nav.querySelector('.nav-icon');
-  if (label) label.textContent = user ? user.username : 'Đăng nhập';
-  if (icon) icon.textContent = user ? '👤' : '🔑';
-}
-
-// ============================================================
-// [12] BUG REPORT
-// ============================================================
 function openBugModal() { Modal.open('bug-modal'); setTimeout(() => $('bug-name')?.focus(), 100); }
 function closeBugModal() { Modal.close('bug-modal'); const s = $('bug-status'); if (s) s.style.display = 'none'; }
 async function submitBugReport() {
@@ -1141,13 +759,13 @@ async function submitBugReport() {
   let success = false;
   if (CONFIG.bugWebhook && CONFIG.bugWebhook.includes('/api/webhooks/') && !CONFIG.bugWebhook.includes('CHANGE_ME')) {
     try {
-      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Giao diện lỗi': 0x3498db, 'Trang bị treo': 0xe91e63, 'Khác': 0x95a5a6 };
+      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Âm lượng không hoạt động': 0x9b59b6, 'Giao diện lỗi': 0x3498db, 'Khác': 0x95a5a6 };
       const embed = { title: `🐛 Báo lỗi mới — ${type}`, color: colorMap[type] || 0xff6ac1, fields: [{ name: '👤 Người báo', value: escMd(name), inline: true }, { name: '📁 Context', value: escMd(ctx).substring(0, 200), inline: true }, { name: '📝 Mô tả', value: escMd(desc).substring(0, 1000) }], footer: { text: `${CONFIG.brand.name} v${CONFIG.brand.version}` }, timestamp: payload.timestamp };
       const res = await fetch(CONFIG.bugWebhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'Answer Checker 🐱', embeds: [embed] }) });
       if (res.ok || res.status === 204) { success = true; statusEl.innerHTML = '<span style="color:#22c55e">✅ Đã gửi!</span>'; }
     } catch (err) { console.warn('Discord failed:', err); statusEl.innerHTML = '<span style="color:#f1c40f">⚠️ Lưu cục bộ</span>'; }
   } else { statusEl.innerHTML = '<span style="color:#f1c40f">ℹ️ Chưa cấu hình webhook, lưu cục bộ</span>'; }
-  try { const arr = LS.get('bug_reports', []); arr.push(payload); if (arr.length > 50) arr.splice(0, arr.length - 50); LS.set('bug_reports', arr); } catch {}
+  try { const arr = JSON.parse(localStorage.getItem('ac:bug_reports') || '[]'); arr.push(payload); if (arr.length > 50) arr.splice(0, arr.length - 50); localStorage.setItem('ac:bug_reports', JSON.stringify(arr)); } catch {}
   setTimeout(() => {
     btn.disabled = false; btn.textContent = old; closeBugModal();
     ['bug-name', 'bug-type', 'bug-desc', 'bug-context'].forEach(id => { const el = $(id); if (el) el.value = ''; });
@@ -1157,109 +775,64 @@ async function submitBugReport() {
 }
 
 // ============================================================
-// [13] NOTIFICATIONS
-// ============================================================
-let _notifOpen = false;
-let _notifLoaded = false;
-function loadNotifs(force = false) {
-  if (_notifLoaded && !force) return;
-  const list = $('notif-list'); if (!list) return;
-  const cached = LS.get('notifs_cache');
-  if (cached && Array.isArray(cached) && cached.length) { renderNotifs(cached); _notifLoaded = true; return; }
-  list.innerHTML = `<div style="text-align:center;color:#888;font-size:13px;padding:20px;line-height:1.6">📭 <b style="color:#f1c40f">Chưa có thông báo</b><br><span style="font-size:11px;color:#666">Admin có thể gửi qua URL:<br><code style="background:#1c1c26;padding:2px 6px;border-radius:4px;font-size:10px">?notif=Tiêu đề|Nội dung|level</code></span></div>`;
-}
-function renderNotifs(notifs) {
-  const list = $('notif-list'); if (!list) return;
-  list.innerHTML = notifs.map(n => `<div class="notif-item level-${esc(n.level || 'info')}"><h4>${esc(n.title || 'Thông báo')}</h4><p>${esc(n.message || '')}</p><time>${esc(n.timestamp ? fmtDate(n.timestamp) : '')}</time></div>`).join('');
-  const badge = $('bell-badge');
-  if (badge) { if (notifs.length) { badge.textContent = notifs.length > 9 ? '9+' : notifs.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
-  _notifLoaded = true;
-}
-function toggleNotif() {
-  const panel = $('notif-panel'); if (!panel) return;
-  _notifOpen = !_notifOpen;
-  panel.classList.toggle('hidden', !_notifOpen);
-  if (_notifOpen) loadNotifs(true);
-}
-function closeNotif() { _notifOpen = false; $('notif-panel')?.classList.add('hidden'); }
-(function(){
-  try {
-    const params = new URLSearchParams(location.search);
-    const notif = params.get('notif');
-    if (notif) {
-      const parts = notif.split('|');
-      const arr = LS.get('notifs_cache', []);
-      arr.unshift({ title: parts[0] || 'Thông báo', message: parts[1] || '', level: parts[2] || 'info', timestamp: new Date().toISOString() });
-      if (arr.length > 20) arr.splice(20);
-      LS.set('notifs_cache', arr);
-      window.history.replaceState({}, '', location.pathname);
-    }
-  } catch {}
-})();
-
-// ============================================================
-// [14] 🎵 MUSIC SYSTEM v11 — Fixed YouTube API timing
+// [14] 🎵 MUSIC SYSTEM v13 — Volume fixed
 // ============================================================
 (function initMusicSystem(){
-  if (!CONFIG.features.enableMusic) return;
-
-  const MUSIC_KEY = 'music_config';
-
+  const MUSIC_KEY = 'ac:music_config';
   const DEFAULT_PLAYLIST = [
     { id: 'tam-su', title: 'Tâm Sự', artist: 'Solmee ft. Dyteller', type: 'youtube', videoId: 'blvOdCKkPOc' },
     { id: 'vet-thuong', title: 'Vết Thương', artist: 'fishy', type: 'youtube', videoId: 'LIKOvbJ-DZg' },
     { id: 'giac-mo', title: 'Giấc Mơ Từng Rất Thơ', artist: 'MER ft. QUANGHUY', type: 'youtube', videoId: 'w9qxn5Kw3-I' },
   ];
 
-  let config = LS.get(MUSIC_KEY, { currentIndex: 0, volume: 40, customTracks: [], enabled: false });
+  // Đọc config từ localStorage
+  let config = { currentIndex: 0, volume: 40, customTracks: [], enabled: false };
+  try { const raw = localStorage.getItem(MUSIC_KEY); if (raw) config = { ...config, ...JSON.parse(raw) }; } catch {}
+
+  function saveConfig() { try { localStorage.setItem(MUSIC_KEY, JSON.stringify(config)); } catch {} }
   function getPlaylist() { return [...DEFAULT_PLAYLIST, ...(config.customTracks || [])]; }
 
-  let player = null;
-  let audioEl = null;
-  let isPlaying = false;
-  let playerReady = false;
-  let pendingPlay = false;
-  let currentTrack = null;
-  let errorCount = 0;
+  let player = null, audioEl = null, isPlaying = false, playerReady = false, pendingPlay = false, currentTrack = null, errorCount = 0;
   const MAX_ERRORS = 3;
 
-  const widget = $('music-widget');
-  const btnToggle = $('music-toggle');
-  const btnSettings = $('music-settings-btn');
-  const settingsPanel = $('music-settings');
-  const btnSettingsClose = $('music-settings-close');
-  const playlistEl = $('music-playlist');
-  const customInput = $('music-custom-url');
-  const btnCustomAdd = $('music-custom-add');
-  const volumeSlider = $('music-volume');
-  const volumeValue = $('music-volume-value');
-  const titleEl = $('music-title');
-  const artistEl = $('music-artist');
+  const widget = $('music-widget'), btnToggle = $('music-toggle'), btnSettings = $('music-settings-btn'), settingsPanel = $('music-settings'), btnSettingsClose = $('music-settings-close'), playlistEl = $('music-playlist'), customInput = $('music-custom-url'), btnCustomAdd = $('music-custom-add'), volumeSlider = $('music-volume'), volumeValue = $('music-volume-value'), titleEl = $('music-title'), artistEl = $('music-artist');
+  if (!widget || !btnToggle) return;
 
-  if (!widget || !btnToggle) { console.warn('❌ Music widget không tồn tại'); return; }
+  // ═══ HÀM SET VOLUME — DÙNG CHUNG CHO PLAYER + AUDIO ═══
+  function applyVolume(vol) {
+    vol = Math.max(0, Math.min(100, parseInt(vol, 10) || 0));
+    config.volume = vol;
+    if (volumeValue) volumeValue.textContent = vol;
+    // Set cho YouTube player
+    if (player && playerReady && typeof player.setVolume === 'function') {
+      try { player.setVolume(vol); } catch(e) { console.warn('Set YT volume failed:', e); }
+    }
+    // Set cho audio element
+    if (audioEl) {
+      audioEl.volume = vol / 100;
+    }
+    saveConfig();
+  }
 
-  function saveConfig() { LS.set(MUSIC_KEY, config); }
-
-  // ═══ TẠO PLAYER ═══
   function createPlayer() {
     if (player) return;
     const container = $('yt-player');
-    if (!container) { console.error('❌ #yt-player không tồn tại'); return; }
+    if (!container) return;
     console.log('🎬 Creating YouTube player...');
     try {
       player = new window.YT.Player('yt-player', {
         height: '1', width: '1',
         videoId: DEFAULT_PLAYLIST[0].videoId,
-        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0, origin: window.location.origin },
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
         events: {
           onReady: (e) => {
             playerReady = true;
-            try { e.target.setVolume(config.volume); } catch(err){}
+            // Áp dụng volume NGAY khi player ready
+            applyVolume(config.volume);
             console.log('✅ YouTube player READY — volume:', config.volume);
             if (pendingPlay) { pendingPlay = false; playTrackAtIndex(config.currentIndex); }
           },
           onStateChange: (e) => {
-            console.log('🎵 State:', e.data);
             if (e.data === 1) { isPlaying = true; errorCount = 0; updateWidgetUI(); renderPlaylist(); }
             else if (e.data === 2 || e.data === 0) { isPlaying = false; updateWidgetUI(); renderPlaylist(); }
           },
@@ -1273,7 +846,6 @@ function closeNotif() { _notifOpen = false; $('notif-panel')?.classList.add('hid
     } catch (err) { console.error('❌ Lỗi tạo player:', err); }
   }
 
-  // ═══ CHỜ YT.Player — Poll mỗi 100ms, tối đa 10s ═══
   function waitForYT(retries = 100) {
     if (window.YT && typeof window.YT.Player === 'function') { console.log('✅ YT.Player sẵn sàng'); createPlayer(); return; }
     if (retries <= 0) { console.error('❌ YT.Player không load sau 10 giây'); showStatus('❌ Không load được YouTube. Kiểm tra mạng/adblock.', 'error'); return; }
@@ -1285,62 +857,41 @@ function closeNotif() { _notifOpen = false; $('notif-panel')?.classList.add('hid
   else {
     console.log('⏳ Đợi YT API...');
     const oldCb = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = function() {
-      if (oldCb) try { oldCb(); } catch(e){}
-      console.log('🎵 onYouTubeIframeAPIReady fired');
-      createPlayer();
-    };
-    setTimeout(() => {
-      if (!window.YT || typeof window.YT.Player !== 'function') {
-        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-          console.log('📥 Tự thêm YT API script (fallback)...');
-          const s = document.createElement('script');
-          s.src = 'https://www.youtube.com/iframe_api';
-          document.head.appendChild(s);
-        }
-        waitForYT();
-      }
-    }, 500);
+    window.onYouTubeIframeAPIReady = function() { if (oldCb) try { oldCb(); } catch(e){} console.log('🎵 onYouTubeIframeAPIReady fired'); createPlayer(); };
+    setTimeout(() => { if (!window.YT || typeof window.YT.Player !== 'function') { if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) { const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s); } waitForYT(); } }, 500);
   }
 
-  // ═══ PLAY ═══
   function playTrackAtIndex(index) {
     const playlist = getPlaylist();
     if (index < 0 || index >= playlist.length) return;
-    config.currentIndex = index;
-    saveConfig();
-    const track = playlist[index];
-    currentTrack = track;
+    config.currentIndex = index; saveConfig();
+    const track = playlist[index]; currentTrack = track;
     console.log(`🎵 Play [${index}]: ${track.title}`);
     if (player && typeof player.stopVideo === 'function') { try { player.stopVideo(); } catch(e){} }
     if (audioEl) { audioEl.pause(); audioEl.src = ''; }
-    if (track.type === 'youtube' && !playerReady) { console.warn('⏳ Player chưa ready, pending...'); pendingPlay = true; return; }
+    if (track.type === 'youtube' && !playerReady) { pendingPlay = true; return; }
     if (track.type === 'youtube') playYouTube(track);
     else if (track.type === 'audio') playAudio(track);
     else if (track.type === 'soundcloud') playSoundCloud(track);
-    renderPlaylist();
-    updateWidgetUI();
+    renderPlaylist(); updateWidgetUI();
   }
-
   function playYouTube(track) {
-    if (!player || typeof player.loadVideoById !== 'function') { console.warn('❌ Player chưa có method'); return; }
+    if (!player || typeof player.loadVideoById !== 'function') return;
     try {
       player.loadVideoById({ videoId: track.videoId, startSeconds: 0 });
-      if (typeof player.setVolume === 'function') player.setVolume(config.volume);
-      if (typeof player.playVideo === 'function') player.playVideo();
-      console.log('▶️ Play sent:', track.videoId);
+      player.setVolume(config.volume);  // ⭐ Set volume khi đổi bài
+      player.playVideo();
+      console.log('▶️ Play sent:', track.videoId, '| volume:', config.volume);
     } catch(e) { console.error('❌ playYouTube error:', e); nextTrackOnError(); }
   }
-
   function playAudio(track) {
     if (!audioEl) return;
     try {
       audioEl.src = track.url;
-      audioEl.volume = config.volume / 100;
+      audioEl.volume = config.volume / 100;  // ⭐ Set volume
       audioEl.play().then(() => { isPlaying = true; updateWidgetUI(); }).catch(e => { console.error('❌ Audio error:', e); nextTrackOnError(); });
     } catch(e) { console.error(e); }
   }
-
   function playSoundCloud(track) {
     const scUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&auto_play=true`;
     const iframe = document.createElement('iframe');
@@ -1348,64 +899,39 @@ function closeNotif() { _notifOpen = false; $('notif-panel')?.classList.add('hid
     iframe.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;';
     iframe.allow = 'autoplay';
     document.body.appendChild(iframe);
-    isPlaying = true;
-    updateWidgetUI();
+    isPlaying = true; updateWidgetUI();
     setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 10 * 60 * 1000);
   }
-
   function nextTrackOnError() {
     errorCount++;
     if (errorCount >= MAX_ERRORS) { showStatus('❌ Không phát được bài nào. Thử link khác.', 'error'); isPlaying = false; updateWidgetUI(); return; }
     const playlist = getPlaylist();
-    if (playlist.length > 1) {
-      const nextIdx = (config.currentIndex + 1) % playlist.length;
-      console.log(`⏭️ Auto next: [${nextIdx}]`);
-      setTimeout(() => playTrackAtIndex(nextIdx), 800);
-    }
+    if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; setTimeout(() => playTrackAtIndex(nextIdx), 800); }
   }
-
-  function togglePlay() {
-    if (!currentTrack) { errorCount = 0; playTrackAtIndex(config.currentIndex || 0); return; }
-    isPlaying ? pauseMusic() : resumeMusic();
-  }
-
+  function togglePlay() { if (!currentTrack) { errorCount = 0; playTrackAtIndex(config.currentIndex || 0); return; } isPlaying ? pauseMusic() : resumeMusic(); }
   function pauseMusic() {
     if (currentTrack?.type === 'youtube' && player && typeof player.pauseVideo === 'function') { try { player.pauseVideo(); } catch(e){} }
     if (currentTrack?.type === 'audio' && audioEl) audioEl.pause();
     isPlaying = false; updateWidgetUI(); renderPlaylist();
   }
-
   function resumeMusic() {
     if (currentTrack?.type === 'youtube' && player && typeof player.playVideo === 'function') { try { player.playVideo(); } catch(e){} }
     if (currentTrack?.type === 'audio' && audioEl) audioEl.play().catch(e => console.warn(e));
     isPlaying = true; updateWidgetUI(); renderPlaylist();
   }
-
-  // ═══ UI ═══
   function renderPlaylist() {
     if (!playlistEl) return;
-    const playlist = getPlaylist();
-    const currentId = currentTrack?.id;
-    playlistEl.innerHTML = playlist.map((track, i) => `
-      <div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}">
-        <div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div>
-        <div class="info"><div class="title">${esc(track.title)}</div><div class="artist">${esc(track.artist)}</div></div>
-      </div>
-    `).join('');
-    playlistEl.querySelectorAll('[data-track-index]').forEach(el => {
-      el.addEventListener('click', () => { const idx = parseInt(el.dataset.trackIndex, 10); errorCount = 0; playTrackAtIndex(idx); });
-    });
+    const playlist = getPlaylist(); const currentId = currentTrack?.id;
+    playlistEl.innerHTML = playlist.map((track, i) => `<div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}"><div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div><div class="info"><div class="title">${esc(track.title)}</div><div class="artist">${esc(track.artist)}</div></div></div>`).join('');
+    playlistEl.querySelectorAll('[data-track-index]').forEach(el => { el.addEventListener('click', () => { const idx = parseInt(el.dataset.trackIndex, 10); errorCount = 0; playTrackAtIndex(idx); }); });
   }
-
   function updateWidgetUI() {
     if (isPlaying) { widget.classList.add('playing'); btnToggle.textContent = '⏸'; btnToggle.title = 'Tắt nhạc'; }
     else { widget.classList.remove('playing'); btnToggle.textContent = '🔇'; btnToggle.title = 'Bật nhạc'; }
     if (currentTrack) { if (titleEl) titleEl.textContent = currentTrack.title; if (artistEl) artistEl.textContent = currentTrack.artist; }
   }
-
   function parseMusicUrl(url) {
-    url = url.trim();
-    if (!url) return null;
+    url = url.trim(); if (!url) return null;
     const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
     if (ytMatch) return { id: 'yt-' + ytMatch[1], title: 'YouTube Video', artist: ytMatch[1], type: 'youtube', videoId: ytMatch[1] };
     if (url.includes('soundcloud.com')) return { id: 'sc-' + Date.now(), title: 'SoundCloud', artist: 'SC', type: 'soundcloud', url };
@@ -1425,89 +951,53 @@ function closeNotif() { _notifOpen = false; $('notif-panel')?.classList.add('hid
     if (!track) { showStatus('❌ Link không hợp lệ', 'error'); return; }
     if (track.error) { showStatus('❌ ' + track.error, 'error'); return; }
     if (!config.customTracks) config.customTracks = [];
-    config.customTracks.push(track);
-    saveConfig();
-    customInput.value = '';
-    renderPlaylist();
+    config.customTracks.push(track); saveConfig(); customInput.value = ''; renderPlaylist();
     showStatus('✅ Đã thêm: ' + track.title, 'success');
   });
-  volumeSlider?.addEventListener('input', (e) => {
-    const vol = parseInt(e.target.value, 10);
-    config.volume = vol;
-    if (volumeValue) volumeValue.textContent = vol;
-    saveConfig();
-    if (player && typeof player.setVolume === 'function') { try { player.setVolume(vol); } catch(e){} }
-    if (audioEl) audioEl.volume = vol / 100;
-  });
-  if (volumeSlider) volumeSlider.value = config.volume;
-  if (volumeValue) volumeValue.textContent = config.volume;
-  document.addEventListener('click', (e) => {
-    if (!settingsPanel || settingsPanel.classList.contains('hidden')) return;
-    if (settingsPanel.contains(e.target)) return;
-    if (btnSettings?.contains(e.target)) return;
-    settingsPanel.classList.add('hidden');
-  });
-  audioEl = $('audio-player');
-  if (audioEl) {
-    audioEl.addEventListener('ended', () => {
-      isPlaying = false; updateWidgetUI();
-      const playlist = getPlaylist();
-      if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; playTrackAtIndex(nextIdx); }
-    });
+
+  // ⭐ VOLUME SLIDER — XỬ LÝ CẢ 'input' VÀ 'change'
+  if (volumeSlider) {
+    volumeSlider.value = config.volume;
+    if (volumeValue) volumeValue.textContent = config.volume;
+
+    const onVolumeChange = (e) => {
+      const vol = parseInt(e.target.value, 10);
+      console.log('🔊 Volume changed:', vol);
+      applyVolume(vol);
+    };
+    volumeSlider.addEventListener('input', onVolumeChange);
+    volumeSlider.addEventListener('change', onVolumeChange);
   }
-  (function restoreMusicState() {
-    if (config.enabled === true && getPlaylist().length > 0) {
-      const resume = () => { playTrackAtIndex(config.currentIndex || 0); document.removeEventListener('click', resume); document.removeEventListener('keydown', resume); };
-      document.addEventListener('click', resume, { once: true });
-      document.addEventListener('keydown', resume, { once: true });
-    }
-  })();
-  setInterval(() => { if (config.enabled !== isPlaying) { config.enabled = isPlaying; saveConfig(); } }, 2000);
+
+  document.addEventListener('click', (e) => { if (!settingsPanel || settingsPanel.classList.contains('hidden')) return; if (settingsPanel.contains(e.target)) return; if (btnSettings?.contains(e.target)) return; settingsPanel.classList.add('hidden'); });
+
+  audioEl = $('audio-player');
+  if (audioEl) { audioEl.addEventListener('ended', () => { isPlaying = false; updateWidgetUI(); const playlist = getPlaylist(); if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; playTrackAtIndex(nextIdx); } }); }
+
   renderPlaylist();
-  console.log('🎵 Music system v11 ready — waiting for YT...');
+  console.log('🎵 Music system v13 ready — volume fixed');
 })();
 
-// ============================================================
-// [15] EVENTS & INIT
-// ============================================================
 function initAll() {
   console.log(`%c🐱 ${CONFIG.brand.name} v${CONFIG.brand.version}`, 'color:#fff;background:#5865F2;padding:4px 10px;border-radius:4px;font-weight:bold');
   console.log(`%c✨ Made with 💖 by ${CONFIG.brand.author}`, 'color:#ff6ac1;font-weight:bold');
-
   initNavbar();
   initCheatPage();
-  initSharePage();
-  initAccountPage();
-  updateNavbarUser();
-
   $('fab-bug')?.addEventListener('click', openBugModal);
-  $('fab-bell')?.addEventListener('click', toggleNotif);
   $('bug-submit')?.addEventListener('click', submitBugReport);
   $('bug-desc')?.addEventListener('input', e => { const c = $('bug-count'); if (c) c.textContent = e.target.value.length; });
   $('bug-modal')?.addEventListener('click', e => { if (e.target === $('bug-modal')) closeBugModal(); });
   $('open-bug-from-guide')?.addEventListener('click', openBugModal);
-
   document.addEventListener('click', e => {
     const action = e.target.closest('[data-action]')?.dataset.action;
     if (!action) return;
-    if (action === 'close-notif') closeNotif();
     if (action === 'close-bug') closeBugModal();
   });
-
-  document.addEventListener('click', e => {
-    if (_notifOpen && !$('notif-panel')?.contains(e.target) && !$('fab-bell')?.contains(e.target)) closeNotif();
-  });
-
   document.addEventListener('keydown', e => { if (e.key === 'Escape') Modal.closeAll(); });
-
-  setTimeout(() => loadNotifs(), 1000);
-
   console.log('%c✅ Ready', 'color:#2ecc71;font-weight:bold');
 }
-
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll);
 else initAll();
-
 })();
 </script>
 
