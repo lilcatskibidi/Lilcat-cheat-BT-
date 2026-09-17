@@ -7,6 +7,10 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+
+<!-- ⬇️ LOAD YOUTUBE API TRƯỚC SCRIPT CHÍNH — FIX no-sound bug -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <style>
 :root{--neon:#ff6ac1;--bg:#0a0a12;--card:#14141f;--border:#2a2a3e}
 *{box-sizing:border-box}
@@ -129,14 +133,12 @@ body::before{content:'';position:fixed;inset:0;background:
 .notif-item p{font-size:13px;color:#ccc;line-height:1.5}
 .notif-item time{font-size:10px;color:#666;display:block;margin-top:6px}
 
-/* LMS360 banner */
 .lms-banner{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(139,195,74,.1));border:1.5px solid rgba(76,175,80,.4);border-radius:14px;padding:20px;margin-bottom:16px}
 .lms-banner h3{color:#8bc34a;font-weight:900;font-size:18px;margin-bottom:8px}
 .lms-banner p{font-size:13px;color:#a5d6a7;line-height:1.6;margin-bottom:12px}
 .lms-btn{background:linear-gradient(135deg,#4caf50,#8bc34a);color:#0a0a12;font-weight:800;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all .25s;font-family:inherit}
 .lms-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.5)}
 
-/* Music widget */
 #music-widget{position:fixed;bottom:24px;left:24px;z-index:9100;display:flex;align-items:center;gap:10px;background:rgba(20,20,31,.95);backdrop-filter:blur(12px);border:1.5px solid var(--border);border-radius:999px;padding:8px 8px 8px 16px;box-shadow:0 8px 32px rgba(0,0,0,.6);transition:all .3s cubic-bezier(.4,0,.2,1);user-select:none;max-width:calc(100vw - 48px)}
 #music-widget:hover{border-color:rgba(255,106,193,.5);transform:translateY(-2px)}
 #music-widget.playing{border-color:rgba(76,175,80,.6);background:rgba(20,31,20,.95)}
@@ -249,36 +251,12 @@ body::before{content:'';position:fixed;inset:0;background:
     <section class="mt-12 anim-fadeInUp" style="animation-delay:.25s">
       <h2 class="text-2xl font-black neon glow mb-6">✨ Tính năng nổi bật</h2>
       <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <div class="feature-title">Hỗ trợ LMS360</div>
-          <div class="feature-desc">Chuyển nhanh sang lms360hack.pages.dev để lấy đáp án LMS360.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📁</div>
-          <div class="feature-title">Chọn file linh hoạt</div>
-          <div class="feature-desc">Kéo thả file HTML từ máy — parse ngay, không cần upload server.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔗</div>
-          <div class="feature-title">Dán link tự động</div>
-          <div class="feature-desc">Fetch HTML qua 4 proxy CORS fallback, tự động chuyển nếu proxy lỗi.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🧠</div>
-          <div class="feature-title">Nhận diện 3 format</div>
-          <div class="feature-desc">Hỗ trợ quizData 2D, deckName.questions, allQuestions.de1/de2.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎵</div>
-          <div class="feature-title">Nhạc nền</div>
-          <div class="feature-desc">Playlist YouTube + SoundCloud, tùy chỉnh âm lượng, thêm link tùy ý.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🚀</div>
-          <div class="feature-title">1M+ users</div>
-          <div class="feature-desc">IndexedDB + lazy loading, không giật lag kể cả dữ liệu lớn.</div>
-        </div>
+        <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Hỗ trợ LMS360</div><div class="feature-desc">Chuyển nhanh sang lms360hack.pages.dev để lấy đáp án LMS360.</div></div>
+        <div class="feature-card"><div class="feature-icon">📁</div><div class="feature-title">Chọn file linh hoạt</div><div class="feature-desc">Kéo thả file HTML từ máy — parse ngay, không cần upload server.</div></div>
+        <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">Dán link tự động</div><div class="feature-desc">Fetch HTML qua 4 proxy CORS fallback, tự động chuyển nếu proxy lỗi.</div></div>
+        <div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-title">Nhận diện 3 format</div><div class="feature-desc">Hỗ trợ quizData 2D, deckName.questions, allQuestions.de1/de2.</div></div>
+        <div class="feature-card"><div class="feature-icon">🎵</div><div class="feature-title">Nhạc nền</div><div class="feature-desc">Playlist YouTube + SoundCloud, tùy chỉnh âm lượng, thêm link tùy ý.</div></div>
+        <div class="feature-card"><div class="feature-icon">🚀</div><div class="feature-title">1M+ users</div><div class="feature-desc">IndexedDB + lazy loading, không giật lag kể cả dữ liệu lớn.</div></div>
       </div>
     </section>
   </div>
@@ -401,116 +379,63 @@ body::before{content:'';position:fixed;inset:0;background:
     <div class="card p-6 mb-6 anim-fadeInUp">
       <h2 class="text-xl font-black neon mb-4">🎯 Cách dùng với LMS360</h2>
       <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div>
-          <div>Vào tab <b>Cheat</b> → click nút <b>"🚀 Mở LMS360 Hack"</b></div>
-        </div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div>
-          <div>Dán link LMS360 của bạn vào ô <b>"Link LMS360"</b> trên trang LMS360 Hack</div>
-        </div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div>
-          <div>Bấm <b>"Lấy đáp án"</b> — đáp án hiện ra sau vài giây</div>
-        </div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Vào tab <b>Cheat</b> → click nút <b>"🚀 Mở LMS360 Hack"</b></div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Dán link LMS360 của bạn vào ô <b>"Link LMS360"</b> trên trang LMS360 Hack</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div>Bấm <b>"Lấy đáp án"</b> — đáp án hiện ra sau vài giây</div></div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.1s">
       <h2 class="text-xl font-black neon mb-4">🐱 Cách dùng Cheat (file/link/HTML)</h2>
       <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div>
-          <div><b>Chọn nguồn</b> — file HTML, dán link web quiz, hoặc dán HTML trực tiếp.</div>
-        </div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div>
-          <div><b>Bấm "Kiểm tra"</b> — tool tự tìm biến chứa câu hỏi.</div>
-        </div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div>
-          <div><b>Xem đáp án</b> — chuyển tab Đề 1/2/3, bấm Copy để lấy toàn bộ.</div>
-        </div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div><b>Chọn nguồn</b> — file HTML, dán link web quiz, hoặc dán HTML trực tiếp.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div><b>Bấm "Kiểm tra"</b> — tool tự tìm biến chứa câu hỏi.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div><b>Xem đáp án</b> — chuyển tab Đề 1/2/3, bấm Copy để lấy toàn bộ.</div></div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
       <h2 class="text-xl font-black neon mb-4">📋 3 format được hỗ trợ</h2>
       <div class="space-y-4">
-        <div>
-          <div class="font-black text-yellow-400 mb-1">Format A — quizData 2D</div>
-          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
+        <div><div class="font-black text-yellow-400 mb-1">Format A — quizData 2D</div><pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
   [ {type:'mcq', question, options, answer}, ... ],
   [ ... ]
-];</pre>
-        </div>
-        <div>
-          <div class="font-black text-yellow-400 mb-1">Format B — deckName</div>
-          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
+];</pre></div>
+        <div><div class="font-black text-yellow-400 mb-1">Format B — deckName</div><pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const quizData = [
   { deckName: 'Đề 1', questions: [ ... ] },
   { deckName: 'Đề 2', questions: [ ... ] }
-];</pre>
-        </div>
-        <div>
-          <div class="font-black text-yellow-400 mb-1">Format C — de1/de2/de3</div>
-          <pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const allQuestions = {
+];</pre></div>
+        <div><div class="font-black text-yellow-400 mb-1">Format C — de1/de2/de3</div><pre class="text-xs bg-[#0a0a12] p-3 rounded border border-[#2a2a3e] overflow-x-auto">const allQuestions = {
   de1: [ { type:'mc', answer:'A' }, ... ],
   de2: [ ... ],
   de3: [ ... ]
-};</pre>
-        </div>
+};</pre></div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.3s">
       <h2 class="text-xl font-black neon mb-4">🎵 Cách dùng nhạc nền</h2>
       <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div>
-          <div>Click nút <b>⚙️</b> trên widget nhạc (góc dưới trái) để mở cài đặt</div>
-        </div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div>
-          <div>Chọn bài trong playlist hoặc dán link YouTube/SoundCloud/MP3 vào ô custom</div>
-        </div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div>
-          <div>Click <b>▶</b> trên widget để bật/tắt nhạc, kéo slider để chỉnh âm lượng</div>
-        </div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Click nút <b>⚙️</b> trên widget nhạc (góc dưới trái) để mở cài đặt</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Chọn bài trong playlist hoặc dán link YouTube/SoundCloud/MP3 vào ô custom</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div>Click <b>▶</b> trên widget để bật/tắt nhạc, kéo slider để chỉnh âm lượng</div></div>
       </div>
     </div>
 
     <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.4s">
       <h2 class="text-xl font-black neon mb-4">❓ FAQ</h2>
       <div class="space-y-3">
-        <div>
-          <div class="font-black text-yellow-400">Không tìm thấy đáp án?</div>
-          <div class="text-sm text-gray-400">→ Thử copy toàn bộ source (Ctrl+U → Ctrl+A → Ctrl+C) → dán vào tab HTML.</div>
-        </div>
-        <div>
-          <div class="font-black text-yellow-400">Lỗi CORS?</div>
-          <div class="text-sm text-gray-400">→ Trang chặn fetch. Dùng tab File hoặc HTML thay thế.</div>
-        </div>
-        <div>
-          <div class="font-black text-yellow-400">Nhạc không phát?</div>
-          <div class="text-sm text-gray-400">→ Video YouTube có thể chặn embed. Thử SoundCloud hoặc MP3.</div>
-        </div>
-        <div>
-          <div class="font-black text-yellow-400">Chia sẻ file thế nào?</div>
-          <div class="text-sm text-gray-400">→ Đăng nhập → tab Chia sẻ → upload. File lưu cục bộ (IndexedDB).</div>
-        </div>
+        <div><div class="font-black text-yellow-400">Không tìm thấy đáp án?</div><div class="text-sm text-gray-400">→ Thử copy toàn bộ source (Ctrl+U → Ctrl+A → Ctrl+C) → dán vào tab HTML.</div></div>
+        <div><div class="font-black text-yellow-400">Lỗi CORS?</div><div class="text-sm text-gray-400">→ Trang chặn fetch. Dùng tab File hoặc HTML thay thế.</div></div>
+        <div><div class="font-black text-yellow-400">Nhạc không phát?</div><div class="text-sm text-gray-400">→ Video YouTube có thể chặn embed. Thử SoundCloud hoặc MP3.</div></div>
+        <div><div class="font-black text-yellow-400">Chia sẻ file thế nào?</div><div class="text-sm text-gray-400">→ Đăng nhập → tab Chia sẻ → upload. File lưu cục bộ (IndexedDB).</div></div>
       </div>
     </div>
 
     <div class="card p-6 anim-fadeInUp" style="animation-delay:.5s">
       <h2 class="text-xl font-black neon mb-3">💖 Về dự án</h2>
-      <p class="text-sm text-gray-400 mb-2">
-        <b>Answer Checker v10.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.
-      </p>
-      <p class="text-xs text-gray-500 mb-4">
-        Cảm hứng từ <a href="https://github.com/HiennNek/lms360hack" target="_blank" class="text-blue-400 hover:underline">LMS360 Hack</a>.
-        Mã nguồn mở, miễn phí, không thu phí.
-      </p>
+      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v11.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.</p>
+      <p class="text-xs text-gray-500 mb-4">Cảm hứng từ <a href="https://github.com/HiennNek/lms360hack" target="_blank" class="text-blue-400 hover:underline">LMS360 Hack</a>. Mã nguồn mở, miễn phí, không thu phí.</p>
       <button class="btn-neon px-6 py-2 rounded-lg text-sm" id="open-bug-from-guide">🐛 Báo lỗi / Góp ý</button>
     </div>
   </div>
@@ -525,7 +450,7 @@ body::before{content:'';position:fixed;inset:0;background:
 
 <!-- FOOTER -->
 <footer class="text-center text-xs text-gray-600 py-8 relative z-10">
-  🐱 Answer Checker v10.0 — Made with 💖 by <b class="neon">Lilcat</b>
+  🐱 Answer Checker v11.0 — Made with 💖 by <b class="neon">Lilcat</b>
 </footer>
 
 <!-- FABs -->
@@ -543,27 +468,18 @@ body::before{content:'';position:fixed;inset:0;background:
 </div>
 
 <div id="music-settings" class="hidden">
-  <h3>
-    🎵 Cài đặt nhạc
-    <button class="close-btn" id="music-settings-close">✕</button>
-  </h3>
-
+  <h3>🎵 Cài đặt nhạc<button class="close-btn" id="music-settings-close">✕</button></h3>
   <div class="music-section-label">📀 Playlist mặc định</div>
   <div class="music-playlist" id="music-playlist"></div>
-
   <div class="music-section-label">🔗 Nhạc từ link (YouTube / SoundCloud / MP3)</div>
   <div class="custom-url-input">
     <input type="text" id="music-custom-url" placeholder="Dán link YouTube, SoundCloud, MP3...">
     <button id="music-custom-add">Thêm</button>
   </div>
-
   <div class="music-section-label">🔊 Âm lượng</div>
   <input type="range" id="music-volume" class="volume-slider" min="0" max="100" value="40">
   <div style="text-align:right;font-size:11px;color:#888"><span id="music-volume-value">40</span>%</div>
-
-  <div class="music-hint">
-    💡 <b>Mẹo:</b> Nhạc từ YouTube có thể không phát được nếu video chặn embed. Thử SoundCloud hoặc MP3 nếu gặp lỗi.
-  </div>
+  <div class="music-hint">💡 <b>Mẹo:</b> Nhạc từ YouTube có thể không phát được nếu video chặn embed. Thử SoundCloud hoặc MP3 nếu gặp lỗi.</div>
 </div>
 
 <!-- Hidden YouTube iframe -->
@@ -591,13 +507,8 @@ body::before{content:'';position:fixed;inset:0;background:
       <button class="btn-ghost" style="padding:4px 10px;border-radius:6px;font-size:14px" data-action="close-bug">✕</button>
     </div>
     <p style="font-size:12px;color:#888;margin-bottom:18px">Báo cáo gửi tới Discord của admin.</p>
-
-    <div style="margin-bottom:14px">
-      <label class="modal-label">Tên của bạn (tuỳ chọn)</label>
-      <input type="text" id="bug-name" class="modal-input" placeholder="VD: Nguyễn Văn A" maxlength="60">
-    </div>
-    <div style="margin-bottom:14px">
-      <label class="modal-label">Loại lỗi <span style="color:var(--neon)">*</span></label>
+    <div style="margin-bottom:14px"><label class="modal-label">Tên của bạn (tuỳ chọn)</label><input type="text" id="bug-name" class="modal-input" placeholder="VD: Nguyễn Văn A" maxlength="60"></div>
+    <div style="margin-bottom:14px"><label class="modal-label">Loại lỗi <span style="color:var(--neon)">*</span></label>
       <select id="bug-type" class="modal-select">
         <option value="">-- Chọn loại lỗi --</option>
         <option value="Không tìm thấy đáp án">Không tìm thấy đáp án</option>
@@ -610,15 +521,8 @@ body::before{content:'';position:fixed;inset:0;background:
         <option value="Khác">Khác</option>
       </select>
     </div>
-    <div style="margin-bottom:14px">
-      <label class="modal-label">Mô tả <span style="color:var(--neon)">*</span></label>
-      <textarea id="bug-desc" class="modal-textarea" placeholder="Mô tả càng chi tiết càng tốt..." maxlength="1000"></textarea>
-      <div style="font-size:11px;color:#666;margin-top:4px;text-align:right"><span id="bug-count">0</span>/1000</div>
-    </div>
-    <div style="margin-bottom:20px">
-      <label class="modal-label">File/Link đang dùng (tuỳ chọn)</label>
-      <input type="text" id="bug-context" class="modal-input" placeholder="URL web quiz hoặc tên file" maxlength="200">
-    </div>
+    <div style="margin-bottom:14px"><label class="modal-label">Mô tả <span style="color:var(--neon)">*</span></label><textarea id="bug-desc" class="modal-textarea" placeholder="Mô tả càng chi tiết càng tốt..." maxlength="1000"></textarea><div style="font-size:11px;color:#666;margin-top:4px;text-align:right"><span id="bug-count">0</span>/1000</div></div>
+    <div style="margin-bottom:20px"><label class="modal-label">File/Link đang dùng (tuỳ chọn)</label><input type="text" id="bug-context" class="modal-input" placeholder="URL web quiz hoặc tên file" maxlength="200"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end">
       <button class="btn-ghost" style="padding:10px 20px;border-radius:10px;font-size:14px" data-action="close-bug">Huỷ</button>
       <button id="bug-submit" class="btn-neon" style="padding:10px 24px;border-radius:10px;font-size:14px">📨 Gửi báo cáo</button>
@@ -654,17 +558,9 @@ const CONFIG = {
     enableBugReport: true,
     enableMusic: true,
   },
-  storage: {
-    maxFileSize: 5 * 1024 * 1024,
-  },
-  ui: {
-    statusDuration: 4500,
-  },
-  brand: {
-    name: 'Answer Checker',
-    author: 'Lilcat',
-    version: '10.0.0',
-  },
+  storage: { maxFileSize: 5 * 1024 * 1024 },
+  ui: { statusDuration: 4500 },
+  brand: { name: 'Answer Checker', author: 'Lilcat', version: '11.0.0' },
 };
 
 // ============================================================
@@ -677,11 +573,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
 const escMd = (s) => String(s || '').replace(/([*_`~|\\])/g, '\\$1');
 const isHtml = (t) => /<!DOCTYPE html|<html|<script|<body/i.test(t);
 const isUrl = (t) => { try { const u = new URL(t); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } };
-const fmtBytes = (b) => {
-  if (b < 1024) return b + ' B';
-  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-  return (b / 1048576).toFixed(2) + ' MB';
-};
+const fmtBytes = (b) => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
 const fmtDate = (d) => new Date(d).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
   const r = Math.random() * 16 | 0;
@@ -730,52 +622,11 @@ function openDB() {
   return _dbPromise;
 }
 const FilesDB = {
-  async add(file) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const tx = db.transaction('files', 'readwrite');
-      tx.objectStore('files').put(file);
-      tx.oncomplete = () => res(file);
-      tx.onerror = () => rej(tx.error);
-    });
-  },
-  async get(id) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const r = db.transaction('files').objectStore('files').get(id);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-  },
-  async listByUser(userId) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const r = db.transaction('files').objectStore('files').index('userId').getAll(userId);
-      r.onsuccess = () => res(r.result || []);
-      r.onerror = () => rej(r.error);
-    });
-  },
-  async listPublic(limit = 50) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const r = db.transaction('files').objectStore('files').getAll();
-      r.onsuccess = () => {
-        const all = r.result || [];
-        all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-        res(all.slice(0, limit));
-      };
-      r.onerror = () => rej(r.error);
-    });
-  },
-  async delete(id) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const tx = db.transaction('files', 'readwrite');
-      tx.objectStore('files').delete(id);
-      tx.oncomplete = () => res();
-      tx.onerror = () => rej(tx.error);
-    });
-  },
+  async add(file) { const db = await openDB(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').put(file); tx.oncomplete = () => res(file); tx.onerror = () => rej(tx.error); }); },
+  async get(id) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').get(id); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async listByUser(userId) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').index('userId').getAll(userId); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); }); },
+  async listPublic(limit = 50) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').getAll(); r.onsuccess = () => { const all = r.result || []; all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)); res(all.slice(0, limit)); }; r.onerror = () => rej(r.error); }); },
+  async delete(id) { const db = await openDB(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').delete(id); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
 };
 
 // ============================================================
@@ -783,28 +634,22 @@ const FilesDB = {
 // ============================================================
 const USER_KEY = 'current_user';
 const USERS_KEY = 'users_db';
-
 function getCurrentUser() { return LS.get(USER_KEY); }
 function isLoggedIn() { return !!getCurrentUser(); }
-
 async function register({ username, password, email }) {
   if (!username || !password) throw new Error('Thiếu thông tin');
   if (username.length < 3) throw new Error('Tên đăng nhập >= 3 ký tự');
   if (password.length < 6) throw new Error('Mật khẩu >= 6 ký tự');
-
   const users = LS.get(USERS_KEY, {});
   if (users[username]) throw new Error('Tên đăng nhập đã tồn tại');
-
   const hash = await sha256(password + '::' + username);
   const user = { id: uuid(), username, email: email || '', hash, createdAt: new Date().toISOString() };
   users[username] = user;
   LS.set(USERS_KEY, users);
-
   const { hash: _, ...publicUser } = user;
   LS.set(USER_KEY, publicUser);
   return publicUser;
 }
-
 async function login({ username, password }) {
   if (!username || !password) throw new Error('Thiếu thông tin');
   const users = LS.get(USERS_KEY, {});
@@ -816,7 +661,6 @@ async function login({ username, password }) {
   LS.set(USER_KEY, publicUser);
   return publicUser;
 }
-
 function logout() { LS.remove(USER_KEY); }
 
 // ============================================================
@@ -833,13 +677,7 @@ function showStatus(msg, type = 'info') {
   clearTimeout(el._t);
   el._t = setTimeout(() => el.className = '', CONFIG.ui.statusDuration);
 }
-
-const LOAD_MSGS = [
-  ['Đang xử lý', 'Vui lòng chờ...'],
-  ['Đang đọc dữ liệu', 'Phân tích cấu trúc...'],
-  ['Đang tìm kiếm', 'Trích xuất câu hỏi...'],
-  ['Đang parse', 'Chuẩn bị hiển thị...'],
-];
+const LOAD_MSGS = [['Đang xử lý', 'Vui lòng chờ...'],['Đang đọc dữ liệu', 'Phân tích cấu trúc...'],['Đang tìm kiếm', 'Trích xuất câu hỏi...'],['Đang parse', 'Chuẩn bị hiển thị...']];
 function showLoading(show, msg, sub) {
   const el = $('loading-overlay');
   if (!el) return;
@@ -864,7 +702,6 @@ const Modal = {
 // [6] ROUTER
 // ============================================================
 const PAGES = ['home', 'cheat', 'share', 'guide', 'account'];
-
 function go(page) {
   if (!PAGES.includes(page)) page = 'home';
   $$('.page').forEach(p => p.classList.remove('active'));
@@ -873,107 +710,61 @@ function go(page) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   try { localStorage.setItem(NS + 'page', page); } catch {}
 }
-
 function initNavbar() {
-  $$('[data-nav]').forEach(b => {
-    b.addEventListener('click', () => go(b.dataset.nav));
-  });
-  window.addEventListener('scroll', () => {
-    $('navbar')?.classList.toggle('scrolled', window.scrollY > 20);
-  }, { passive: true });
-  try {
-    const saved = localStorage.getItem(NS + 'page');
-    if (saved && PAGES.includes(saved)) go(saved);
-  } catch {}
+  $$('[data-nav]').forEach(b => b.addEventListener('click', () => go(b.dataset.nav)));
+  window.addEventListener('scroll', () => { $('navbar')?.classList.toggle('scrolled', window.scrollY > 20); }, { passive: true });
+  try { const saved = localStorage.getItem(NS + 'page'); if (saved && PAGES.includes(saved)) go(saved); } catch {}
 }
 
 // ============================================================
 // [7] PARSER
 // ============================================================
 const VAR_NAMES = ['quizData', 'allQuestions', 'questions', 'quizBank', 'QUIZ_DATA', 'data', 'quiz', 'questionsData'];
-
-function safeEval(code) {
-  try { return eval('(' + code + ')'); }
-  catch { try { return new Function('return (' + code + ')')(); } catch { return null; } }
-}
-
+function safeEval(code) { try { return eval('(' + code + ')'); } catch { try { return new Function('return (' + code + ')')(); } catch { return null; } } }
 function looksLikeQuiz(obj) {
   if (!obj) return false;
   if (Array.isArray(obj)) {
     if (!obj.length) return false;
     const first = obj[0];
-    if (Array.isArray(first) && first.length && typeof first[0] === 'object') {
-      return !!(first[0].question || first[0].type);
-    }
-    if (typeof first === 'object' && first !== null) {
-      if (Array.isArray(first.questions)) return true;
-      if (first.question || first.type) return true;
-    }
+    if (Array.isArray(first) && first.length && typeof first[0] === 'object') return !!(first[0].question || first[0].type);
+    if (typeof first === 'object' && first !== null) { if (Array.isArray(first.questions)) return true; if (first.question || first.type) return true; }
   }
   if (typeof obj === 'object') {
     const keys = Object.keys(obj);
     const deckKeys = keys.filter(k => /^de\d+|^deck\d+|^set\d+|^đề\d+/i.test(k));
-    if (deckKeys.length) {
-      const firstVal = obj[deckKeys[0]];
-      if (Array.isArray(firstVal) && firstVal.length && (firstVal[0].question || firstVal[0].type)) return true;
-    }
+    if (deckKeys.length) { const firstVal = obj[deckKeys[0]]; if (Array.isArray(firstVal) && firstVal.length && (firstVal[0].question || firstVal[0].type)) return true; }
     if (Array.isArray(obj.questions) && obj.questions.length && (obj.questions[0].question || obj.questions[0].type)) return true;
   }
   return false;
 }
-
-function findOpen(s, idx) {
-  for (let i = idx; i >= 0; i--) {
-    if (s[i] === '[' || s[i] === '{') return i;
-    if ((s[i] === ';' || s[i] === '\n') && i < idx - 200) break;
-  }
-  return -1;
-}
-
+function findOpen(s, idx) { for (let i = idx; i >= 0; i--) { if (s[i] === '[' || s[i] === '{') return i; if ((s[i] === ';' || s[i] === '\n') && i < idx - 200) break; } return -1; }
 function matchBracket(s, start) {
-  const open = s[start];
-  const close = open === '[' ? ']' : '}';
+  const open = s[start]; const close = open === '[' ? ']' : '}';
   let depth = 0, inStr = null, esc = false;
   for (let i = start; i < s.length; i++) {
     const c = s[i];
-    if (inStr) {
-      if (esc) { esc = false; continue; }
-      if (c === '\\') { esc = true; continue; }
-      if (c === inStr) inStr = null;
-      continue;
-    }
+    if (inStr) { if (esc) { esc = false; continue; } if (c === '\\') { esc = true; continue; } if (c === inStr) inStr = null; continue; }
     if (c === '"' || c === "'") { inStr = c; continue; }
     if (c === open) depth++;
     else if (c === close && --depth === 0) return i;
   }
   return -1;
 }
-
 function extractQuizData(html) {
   if (!html) throw new Error('HTML rỗng');
   const re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-  const scripts = [];
-  let m;
+  const scripts = []; let m;
   while ((m = re.exec(html)) !== null) scripts.push(m[1]);
   if (!scripts.length) scripts.push(html);
   const js = scripts.join('\n');
-
   for (const name of VAR_NAMES) {
     const re1 = new RegExp('(?:const|var|let)\\s+' + name + '\\s*=\\s*(\\[\\s*\\{[\\s\\S]*?\\}\\s*\\]|\\{[\\s\\S]*?\\})\\s*;', 'm');
     const match = js.match(re1);
-    if (match) {
-      const parsed = safeEval(match[1]);
-      if (parsed) return { data: parsed, source: name };
-    }
+    if (match) { const parsed = safeEval(match[1]); if (parsed) return { data: parsed, source: name }; }
   }
-
   const reObj = /(?:const|var|let)\s+(\w+)\s*=\s*(\[[\s\S]*?\]|\{[\s\S]*?\})\s*;/g;
   let mm;
-  while ((mm = reObj.exec(js)) !== null) {
-    const parsed = safeEval(mm[2]);
-    if (parsed && looksLikeQuiz(parsed)) return { data: parsed, source: mm[1] };
-  }
-
+  while ((mm = reObj.exec(js)) !== null) { const parsed = safeEval(mm[2]); if (parsed && looksLikeQuiz(parsed)) return { data: parsed, source: mm[1] }; }
   const markers = ['"question"', "'question'", '"options"', '"statements"', '"answer"', '"type"'];
   for (const mk of markers) {
     const idx = js.indexOf(mk);
@@ -981,43 +772,21 @@ function extractQuizData(html) {
       const start = findOpen(js, idx);
       if (start >= 0) {
         const end = matchBracket(js, start);
-        if (end > start) {
-          const parsed = safeEval(js.substring(start, end + 1));
-          if (parsed && looksLikeQuiz(parsed)) return { data: parsed, source: 'marker:' + mk };
-        }
+        if (end > start) { const parsed = safeEval(js.substring(start, end + 1)); if (parsed && looksLikeQuiz(parsed)) return { data: parsed, source: 'marker:' + mk }; }
       }
     }
   }
   throw new Error('Không tìm thấy dữ liệu câu hỏi');
 }
-
 function normalizeDecks(raw) {
-  if (Array.isArray(raw) && raw.length && Array.isArray(raw[0])) {
-    return raw.map((q, i) => ({ name: 'Đề ' + (i + 1), questions: q, format: 'A' }));
-  }
-  if (Array.isArray(raw) && raw.length && raw[0]?.questions) {
-    return raw.map((d, i) => ({
-      name: d.deckName || d.name || 'Đề ' + (i + 1),
-      questions: d.questions,
-      format: 'B',
-    }));
-  }
+  if (Array.isArray(raw) && raw.length && Array.isArray(raw[0])) return raw.map((q, i) => ({ name: 'Đề ' + (i + 1), questions: q, format: 'A' }));
+  if (Array.isArray(raw) && raw.length && raw[0]?.questions) return raw.map((d, i) => ({ name: d.deckName || d.name || 'Đề ' + (i + 1), questions: d.questions, format: 'B' }));
   if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
     const deckKeys = Object.keys(raw).filter(k => Array.isArray(raw[k]));
-    if (deckKeys.length) {
-      return deckKeys.map(k => ({
-        name: k.replace(/^de/i, 'Đề '),
-        questions: raw[k],
-        format: 'C',
-      }));
-    }
-    if (Array.isArray(raw.questions)) {
-      return [{ name: raw.deckName || 'Đề 1', questions: raw.questions, format: 'C2' }];
-    }
+    if (deckKeys.length) return deckKeys.map(k => ({ name: k.replace(/^de/i, 'Đề '), questions: raw[k], format: 'C' }));
+    if (Array.isArray(raw.questions)) return [{ name: raw.deckName || 'Đề 1', questions: raw.questions, format: 'C2' }];
   }
-  if (Array.isArray(raw) && raw.length && (raw[0].question || raw[0].type)) {
-    return [{ name: 'Đề 1', questions: raw, format: '?' }];
-  }
+  if (Array.isArray(raw) && raw.length && (raw[0].question || raw[0].type)) return [{ name: 'Đề 1', questions: raw, format: '?' }];
   return [];
 }
 
@@ -1025,75 +794,42 @@ function normalizeDecks(raw) {
 // [8] RENDER
 // ============================================================
 let _decks = null;
-
 function renderOneQuestion(q, i) {
   let h = `<div class="q-box" style="animation-delay:${i * 0.03}s">`;
   h += `<div class="ans-yellow mb-1 font-bold">Câu ${i + 1}: <span class="text-gray-500 font-normal text-xs">[${esc(q.type || '?')}]</span>`;
   if (q.topic) h += ` <span class="text-gray-500 font-normal text-xs">— ${esc(q.topic)}</span>`;
   h += `</div>`;
   h += `<div class="text-gray-400 text-xs mb-2">${esc((q.question || '').substring(0, 140))}${(q.question || '').length > 140 ? '...' : ''}</div>`;
-
-  const T = q.type || '';
-  const opts = q.options || [];
-  const stmts = q.statements || [];
-  const ansArr = q.answers || [];
-
+  const T = q.type || ''; const opts = q.options || []; const stmts = q.statements || []; const ansArr = q.answers || [];
   if (T === 'mcq' || T === 'mc') {
     const a = q.answer;
-    if (typeof a === 'string' && a.length === 1 && /[A-D]/i.test(a)) {
-      const idx = 'ABCD'.indexOf(a.toUpperCase());
-      h += `<div class="ans-green">✅ ${a.toUpperCase()}. ${esc(opts[idx] || '')}</div>`;
-    } else {
-      const idx = opts.indexOf(a);
-      const L = idx >= 0 ? String.fromCharCode(65 + idx) : '?';
-      h += `<div class="ans-green">✅ ${L}. ${esc(a)}</div>`;
-    }
+    if (typeof a === 'string' && a.length === 1 && /[A-D]/i.test(a)) { const idx = 'ABCD'.indexOf(a.toUpperCase()); h += `<div class="ans-green">✅ ${a.toUpperCase()}. ${esc(opts[idx] || '')}</div>`; }
+    else { const idx = opts.indexOf(a); const L = idx >= 0 ? String.fromCharCode(65 + idx) : '?'; h += `<div class="ans-green">✅ ${L}. ${esc(a)}</div>`; }
   } else if (T === 'true-false' || T === 'tf') {
     stmts.forEach((s, j) => {
-      let a;
-      if (typeof s === 'object' && 'answer' in s) a = s.answer;
-      else a = ansArr[j];
-      const mark = a ? 'ĐÚNG' : 'SAI';
-      const cls = a ? 'ans-green' : 'ans-red';
+      let a; if (typeof s === 'object' && 'answer' in s) a = s.answer; else a = ansArr[j];
+      const mark = a ? 'ĐÚNG' : 'SAI'; const cls = a ? 'ans-green' : 'ans-red';
       const txt = typeof s === 'string' ? s : (s.text || '');
       h += `<div class="${cls} text-xs">${String.fromCharCode(97 + j)}) ${mark} — <span class="text-gray-400">${esc(txt.substring(0, 60))}${txt.length > 60 ? '...' : ''}</span></div>`;
     });
-  } else if (T === 'short-answer' || T === 'short') {
-    h += `<div class="ans-green">✅ ${esc(q.answer)}</div>`;
-  } else {
-    h += `<div class="text-yellow-400 text-xs">⚠️ Loại không xác định: ${esc(T)}</div>`;
-  }
+  } else if (T === 'short-answer' || T === 'short') { h += `<div class="ans-green">✅ ${esc(q.answer)}</div>`; }
+  else { h += `<div class="text-yellow-400 text-xs">⚠️ Loại không xác định: ${esc(T)}</div>`; }
   h += `</div>`;
   return h;
 }
-
 function renderDeck(idx) {
   if (!_decks || !_decks[idx]) return;
-  const d = _decks[idx];
-  const ct = $('ct');
-  if (!ct) return;
-  let h = `<div class="mb-3 flex justify-between items-center anim-fadeIn">
-    <div class="neon font-bold">📋 ${esc(d.name)} — ${d.questions.length} câu</div>
-    <div class="text-xs text-gray-500">Format ${esc(d.format)}</div>
-  </div>`;
+  const d = _decks[idx]; const ct = $('ct'); if (!ct) return;
+  let h = `<div class="mb-3 flex justify-between items-center anim-fadeIn"><div class="neon font-bold">📋 ${esc(d.name)} — ${d.questions.length} câu</div><div class="text-xs text-gray-500">Format ${esc(d.format)}</div></div>`;
   d.questions.forEach((q, i) => { h += renderOneQuestion(q, i); });
   ct.innerHTML = h;
   $$('#tb .tab').forEach((t, i) => t.classList.toggle('active', i === idx));
 }
-
 function renderTabs() {
-  const tb = $('tb');
-  if (!tb || !_decks) return;
+  const tb = $('tb'); if (!tb || !_decks) return;
   tb.innerHTML = '';
-  _decks.forEach((d, i) => {
-    const b = document.createElement('button');
-    b.className = 'tab';
-    b.textContent = d.name;
-    b.onclick = () => renderDeck(i);
-    tb.appendChild(b);
-  });
+  _decks.forEach((d, i) => { const b = document.createElement('button'); b.className = 'tab'; b.textContent = d.name; b.onclick = () => renderDeck(i); tb.appendChild(b); });
 }
-
 function copyAllText() {
   if (!_decks) return '';
   let t = '';
@@ -1101,41 +837,22 @@ function copyAllText() {
     t += `\n===== ${d.name} =====\n`;
     d.questions.forEach((q, i) => {
       t += `Câu ${i + 1}: `;
-      const T = q.type;
-      const opts = q.options || [];
-      const stmts = q.statements || [];
-      const ansArr = q.answers || [];
+      const T = q.type; const opts = q.options || []; const stmts = q.statements || []; const ansArr = q.answers || [];
       if (T === 'mcq' || T === 'mc') {
         const a = q.answer;
-        if (typeof a === 'string' && a.length === 1 && /[A-D]/i.test(a)) {
-          const idx = 'ABCD'.indexOf(a.toUpperCase());
-          t += `${a.toUpperCase()}. ${opts[idx] || ''}\n`;
-        } else {
-          const idx = opts.indexOf(a);
-          t += `${String.fromCharCode(65 + idx)}. ${a}\n`;
-        }
+        if (typeof a === 'string' && a.length === 1 && /[A-D]/i.test(a)) { const idx = 'ABCD'.indexOf(a.toUpperCase()); t += `${a.toUpperCase()}. ${opts[idx] || ''}\n`; }
+        else { const idx = opts.indexOf(a); t += `${String.fromCharCode(65 + idx)}. ${a}\n`; }
       } else if (T === 'true-false' || T === 'tf') {
-        stmts.forEach((s, j) => {
-          let a;
-          if (typeof s === 'object' && 'answer' in s) a = s.answer;
-          else a = ansArr[j];
-          t += `${String.fromCharCode(97 + j)}) ${a ? 'Đ' : 'S'} `;
-        });
+        stmts.forEach((s, j) => { let a; if (typeof s === 'object' && 'answer' in s) a = s.answer; else a = ansArr[j]; t += `${String.fromCharCode(97 + j)}) ${a ? 'Đ' : 'S'} `; });
         t += '\n';
-      } else if (T === 'short-answer' || T === 'short') {
-        t += q.answer + '\n';
-      }
+      } else if (T === 'short-answer' || T === 'short') { t += q.answer + '\n'; }
     });
   });
   return t;
 }
-
 function showResults(decks, sourceLabel) {
   _decks = decks;
-  if (!_decks || !_decks.length) {
-    showStatus('❌ Không có đề nào', 'error');
-    return;
-  }
+  if (!_decks || !_decks.length) { showStatus('❌ Không có đề nào', 'error'); return; }
   const total = _decks.reduce((s, d) => s + d.questions.length, 0);
   showStatus(`✅ <b>Thành công!</b> ${sourceLabel ? `<code>${esc(sourceLabel)}</code> — ` : ''}${_decks.length} đề, ${total} câu`, 'success');
   $('rs').classList.remove('hidden');
@@ -1148,10 +865,8 @@ function showResults(decks, sourceLabel) {
 // [9] CHEAT PAGE
 // ============================================================
 let _file = null;
-
 function initCheatPage() {
   if (!$('bf')) return;
-
   $$('[data-m]').forEach(b => {
     b.addEventListener('click', () => {
       ['f','u','h'].forEach(k => {
@@ -1160,49 +875,33 @@ function initCheatPage() {
       });
     });
   });
-
   const dz = $('dz'), fi = $('fi');
   dz?.addEventListener('click', () => fi.click());
   fi?.addEventListener('change', e => { if (e.target.files[0]) pickFile(e.target.files[0]); });
   ['dragenter','dragover'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
   ['dragleave','drop'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
   dz?.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) pickFile(f); });
-
   $('bf')?.addEventListener('click', handleFile);
   $('bu')?.addEventListener('click', handleUrl);
   $('bh')?.addEventListener('click', handleHtml);
   $('bc')?.addEventListener('click', copyAll);
   $('bd')?.addEventListener('click', loadDemo);
-
-  // LMS360 open button
   $('open-lms360')?.addEventListener('click', () => {
     window.open(CONFIG.lms360Url, '_blank', 'noopener,noreferrer');
     showStatus('🚀 Đang mở LMS360 Hack...', 'info');
   });
 }
-
 function pickFile(file) {
-  if (!/\.(html?|txt)$/i.test(file.name)) {
-    showStatus('❌ Chỉ hỗ trợ .html/.htm/.txt', 'error');
-    return;
-  }
+  if (!/\.(html?|txt)$/i.test(file.name)) { showStatus('❌ Chỉ hỗ trợ .html/.htm/.txt', 'error'); return; }
   _file = file;
   const info = $('finfo');
   if (info) {
     info.classList.remove('hidden');
-    info.innerHTML = `<div class="flex justify-between items-center">
-      <span>📎 ${esc(file.name)} <span class="text-gray-500">(${fmtBytes(file.size)})</span></span>
-      <button class="btn-ghost px-2 py-1 rounded text-xs" id="clear-file-btn">✕</button>
-    </div>`;
-    $('clear-file-btn')?.addEventListener('click', () => {
-      _file = null;
-      $('fi').value = '';
-      info.classList.add('hidden');
-    });
+    info.innerHTML = `<div class="flex justify-between items-center"><span>📎 ${esc(file.name)} <span class="text-gray-500">(${fmtBytes(file.size)})</span></span><button class="btn-ghost px-2 py-1 rounded text-xs" id="clear-file-btn">✕</button></div>`;
+    $('clear-file-btn')?.addEventListener('click', () => { _file = null; $('fi').value = ''; info.classList.add('hidden'); });
   }
   showStatus('✅ Đã chọn file', 'success');
 }
-
 async function handleFile() {
   if (!_file) { showStatus('⚠️ Chưa chọn file', 'warn'); return; }
   showLoading(true, 'Đang đọc file...');
@@ -1210,37 +909,15 @@ async function handleFile() {
     const text = await _file.text();
     await new Promise(r => setTimeout(r, 500));
     showLoading(false);
-    try {
-      const { data, source } = extractQuizData(text);
-      showResults(normalizeDecks(data), source);
-    } catch (e) {
-      showStatus('❌ ' + e.message, 'error');
-    }
-  } catch (e) {
-    showLoading(false);
-    showStatus('❌ ' + e.message, 'error');
-  }
+    try { const { data, source } = extractQuizData(text); showResults(normalizeDecks(data), source); }
+    catch (e) { showStatus('❌ ' + e.message, 'error'); }
+  } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
 }
-
 async function fetchWithProxies(url) {
-  const proxies = [
-    u => u,
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  ];
-  for (const p of proxies) {
-    try {
-      const res = await fetch(p(url), { mode: 'cors' });
-      if (res.ok) {
-        const t = await res.text();
-        if (isHtml(t)) return t;
-      }
-    } catch {}
-  }
+  const proxies = [u => u, u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, u => `https://corsproxy.io/?${encodeURIComponent(u)}`, u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`];
+  for (const p of proxies) { try { const res = await fetch(p(url), { mode: 'cors' }); if (res.ok) { const t = await res.text(); if (isHtml(t)) return t; } } catch {} }
   throw new Error('Không tải được HTML (CORS)');
 }
-
 async function handleUrl() {
   const url = $('ui')?.value.trim();
   if (!url) { showStatus('⚠️ Chưa có link', 'warn'); return; }
@@ -1250,18 +927,10 @@ async function handleUrl() {
     const html = await fetchWithProxies(url);
     await new Promise(r => setTimeout(r, 500));
     showLoading(false);
-    try {
-      const { data, source } = extractQuizData(html);
-      showResults(normalizeDecks(data), source);
-    } catch (e) {
-      showStatus('❌ ' + e.message, 'error');
-    }
-  } catch (e) {
-    showLoading(false);
-    showStatus('❌ ' + e.message, 'error');
-  }
+    try { const { data, source } = extractQuizData(html); showResults(normalizeDecks(data), source); }
+    catch (e) { showStatus('❌ ' + e.message, 'error'); }
+  } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
 }
-
 async function handleHtml() {
   const html = $('hi')?.value.trim();
   if (!html) { showStatus('⚠️ Chưa có HTML', 'warn'); return; }
@@ -1269,20 +938,10 @@ async function handleHtml() {
   showLoading(true, 'Đang parse...');
   await new Promise(r => setTimeout(r, 500));
   showLoading(false);
-  try {
-    const { data, source } = extractQuizData(html);
-    showResults(normalizeDecks(data), source);
-  } catch (e) {
-    showStatus('❌ ' + e.message, 'error');
-  }
+  try { const { data, source } = extractQuizData(html); showResults(normalizeDecks(data), source); }
+  catch (e) { showStatus('❌ ' + e.message, 'error'); }
 }
-
-function copyAll() {
-  if (!_decks) return;
-  const text = copyAllText();
-  navigator.clipboard.writeText(text).then(() => showStatus('✅ Đã copy!', 'success'));
-}
-
+function copyAll() { if (!_decks) return; const text = copyAllText(); navigator.clipboard.writeText(text).then(() => showStatus('✅ Đã copy!', 'success')); }
 function loadDemo() {
   const d = '<!DOCTYPE html>\n<html><head><title>Demo</title></head>\n<body>\n<script>\nconst allQuestions = {\n  de1: [\n    { type: \'mcq\', question: \'Câu 1?\', options: [\'A\',\'B\',\'C\',\'D\'], answer: \'B\' },\n    { type: \'tf\', question: \'Xét:\', statements: [\'Đúng?\',\'Sai?\'], answers: [true, false] },\n    { type: \'short\', question: \'K_C = ?\', answer: \'36\' }\n  ],\n  de2: [ { type: \'mcq\', question: \'Câu 2?\', options: [\'A\',\'B\'], answer: \'A\' } ]\n};\n<\/script>\n</body></html>';
   $('hi').value = d;
@@ -1295,76 +954,42 @@ function loadDemo() {
 // [10] SHARE PAGE
 // ============================================================
 let _shareFile = null;
-
 function initSharePage() {
   if (!$('share-drop')) return;
   updateShareAuthState();
-
   const dz = $('share-drop'), fi = $('share-file');
   dz?.addEventListener('click', () => fi.click());
   fi?.addEventListener('change', e => { if (e.target.files[0]) pickShare(e.target.files[0]); });
   ['dragenter','dragover'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
   ['dragleave','drop'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
   dz?.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) pickShare(f); });
-
   $('share-upload')?.addEventListener('click', handleShareUpload);
   $('share-refresh')?.addEventListener('click', refreshShareList);
   refreshShareList();
 }
-
 function updateShareAuthState() {
-  const notice = $('share-auth-notice');
-  const panel = $('share-panel');
-  if (isLoggedIn()) {
-    notice?.classList.add('hidden');
-    panel?.classList.remove('hidden');
-  } else {
-    notice?.classList.remove('hidden');
-    panel?.classList.add('hidden');
-  }
+  const notice = $('share-auth-notice'); const panel = $('share-panel');
+  if (isLoggedIn()) { notice?.classList.add('hidden'); panel?.classList.remove('hidden'); }
+  else { notice?.classList.remove('hidden'); panel?.classList.add('hidden'); }
 }
-
 function pickShare(file) {
-  if (!/\.(html?|txt|json)$/i.test(file.name)) {
-    showStatus('❌ Chỉ hỗ trợ .html/.htm/.txt/.json', 'error');
-    return;
-  }
-  if (file.size > CONFIG.storage.maxFileSize) {
-    showStatus(`❌ File quá lớn (tối đa ${fmtBytes(CONFIG.storage.maxFileSize)})`, 'error');
-    return;
-  }
+  if (!/\.(html?|txt|json)$/i.test(file.name)) { showStatus('❌ Chỉ hỗ trợ .html/.htm/.txt/.json', 'error'); return; }
+  if (file.size > CONFIG.storage.maxFileSize) { showStatus(`❌ File quá lớn (tối đa ${fmtBytes(CONFIG.storage.maxFileSize)})`, 'error'); return; }
   _shareFile = file;
   const info = $('share-info');
   if (info) {
     info.classList.remove('hidden');
-    info.innerHTML = `
-      <div class="mb-2"><b>${esc(file.name)}</b> (${fmtBytes(file.size)})</div>
-      <input type="text" id="share-title" placeholder="Tên hiển thị" class="input-field mb-2" maxlength="80" value="${esc(file.name.replace(/\.[^.]+$/, ''))}">
-      <input type="text" id="share-desc" placeholder="Mô tả (tuỳ chọn)" class="input-field" maxlength="200">
-    `;
+    info.innerHTML = `<div class="mb-2"><b>${esc(file.name)}</b> (${fmtBytes(file.size)})</div><input type="text" id="share-title" placeholder="Tên hiển thị" class="input-field mb-2" maxlength="80" value="${esc(file.name.replace(/\.[^.]+$/, ''))}"><input type="text" id="share-desc" placeholder="Mô tả (tuỳ chọn)" class="input-field" maxlength="200">`;
   }
 }
-
 async function handleShareUpload() {
   if (!_shareFile) { showStatus('⚠️ Chưa chọn file', 'warn'); return; }
   const user = getCurrentUser();
   if (!user) { showStatus('⚠️ Cần đăng nhập', 'warn'); return; }
-
   showLoading(true, 'Đang upload...');
   try {
     const content = await _shareFile.text();
-    const item = {
-      id: uuid(),
-      name: _shareFile.name,
-      title: $('share-title')?.value.trim() || _shareFile.name,
-      desc: $('share-desc')?.value.trim() || '',
-      size: _shareFile.size,
-      type: _shareFile.type || 'text/html',
-      content,
-      userId: user.id,
-      username: user.username,
-      uploadedAt: new Date().toISOString(),
-    };
+    const item = { id: uuid(), name: _shareFile.name, title: $('share-title')?.value.trim() || _shareFile.name, desc: $('share-desc')?.value.trim() || '', size: _shareFile.size, type: _shareFile.type || 'text/html', content, userId: user.id, username: user.username, uploadedAt: new Date().toISOString() };
     await FilesDB.add(item);
     showLoading(false);
     _shareFile = null;
@@ -1372,35 +997,19 @@ async function handleShareUpload() {
     $('share-file').value = '';
     refreshShareList();
     showStatus('✅ Upload thành công!', 'success');
-  } catch (e) {
-    showLoading(false);
-    showStatus('❌ ' + e.message, 'error');
-  }
+  } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
 }
-
 async function refreshShareList() {
-  const list = $('share-list');
-  if (!list) return;
+  const list = $('share-list'); if (!list) return;
   const items = await FilesDB.listPublic(50);
-  const count = $('share-count');
-  if (count) count.textContent = items.length;
-
-  if (!items.length) {
-    list.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Chưa có file nào</p>';
-    return;
-  }
-
+  const count = $('share-count'); if (count) count.textContent = items.length;
+  if (!items.length) { list.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Chưa có file nào</p>'; return; }
   const user = getCurrentUser();
   list.innerHTML = items.map(item => `
     <div class="file-item">
       <div class="flex-1 min-w-0">
         <div class="file-name">📄 ${esc(item.title || item.name)}</div>
-        <div class="file-meta">
-          <span>📎 ${esc(item.name)}</span>
-          <span>💾 ${fmtBytes(item.size)}</span>
-          <span>👤 ${esc(item.username || 'Ẩn danh')}</span>
-          <span>🕐 ${fmtDate(item.uploadedAt)}</span>
-        </div>
+        <div class="file-meta"><span>📎 ${esc(item.name)}</span><span>💾 ${fmtBytes(item.size)}</span><span>👤 ${esc(item.username || 'Ẩn danh')}</span><span>🕐 ${fmtDate(item.uploadedAt)}</span></div>
         ${item.desc ? `<div class="text-xs text-gray-400 mt-1">${esc(item.desc)}</div>` : ''}
       </div>
       <div class="file-actions">
@@ -1409,28 +1018,19 @@ async function refreshShareList() {
       </div>
     </div>
   `).join('');
-
-  list.querySelectorAll('[data-download]').forEach(b => {
-    b.addEventListener('click', () => downloadShareFile(b.dataset.download));
-  });
-  list.querySelectorAll('[data-delete]').forEach(b => {
-    b.addEventListener('click', () => deleteShareFile(b.dataset.delete));
-  });
+  list.querySelectorAll('[data-download]').forEach(b => b.addEventListener('click', () => downloadShareFile(b.dataset.download)));
+  list.querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', () => deleteShareFile(b.dataset.delete)));
 }
-
 async function downloadShareFile(id) {
   const item = await FilesDB.get(id);
   if (!item) { showStatus('❌ Không tìm thấy', 'error'); return; }
   const blob = new Blob([item.content], { type: item.type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = item.name;
-  a.click();
+  a.href = url; a.download = item.name; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   showStatus('✅ Đang tải', 'success');
 }
-
 async function deleteShareFile(id) {
   if (!confirm('Xoá file này?')) return;
   await FilesDB.delete(id);
@@ -1441,36 +1041,23 @@ async function deleteShareFile(id) {
 // ============================================================
 // [11] ACCOUNT PAGE
 // ============================================================
-function initAccountPage() {
-  renderAccount();
-}
-
+function initAccountPage() { renderAccount(); }
 function renderAccount() {
-  const el = $('account-content');
-  if (!el) return;
-
+  const el = $('account-content'); if (!el) return;
   if (isLoggedIn()) {
     const user = getCurrentUser();
     el.innerHTML = `
       <div class="card p-8 text-center">
         <div class="text-6xl mb-4">👤</div>
         <h1 class="text-2xl font-black neon glow mb-2">${esc(user.username)}</h1>
-        <p class="text-gray-400 text-sm mb-6">
-          ${user.email ? `📧 ${esc(user.email)}<br>` : ''}
-          🕐 Tham gia: ${fmtDate(user.createdAt)}
-        </p>
+        <p class="text-gray-400 text-sm mb-6">${user.email ? `📧 ${esc(user.email)}<br>` : ''}🕐 Tham gia: ${fmtDate(user.createdAt)}</p>
         <div class="grid grid-cols-2 gap-3 mb-6">
           <div class="stat"><div class="stat-number" id="user-file-count">—</div><div class="stat-label">File đã share</div></div>
           <div class="stat"><div class="stat-number">∞</div><div class="stat-label">Đề đã parse</div></div>
         </div>
         <button class="btn-ghost px-6 py-2 rounded-lg" id="logout-btn">🚪 Đăng xuất</button>
       </div>`;
-
-    FilesDB.listByUser(user.id).then(files => {
-      const fc = $('user-file-count');
-      if (fc) fc.textContent = files.length;
-    });
-
+    FilesDB.listByUser(user.id).then(files => { const fc = $('user-file-count'); if (fc) fc.textContent = files.length; });
     $('logout-btn')?.addEventListener('click', () => {
       logout();
       showStatus('👋 Đã đăng xuất', 'info');
@@ -1488,7 +1075,6 @@ function renderAccount() {
         </div>
         <div id="auth-form"></div>
       </div>`;
-
     renderAuthForm('login');
     el.querySelectorAll('[data-auth-tab]').forEach(b => {
       b.addEventListener('click', () => {
@@ -1499,28 +1085,20 @@ function renderAccount() {
     });
   }
 }
-
 function renderAuthForm(mode) {
-  const el = $('auth-form');
-  if (!el) return;
+  const el = $('auth-form'); if (!el) return;
   el.innerHTML = `
     <div class="space-y-3">
       <input type="text" id="auth-username" placeholder="Tên đăng nhập" class="input-field" autocomplete="username">
       ${mode === 'register' ? '<input type="email" id="auth-email" placeholder="Email (tuỳ chọn)" class="input-field" autocomplete="email">' : ''}
       <input type="password" id="auth-password" placeholder="Mật khẩu" class="input-field" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}">
-      <button class="btn-neon w-full py-3 rounded-xl" id="auth-submit">
-        ${mode === 'login' ? '🔓 Đăng nhập' : '✨ Tạo tài khoản'}
-      </button>
+      <button class="btn-neon w-full py-3 rounded-xl" id="auth-submit">${mode === 'login' ? '🔓 Đăng nhập' : '✨ Tạo tài khoản'}</button>
     </div>
-    <p class="text-xs text-gray-500 mt-4 text-center">
-      ${mode === 'login' ? 'Chưa có tài khoản? Chuyển tab Đăng ký.' : 'Đã có tài khoản? Chuyển tab Đăng nhập.'}
-    </p>`;
-
+    <p class="text-xs text-gray-500 mt-4 text-center">${mode === 'login' ? 'Chưa có tài khoản? Chuyển tab Đăng ký.' : 'Đã có tài khoản? Chuyển tab Đăng nhập.'}</p>`;
   $('auth-submit')?.addEventListener('click', async () => {
     const username = $('auth-username').value.trim();
     const password = $('auth-password').value;
     const email = $('auth-email')?.value.trim();
-
     showLoading(true, mode === 'login' ? 'Đang đăng nhập...' : 'Đang tạo tài khoản...');
     try {
       if (mode === 'login') await login({ username, password });
@@ -1530,16 +1108,11 @@ function renderAuthForm(mode) {
       updateNavbarUser();
       renderAccount();
       updateShareAuthState();
-    } catch (e) {
-      showLoading(false);
-      showStatus('❌ ' + e.message, 'error');
-    }
+    } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
   });
 }
-
 function updateNavbarUser() {
-  const nav = $('nav-account');
-  if (!nav) return;
+  const nav = $('nav-account'); if (!nav) return;
   const user = getCurrentUser();
   const label = nav.querySelector('span:last-child');
   const icon = nav.querySelector('.nav-icon');
@@ -1550,98 +1123,34 @@ function updateNavbarUser() {
 // ============================================================
 // [12] BUG REPORT
 // ============================================================
-function openBugModal() {
-  Modal.open('bug-modal');
-  setTimeout(() => $('bug-name')?.focus(), 100);
-}
-function closeBugModal() {
-  Modal.close('bug-modal');
-  const s = $('bug-status');
-  if (s) s.style.display = 'none';
-}
-
+function openBugModal() { Modal.open('bug-modal'); setTimeout(() => $('bug-name')?.focus(), 100); }
+function closeBugModal() { Modal.close('bug-modal'); const s = $('bug-status'); if (s) s.style.display = 'none'; }
 async function submitBugReport() {
   const name = $('bug-name')?.value.trim() || '(ẩn danh)';
   const type = $('bug-type')?.value;
   const desc = $('bug-desc')?.value.trim();
   const ctx = $('bug-context')?.value.trim() || '(không có)';
-
   if (!type) { showStatus('⚠️ Chọn loại lỗi', 'warn'); return; }
   if (!desc || desc.length < 10) { showStatus('⚠️ Mô tả >= 10 ký tự', 'warn'); return; }
-
-  const btn = $('bug-submit');
-  const old = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Đang gửi...';
-
+  const btn = $('bug-submit'); const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Đang gửi...';
   const statusEl = $('bug-status');
   statusEl.style.display = 'block';
   statusEl.innerHTML = '<span style="color:#f1c40f">⏳ Đang gửi...</span>';
-
-  const payload = {
-    name, type,
-    description: desc,
-    context: ctx,
-    userAgent: navigator.userAgent.substring(0, 200),
-    timestamp: new Date().toISOString(),
-  };
-
+  const payload = { name, type, description: desc, context: ctx, userAgent: navigator.userAgent.substring(0, 200), timestamp: new Date().toISOString() };
   let success = false;
-
   if (CONFIG.bugWebhook && CONFIG.bugWebhook.includes('/api/webhooks/') && !CONFIG.bugWebhook.includes('CHANGE_ME')) {
     try {
-      const colorMap = {
-        'Không tìm thấy đáp án': 0xe74c3c,
-        'Đáp án sai': 0xe67e22,
-        'Không đọc được file': 0xf39c12,
-        'Lỗi CORS khi dán link': 0x9b59b6,
-        'Nhạc không phát': 0x4caf50,
-        'Giao diện lỗi': 0x3498db,
-        'Trang bị treo': 0xe91e63,
-        'Khác': 0x95a5a6,
-      };
-      const embed = {
-        title: `🐛 Báo lỗi mới — ${type}`,
-        color: colorMap[type] || 0xff6ac1,
-        fields: [
-          { name: '👤 Người báo', value: escMd(name), inline: true },
-          { name: '📁 Context', value: escMd(ctx).substring(0, 200), inline: true },
-          { name: '📝 Mô tả', value: escMd(desc).substring(0, 1000) },
-        ],
-        footer: { text: `${CONFIG.brand.name} v${CONFIG.brand.version}` },
-        timestamp: payload.timestamp,
-      };
-      const res = await fetch(CONFIG.bugWebhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'Answer Checker 🐱', embeds: [embed] }),
-      });
-      if (res.ok || res.status === 204) {
-        success = true;
-        statusEl.innerHTML = '<span style="color:#22c55e">✅ Đã gửi!</span>';
-      }
-    } catch (err) {
-      console.warn('Discord failed:', err);
-      statusEl.innerHTML = '<span style="color:#f1c40f">⚠️ Lưu cục bộ</span>';
-    }
-  } else {
-    statusEl.innerHTML = '<span style="color:#f1c40f">ℹ️ Chưa cấu hình webhook, lưu cục bộ</span>';
-  }
-
-  try {
-    const arr = LS.get('bug_reports', []);
-    arr.push(payload);
-    if (arr.length > 50) arr.splice(0, arr.length - 50);
-    LS.set('bug_reports', arr);
-  } catch {}
-
+      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Giao diện lỗi': 0x3498db, 'Trang bị treo': 0xe91e63, 'Khác': 0x95a5a6 };
+      const embed = { title: `🐛 Báo lỗi mới — ${type}`, color: colorMap[type] || 0xff6ac1, fields: [{ name: '👤 Người báo', value: escMd(name), inline: true }, { name: '📁 Context', value: escMd(ctx).substring(0, 200), inline: true }, { name: '📝 Mô tả', value: escMd(desc).substring(0, 1000) }], footer: { text: `${CONFIG.brand.name} v${CONFIG.brand.version}` }, timestamp: payload.timestamp };
+      const res = await fetch(CONFIG.bugWebhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'Answer Checker 🐱', embeds: [embed] }) });
+      if (res.ok || res.status === 204) { success = true; statusEl.innerHTML = '<span style="color:#22c55e">✅ Đã gửi!</span>'; }
+    } catch (err) { console.warn('Discord failed:', err); statusEl.innerHTML = '<span style="color:#f1c40f">⚠️ Lưu cục bộ</span>'; }
+  } else { statusEl.innerHTML = '<span style="color:#f1c40f">ℹ️ Chưa cấu hình webhook, lưu cục bộ</span>'; }
+  try { const arr = LS.get('bug_reports', []); arr.push(payload); if (arr.length > 50) arr.splice(0, arr.length - 50); LS.set('bug_reports', arr); } catch {}
   setTimeout(() => {
-    btn.disabled = false;
-    btn.textContent = old;
-    closeBugModal();
-    ['bug-name', 'bug-type', 'bug-desc', 'bug-context'].forEach(id => {
-      const el = $(id); if (el) el.value = '';
-    });
+    btn.disabled = false; btn.textContent = old; closeBugModal();
+    ['bug-name', 'bug-type', 'bug-desc', 'bug-context'].forEach(id => { const el = $(id); if (el) el.value = ''; });
     const cnt = $('bug-count'); if (cnt) cnt.textContent = '0';
     showStatus(success ? '✅ Cảm ơn báo cáo!' : 'ℹ️ Đã lưu cục bộ', success ? 'success' : 'info');
   }, 1500);
@@ -1652,57 +1161,27 @@ async function submitBugReport() {
 // ============================================================
 let _notifOpen = false;
 let _notifLoaded = false;
-
 function loadNotifs(force = false) {
   if (_notifLoaded && !force) return;
-  const list = $('notif-list');
-  if (!list) return;
+  const list = $('notif-list'); if (!list) return;
   const cached = LS.get('notifs_cache');
-  if (cached && Array.isArray(cached) && cached.length) {
-    renderNotifs(cached);
-    _notifLoaded = true;
-    return;
-  }
-  list.innerHTML = `
-    <div style="text-align:center;color:#888;font-size:13px;padding:20px;line-height:1.6">
-      📭 <b style="color:#f1c40f">Chưa có thông báo</b><br>
-      <span style="font-size:11px;color:#666">Admin có thể gửi qua URL:<br>
-      <code style="background:#1c1c26;padding:2px 6px;border-radius:4px;font-size:10px">?notif=Tiêu đề|Nội dung|level</code></span>
-    </div>`;
+  if (cached && Array.isArray(cached) && cached.length) { renderNotifs(cached); _notifLoaded = true; return; }
+  list.innerHTML = `<div style="text-align:center;color:#888;font-size:13px;padding:20px;line-height:1.6">📭 <b style="color:#f1c40f">Chưa có thông báo</b><br><span style="font-size:11px;color:#666">Admin có thể gửi qua URL:<br><code style="background:#1c1c26;padding:2px 6px;border-radius:4px;font-size:10px">?notif=Tiêu đề|Nội dung|level</code></span></div>`;
 }
-
 function renderNotifs(notifs) {
-  const list = $('notif-list');
-  if (!list) return;
-  list.innerHTML = notifs.map(n => `
-    <div class="notif-item level-${esc(n.level || 'info')}">
-      <h4>${esc(n.title || 'Thông báo')}</h4>
-      <p>${esc(n.message || '')}</p>
-      <time>${esc(n.timestamp ? fmtDate(n.timestamp) : '')}</time>
-    </div>
-  `).join('');
+  const list = $('notif-list'); if (!list) return;
+  list.innerHTML = notifs.map(n => `<div class="notif-item level-${esc(n.level || 'info')}"><h4>${esc(n.title || 'Thông báo')}</h4><p>${esc(n.message || '')}</p><time>${esc(n.timestamp ? fmtDate(n.timestamp) : '')}</time></div>`).join('');
   const badge = $('bell-badge');
-  if (badge) {
-    if (notifs.length) {
-      badge.textContent = notifs.length > 9 ? '9+' : notifs.length;
-      badge.classList.remove('hidden');
-    } else badge.classList.add('hidden');
-  }
+  if (badge) { if (notifs.length) { badge.textContent = notifs.length > 9 ? '9+' : notifs.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
   _notifLoaded = true;
 }
-
 function toggleNotif() {
-  const panel = $('notif-panel');
-  if (!panel) return;
+  const panel = $('notif-panel'); if (!panel) return;
   _notifOpen = !_notifOpen;
   panel.classList.toggle('hidden', !_notifOpen);
   if (_notifOpen) loadNotifs(true);
 }
-function closeNotif() {
-  _notifOpen = false;
-  $('notif-panel')?.classList.add('hidden');
-}
-
+function closeNotif() { _notifOpen = false; $('notif-panel')?.classList.add('hidden'); }
 (function(){
   try {
     const params = new URLSearchParams(location.search);
@@ -1710,12 +1189,7 @@ function closeNotif() {
     if (notif) {
       const parts = notif.split('|');
       const arr = LS.get('notifs_cache', []);
-      arr.unshift({
-        title: parts[0] || 'Thông báo',
-        message: parts[1] || '',
-        level: parts[2] || 'info',
-        timestamp: new Date().toISOString(),
-      });
+      arr.unshift({ title: parts[0] || 'Thông báo', message: parts[1] || '', level: parts[2] || 'info', timestamp: new Date().toISOString() });
       if (arr.length > 20) arr.splice(20);
       LS.set('notifs_cache', arr);
       window.history.replaceState({}, '', location.pathname);
@@ -1724,7 +1198,7 @@ function closeNotif() {
 })();
 
 // ============================================================
-// [14] 🎵 MUSIC SYSTEM
+// [14] 🎵 MUSIC SYSTEM v11 — Fixed YouTube API timing
 // ============================================================
 (function initMusicSystem(){
   if (!CONFIG.features.enableMusic) return;
@@ -1732,46 +1206,22 @@ function closeNotif() {
   const MUSIC_KEY = 'music_config';
 
   const DEFAULT_PLAYLIST = [
-    {
-      id: 'tam-su',
-      title: 'Tâm Sự',
-      artist: 'Solmee ft. Dyteller',
-      type: 'youtube',
-      videoId: 'blvOdCKkPOc',
-    },
-    {
-      id: 'track-2',
-      title: 'Bài hát 2',
-      artist: 'Unknown',
-      type: 'youtube',
-      videoId: 'LIKOvbJ-DZg',
-    },
-    {
-      id: 'track-3',
-      title: 'Bài hát 3',
-      artist: 'Unknown',
-      type: 'youtube',
-      videoId: 'w9qxn5Kw3-I',
-    },
+    { id: 'tam-su', title: 'Tâm Sự', artist: 'Solmee ft. Dyteller', type: 'youtube', videoId: 'blvOdCKkPOc' },
+    { id: 'vet-thuong', title: 'Vết Thương', artist: 'fishy', type: 'youtube', videoId: 'LIKOvbJ-DZg' },
+    { id: 'giac-mo', title: 'Giấc Mơ Từng Rất Thơ', artist: 'MER ft. QUANGHUY', type: 'youtube', videoId: 'w9qxn5Kw3-I' },
   ];
 
-  let config = LS.get(MUSIC_KEY, {
-    currentIndex: 0,
-    volume: 40,
-    customTracks: [],
-    enabled: false,
-  });
-
-  function getPlaylist() {
-    return [...DEFAULT_PLAYLIST, ...(config.customTracks || [])];
-  }
+  let config = LS.get(MUSIC_KEY, { currentIndex: 0, volume: 40, customTracks: [], enabled: false });
+  function getPlaylist() { return [...DEFAULT_PLAYLIST, ...(config.customTracks || [])]; }
 
   let player = null;
   let audioEl = null;
   let isPlaying = false;
-  let apiReady = false;
+  let playerReady = false;
   let pendingPlay = false;
   let currentTrack = null;
+  let errorCount = 0;
+  const MAX_ERRORS = 3;
 
   const widget = $('music-widget');
   const btnToggle = $('music-toggle');
@@ -1786,146 +1236,100 @@ function closeNotif() {
   const titleEl = $('music-title');
   const artistEl = $('music-artist');
 
-  if (!widget || !btnToggle) return;
+  if (!widget || !btnToggle) { console.warn('❌ Music widget không tồn tại'); return; }
 
-  function saveConfig() {
-    LS.set(MUSIC_KEY, config);
-  }
+  function saveConfig() { LS.set(MUSIC_KEY, config); }
 
-  function parseMusicUrl(url) {
-    url = url.trim();
-    if (!url) return null;
-
-    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
-    if (ytMatch) {
-      return {
-        id: 'yt-' + ytMatch[1],
-        title: 'YouTube Video',
-        artist: ytMatch[1],
-        type: 'youtube',
-        videoId: ytMatch[1],
-      };
-    }
-
-    if (url.includes('soundcloud.com')) {
-      return {
-        id: 'sc-' + Date.now(),
-        title: 'SoundCloud Track',
-        artist: 'SoundCloud',
-        type: 'soundcloud',
-        url: url,
-      };
-    }
-
-    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(url) || url.startsWith('data:audio')) {
-      return {
-        id: 'audio-' + Date.now(),
-        title: 'Audio File',
-        artist: 'Custom',
-        type: 'audio',
-        url: url,
-      };
-    }
-
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      return { error: 'Link YouTube không hợp lệ' };
-    }
-
-    return {
-      id: 'audio-' + Date.now(),
-      title: 'Custom Audio',
-      artist: 'Custom',
-      type: 'audio',
-      url: url,
-    };
-  }
-
-  function renderPlaylist() {
-    if (!playlistEl) return;
-    const playlist = getPlaylist();
-    const currentId = currentTrack?.id;
-
-    playlistEl.innerHTML = playlist.map((track, i) => `
-      <div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}">
-        <div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div>
-        <div class="info">
-          <div class="title">${esc(track.title)}</div>
-          <div class="artist">${esc(track.artist)}</div>
-        </div>
-      </div>
-    `).join('');
-
-    playlistEl.querySelectorAll('[data-track-index]').forEach(el => {
-      el.addEventListener('click', () => {
-        const idx = parseInt(el.dataset.trackIndex, 10);
-        playTrackAtIndex(idx);
+  // ═══ TẠO PLAYER ═══
+  function createPlayer() {
+    if (player) return;
+    const container = $('yt-player');
+    if (!container) { console.error('❌ #yt-player không tồn tại'); return; }
+    console.log('🎬 Creating YouTube player...');
+    try {
+      player = new window.YT.Player('yt-player', {
+        height: '1', width: '1',
+        videoId: DEFAULT_PLAYLIST[0].videoId,
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0, origin: window.location.origin },
+        events: {
+          onReady: (e) => {
+            playerReady = true;
+            try { e.target.setVolume(config.volume); } catch(err){}
+            console.log('✅ YouTube player READY — volume:', config.volume);
+            if (pendingPlay) { pendingPlay = false; playTrackAtIndex(config.currentIndex); }
+          },
+          onStateChange: (e) => {
+            console.log('🎵 State:', e.data);
+            if (e.data === 1) { isPlaying = true; errorCount = 0; updateWidgetUI(); renderPlaylist(); }
+            else if (e.data === 2 || e.data === 0) { isPlaying = false; updateWidgetUI(); renderPlaylist(); }
+          },
+          onError: (e) => {
+            const errMap = { 2: 'ID không hợp lệ', 5: 'Lỗi HTML5', 100: 'Video không tồn tại', 101: 'Chủ video chặn embed', 150: 'Chủ video chặn embed' };
+            console.warn(`❌ YouTube error ${e.data}: ${errMap[e.data] || 'không rõ'}`);
+            if ([100, 101, 150].includes(e.data)) nextTrackOnError();
+          },
+        },
       });
-    });
+    } catch (err) { console.error('❌ Lỗi tạo player:', err); }
   }
 
-  function updateWidgetUI() {
-    if (isPlaying) {
-      widget.classList.add('playing');
-      btnToggle.textContent = '⏸';
-      btnToggle.title = 'Tắt nhạc';
-    } else {
-      widget.classList.remove('playing');
-      btnToggle.textContent = '🔇';
-      btnToggle.title = 'Bật nhạc';
-    }
-
-    if (currentTrack) {
-      if (titleEl) titleEl.textContent = currentTrack.title;
-      if (artistEl) artistEl.textContent = currentTrack.artist;
-    }
+  // ═══ CHỜ YT.Player — Poll mỗi 100ms, tối đa 10s ═══
+  function waitForYT(retries = 100) {
+    if (window.YT && typeof window.YT.Player === 'function') { console.log('✅ YT.Player sẵn sàng'); createPlayer(); return; }
+    if (retries <= 0) { console.error('❌ YT.Player không load sau 10 giây'); showStatus('❌ Không load được YouTube. Kiểm tra mạng/adblock.', 'error'); return; }
+    setTimeout(() => waitForYT(retries - 1), 100);
   }
 
+  if (window.YT && typeof window.YT.Player === 'function') { console.log('✅ YT đã có sẵn'); createPlayer(); }
+  else if (window.YT && window.YT.loaded) { console.log('⏳ YT API loaded, đợi Player...'); waitForYT(); }
+  else {
+    console.log('⏳ Đợi YT API...');
+    const oldCb = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (oldCb) try { oldCb(); } catch(e){}
+      console.log('🎵 onYouTubeIframeAPIReady fired');
+      createPlayer();
+    };
+    setTimeout(() => {
+      if (!window.YT || typeof window.YT.Player !== 'function') {
+        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+          console.log('📥 Tự thêm YT API script (fallback)...');
+          const s = document.createElement('script');
+          s.src = 'https://www.youtube.com/iframe_api';
+          document.head.appendChild(s);
+        }
+        waitForYT();
+      }
+    }, 500);
+  }
+
+  // ═══ PLAY ═══
   function playTrackAtIndex(index) {
     const playlist = getPlaylist();
     if (index < 0 || index >= playlist.length) return;
-
     config.currentIndex = index;
     saveConfig();
-
     const track = playlist[index];
     currentTrack = track;
-    console.log('🎵 Đang phát:', track.title);
-
-    if (player && player.stopVideo) {
-      try { player.stopVideo(); } catch(e){}
-    }
-    if (audioEl) {
-      audioEl.pause();
-      audioEl.src = '';
-    }
-
-    if (track.type === 'youtube') {
-      playYouTube(track);
-    } else if (track.type === 'audio') {
-      playAudio(track);
-    } else if (track.type === 'soundcloud') {
-      playSoundCloud(track);
-    }
-
+    console.log(`🎵 Play [${index}]: ${track.title}`);
+    if (player && typeof player.stopVideo === 'function') { try { player.stopVideo(); } catch(e){} }
+    if (audioEl) { audioEl.pause(); audioEl.src = ''; }
+    if (track.type === 'youtube' && !playerReady) { console.warn('⏳ Player chưa ready, pending...'); pendingPlay = true; return; }
+    if (track.type === 'youtube') playYouTube(track);
+    else if (track.type === 'audio') playAudio(track);
+    else if (track.type === 'soundcloud') playSoundCloud(track);
     renderPlaylist();
     updateWidgetUI();
   }
 
   function playYouTube(track) {
-    if (!apiReady) {
-      pendingPlay = true;
-      return;
-    }
-    if (player && player.loadVideoById) {
-      try {
-        player.loadVideoById(track.videoId);
-        player.setVolume(config.volume);
-        player.playVideo();
-      } catch(e) {
-        console.error('YouTube play error:', e);
-        showStatus('⚠️ Không phát được video YouTube', 'warn');
-      }
-    }
+    if (!player || typeof player.loadVideoById !== 'function') { console.warn('❌ Player chưa có method'); return; }
+    try {
+      player.loadVideoById({ videoId: track.videoId, startSeconds: 0 });
+      if (typeof player.setVolume === 'function') player.setVolume(config.volume);
+      if (typeof player.playVideo === 'function') player.playVideo();
+      console.log('▶️ Play sent:', track.videoId);
+    } catch(e) { console.error('❌ playYouTube error:', e); nextTrackOnError(); }
   }
 
   function playAudio(track) {
@@ -1933,18 +1337,8 @@ function closeNotif() {
     try {
       audioEl.src = track.url;
       audioEl.volume = config.volume / 100;
-      audioEl.play().then(() => {
-        isPlaying = true;
-        updateWidgetUI();
-      }).catch(e => {
-        console.error('Audio play error:', e);
-        showStatus('❌ Không phát được file audio', 'error');
-        isPlaying = false;
-        updateWidgetUI();
-      });
-    } catch(e) {
-      console.error(e);
-    }
+      audioEl.play().then(() => { isPlaying = true; updateWidgetUI(); }).catch(e => { console.error('❌ Audio error:', e); nextTrackOnError(); });
+    } catch(e) { console.error(e); }
   }
 
   function playSoundCloud(track) {
@@ -1956,196 +1350,121 @@ function closeNotif() {
     document.body.appendChild(iframe);
     isPlaying = true;
     updateWidgetUI();
-    setTimeout(() => {
-      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-    }, 10 * 60 * 1000);
+    setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 10 * 60 * 1000);
+  }
+
+  function nextTrackOnError() {
+    errorCount++;
+    if (errorCount >= MAX_ERRORS) { showStatus('❌ Không phát được bài nào. Thử link khác.', 'error'); isPlaying = false; updateWidgetUI(); return; }
+    const playlist = getPlaylist();
+    if (playlist.length > 1) {
+      const nextIdx = (config.currentIndex + 1) % playlist.length;
+      console.log(`⏭️ Auto next: [${nextIdx}]`);
+      setTimeout(() => playTrackAtIndex(nextIdx), 800);
+    }
   }
 
   function togglePlay() {
-    if (!currentTrack) {
-      playTrackAtIndex(config.currentIndex || 0);
-      return;
-    }
-
-    if (isPlaying) {
-      pauseMusic();
-    } else {
-      resumeMusic();
-    }
+    if (!currentTrack) { errorCount = 0; playTrackAtIndex(config.currentIndex || 0); return; }
+    isPlaying ? pauseMusic() : resumeMusic();
   }
 
   function pauseMusic() {
-    if (currentTrack?.type === 'youtube' && player && player.pauseVideo) {
-      try { player.pauseVideo(); } catch(e){}
-    }
-    if (currentTrack?.type === 'audio' && audioEl) {
-      audioEl.pause();
-    }
-    isPlaying = false;
-    updateWidgetUI();
-    renderPlaylist();
+    if (currentTrack?.type === 'youtube' && player && typeof player.pauseVideo === 'function') { try { player.pauseVideo(); } catch(e){} }
+    if (currentTrack?.type === 'audio' && audioEl) audioEl.pause();
+    isPlaying = false; updateWidgetUI(); renderPlaylist();
   }
 
   function resumeMusic() {
-    if (currentTrack?.type === 'youtube' && player && player.playVideo) {
-      try { player.playVideo(); } catch(e){}
-    }
-    if (currentTrack?.type === 'audio' && audioEl) {
-      audioEl.play().catch(e => console.warn(e));
-    }
-    isPlaying = true;
-    updateWidgetUI();
-    renderPlaylist();
+    if (currentTrack?.type === 'youtube' && player && typeof player.playVideo === 'function') { try { player.playVideo(); } catch(e){} }
+    if (currentTrack?.type === 'audio' && audioEl) audioEl.play().catch(e => console.warn(e));
+    isPlaying = true; updateWidgetUI(); renderPlaylist();
   }
 
-  window.onYouTubeIframeAPIReady = function() {
-    apiReady = true;
-    console.log('🎵 YouTube API ready');
-
-    player = new YT.Player('yt-player', {
-      height: '1',
-      width: '1',
-      videoId: DEFAULT_PLAYLIST[0].videoId,
-      playerVars: {
-        autoplay: 0,
-        loop: 1,
-        playlist: DEFAULT_PLAYLIST[0].videoId,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        playsinline: 1,
-        rel: 0,
-      },
-      events: {
-        onReady: (e) => {
-          e.target.setVolume(config.volume);
-          console.log('🎵 YouTube player ready');
-          if (pendingPlay) {
-            pendingPlay = false;
-            playTrackAtIndex(config.currentIndex);
-          }
-        },
-        onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) {
-            isPlaying = true;
-            updateWidgetUI();
-            renderPlaylist();
-          } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
-            isPlaying = false;
-            updateWidgetUI();
-            renderPlaylist();
-          }
-        },
-        onError: (e) => {
-          console.warn('YouTube error:', e.data);
-          if (e.data === 101 || e.data === 150) {
-            showStatus('⚠️ Video không cho phép phát nhúng. Thử bài khác.', 'warn');
-            const playlist = getPlaylist();
-            if (playlist.length > 1) {
-              const nextIdx = (config.currentIndex + 1) % playlist.length;
-              setTimeout(() => playTrackAtIndex(nextIdx), 1500);
-            }
-          }
-        },
-      },
-    });
-  };
-
-  const ytScript = document.createElement('script');
-  ytScript.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(ytScript);
-
-  audioEl = $('audio-player');
-  if (audioEl) {
-    audioEl.addEventListener('ended', () => {
-      isPlaying = false;
-      updateWidgetUI();
-      const playlist = getPlaylist();
-      if (playlist.length > 1) {
-        const nextIdx = (config.currentIndex + 1) % playlist.length;
-        playTrackAtIndex(nextIdx);
-      }
+  // ═══ UI ═══
+  function renderPlaylist() {
+    if (!playlistEl) return;
+    const playlist = getPlaylist();
+    const currentId = currentTrack?.id;
+    playlistEl.innerHTML = playlist.map((track, i) => `
+      <div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}">
+        <div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div>
+        <div class="info"><div class="title">${esc(track.title)}</div><div class="artist">${esc(track.artist)}</div></div>
+      </div>
+    `).join('');
+    playlistEl.querySelectorAll('[data-track-index]').forEach(el => {
+      el.addEventListener('click', () => { const idx = parseInt(el.dataset.trackIndex, 10); errorCount = 0; playTrackAtIndex(idx); });
     });
   }
 
+  function updateWidgetUI() {
+    if (isPlaying) { widget.classList.add('playing'); btnToggle.textContent = '⏸'; btnToggle.title = 'Tắt nhạc'; }
+    else { widget.classList.remove('playing'); btnToggle.textContent = '🔇'; btnToggle.title = 'Bật nhạc'; }
+    if (currentTrack) { if (titleEl) titleEl.textContent = currentTrack.title; if (artistEl) artistEl.textContent = currentTrack.artist; }
+  }
+
+  function parseMusicUrl(url) {
+    url = url.trim();
+    if (!url) return null;
+    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+    if (ytMatch) return { id: 'yt-' + ytMatch[1], title: 'YouTube Video', artist: ytMatch[1], type: 'youtube', videoId: ytMatch[1] };
+    if (url.includes('soundcloud.com')) return { id: 'sc-' + Date.now(), title: 'SoundCloud', artist: 'SC', type: 'soundcloud', url };
+    if (/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(url) || url.startsWith('data:audio')) return { id: 'audio-' + Date.now(), title: 'Audio File', artist: 'Custom', type: 'audio', url };
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return { error: 'Link YouTube không hợp lệ' };
+    return { id: 'audio-' + Date.now(), title: 'Custom Audio', artist: 'Custom', type: 'audio', url };
+  }
+
+  // ═══ EVENTS ═══
   btnToggle.addEventListener('click', togglePlay);
-
-  btnSettings?.addEventListener('click', () => {
-    settingsPanel.classList.toggle('hidden');
-    if (!settingsPanel.classList.contains('hidden')) {
-      renderPlaylist();
-    }
-  });
-
-  btnSettingsClose?.addEventListener('click', () => {
-    settingsPanel.classList.add('hidden');
-  });
-
+  btnSettings?.addEventListener('click', () => { settingsPanel.classList.toggle('hidden'); if (!settingsPanel.classList.contains('hidden')) renderPlaylist(); });
+  btnSettingsClose?.addEventListener('click', () => { settingsPanel.classList.add('hidden'); });
   btnCustomAdd?.addEventListener('click', () => {
     const url = customInput?.value.trim();
     if (!url) { showStatus('⚠️ Chưa nhập link', 'warn'); return; }
-
     const track = parseMusicUrl(url);
     if (!track) { showStatus('❌ Link không hợp lệ', 'error'); return; }
     if (track.error) { showStatus('❌ ' + track.error, 'error'); return; }
-
     if (!config.customTracks) config.customTracks = [];
     config.customTracks.push(track);
     saveConfig();
-
     customInput.value = '';
     renderPlaylist();
     showStatus('✅ Đã thêm: ' + track.title, 'success');
   });
-
   volumeSlider?.addEventListener('input', (e) => {
     const vol = parseInt(e.target.value, 10);
     config.volume = vol;
     if (volumeValue) volumeValue.textContent = vol;
     saveConfig();
-
-    if (player && player.setVolume) {
-      try { player.setVolume(vol); } catch(e){}
-    }
-    if (audioEl) {
-      audioEl.volume = vol / 100;
-    }
+    if (player && typeof player.setVolume === 'function') { try { player.setVolume(vol); } catch(e){} }
+    if (audioEl) audioEl.volume = vol / 100;
   });
-
   if (volumeSlider) volumeSlider.value = config.volume;
   if (volumeValue) volumeValue.textContent = config.volume;
-
   document.addEventListener('click', (e) => {
     if (!settingsPanel || settingsPanel.classList.contains('hidden')) return;
     if (settingsPanel.contains(e.target)) return;
     if (btnSettings?.contains(e.target)) return;
     settingsPanel.classList.add('hidden');
   });
-
+  audioEl = $('audio-player');
+  if (audioEl) {
+    audioEl.addEventListener('ended', () => {
+      isPlaying = false; updateWidgetUI();
+      const playlist = getPlaylist();
+      if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; playTrackAtIndex(nextIdx); }
+    });
+  }
   (function restoreMusicState() {
-    const shouldAutoplay = config.enabled === true;
-    if (shouldAutoplay && getPlaylist().length > 0) {
-      const resume = () => {
-        playTrackAtIndex(config.currentIndex || 0);
-        document.removeEventListener('click', resume);
-        document.removeEventListener('keydown', resume);
-      };
+    if (config.enabled === true && getPlaylist().length > 0) {
+      const resume = () => { playTrackAtIndex(config.currentIndex || 0); document.removeEventListener('click', resume); document.removeEventListener('keydown', resume); };
       document.addEventListener('click', resume, { once: true });
       document.addEventListener('keydown', resume, { once: true });
     }
   })();
-
-  setInterval(() => {
-    if (config.enabled !== isPlaying) {
-      config.enabled = isPlaying;
-      saveConfig();
-    }
-  }, 2000);
-
+  setInterval(() => { if (config.enabled !== isPlaying) { config.enabled = isPlaying; saveConfig(); } }, 2000);
   renderPlaylist();
-
-  console.log('🎵 Music system ready — ' + getPlaylist().length + ' tracks');
+  console.log('🎵 Music system v11 ready — waiting for YT...');
 })();
 
 // ============================================================
@@ -2163,14 +1482,9 @@ function initAll() {
 
   $('fab-bug')?.addEventListener('click', openBugModal);
   $('fab-bell')?.addEventListener('click', toggleNotif);
-
   $('bug-submit')?.addEventListener('click', submitBugReport);
-  $('bug-desc')?.addEventListener('input', e => {
-    const c = $('bug-count'); if (c) c.textContent = e.target.value.length;
-  });
-  $('bug-modal')?.addEventListener('click', e => {
-    if (e.target === $('bug-modal')) closeBugModal();
-  });
+  $('bug-desc')?.addEventListener('input', e => { const c = $('bug-count'); if (c) c.textContent = e.target.value.length; });
+  $('bug-modal')?.addEventListener('click', e => { if (e.target === $('bug-modal')) closeBugModal(); });
   $('open-bug-from-guide')?.addEventListener('click', openBugModal);
 
   document.addEventListener('click', e => {
@@ -2181,27 +1495,18 @@ function initAll() {
   });
 
   document.addEventListener('click', e => {
-    if (_notifOpen &&
-        !$('notif-panel')?.contains(e.target) &&
-        !$('fab-bell')?.contains(e.target)) {
-      closeNotif();
-    }
+    if (_notifOpen && !$('notif-panel')?.contains(e.target) && !$('fab-bell')?.contains(e.target)) closeNotif();
   });
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') Modal.closeAll();
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') Modal.closeAll(); });
 
   setTimeout(() => loadNotifs(), 1000);
 
   console.log('%c✅ Ready', 'color:#2ecc71;font-weight:bold');
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAll);
-} else {
-  initAll();
-}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll);
+else initAll();
 
 })();
 </script>
