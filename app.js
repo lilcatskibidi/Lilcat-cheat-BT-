@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════
-// 🐱 ANSWER CHECKER — MAIN APP
-// Điều khiển: UI, nav, music, minigame, bug report
-// Compatible with QuizParser v29+
+// 🐱 ANSWER CHECKER — MAIN APP v18.3
+// "Smart Multi-Source + Multi-URL"
+// Compatible with QuizParser v35+
 // ═══════════════════════════════════════════════════════════════════
 
 (function(){
@@ -11,7 +11,8 @@ const CONFIG = {
   bugWebhook: 'https://discord.com/api/webhooks/1549784660043632792/_hVAUHbku6aMX8jsYczJT6PB6_8EZIefFhNN8c7wJVBuwLBJxfb_R1IeRyIgViMypNg5',
   lms360Url: 'https://lms360hack.pages.dev/',
   ui: { statusDuration: 4500 },
-  brand: { name: 'Answer Checker', author: 'Lilcat', version: '17.0.0' },
+  brand: { name: 'Answer Checker', author: 'Lilcat', version: '18.3.0' },
+  parser: { minVersion: '35.0.0' },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -23,15 +24,13 @@ const isUrl = (t) => { try { const u = new URL(t); return u.protocol === 'http:'
 const fmtBytes = (b) => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
 
 // ═══════════════════════════════════════════════════════════════
-// 🆕 v17: UNIVERSAL ANSWER FORMATTER (fallback nếu parser cũ)
+// UNIVERSAL ANSWER FORMATTER
 // ═══════════════════════════════════════════════════════════════
 
 function localFormatAnswer(answer, options, type) {
-  // Prefer parser's formatter
   if (typeof QuizParser !== 'undefined' && typeof QuizParser.formatAnswerDisplay === 'function') {
     return QuizParser.formatAnswerDisplay(answer, options, type);
   }
-  // Fallback: minimal inline formatter
   const result = { value: answer, index: null, letter: null, display: '?', valid: false };
   if (answer === null || answer === undefined) { result.display = '(chưa có)'; return result; }
   if (type === 'tf') {
@@ -46,7 +45,6 @@ function localFormatAnswer(answer, options, type) {
     result.valid = true;
     return result;
   }
-  // MCQ
   let idx = -1;
   if (typeof answer === 'number') { if (answer >= 0 && answer < 26) idx = answer; }
   else if (typeof answer === 'string') {
@@ -110,16 +108,15 @@ function initNavbar() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// RENDER HELPERS — FIXED for v29
+// RENDER HELPERS — v18.3
 // ═══════════════════════════════════════════════════════════════════
 
 let _decks = null;
+let _lastMeta = null;
 
-// 🆕 v17: Normalize answer cho MCQ (dùng parser nếu có)
 function normalizeMcqForDisplay(answer, options) {
   return localFormatAnswer(answer, options, 'mcq');
 }
-
 function normalizeTfForDisplay(answer) {
   return localFormatAnswer(answer, null, 'tf');
 }
@@ -136,47 +133,45 @@ function renderOneQuestion(q, i) {
   const stmts = q.statements || [];
   const ansArr = q.answers || [];
 
-  // ═══════════════════════════════════════════════════════════
-  // MCQ — 🆕 v17: Use universal formatter
-  // ═══════════════════════════════════════════════════════════
   if (T === 'mcq') {
-    const formatted = normalizeMcqForDisplay(q.answer, opts);
-    if (formatted.valid) {
-      h += `<div class="ans-green">✅ ${esc(formatted.display)}</div>`;
-    } else if (q.answer !== null && q.answer !== undefined) {
-      // Fallback: show raw answer
-      h += `<div class="ans-green">✅ ${esc(String(q.answer))}</div>`;
+    if (q.answerWarning && q.answerText) {
+      h += `<div class="text-yellow-400 text-[11px] mb-1">⚠️ ${esc(q.answerWarning)}</div>`;
+      h += `<div class="ans-green text-sm">✅ Đáp án đúng: <b>${esc(q.answerText)}</b></div>`;
+      if (opts.length) {
+        h += `<div class="mt-2 text-[10px] text-gray-500 space-y-0.5">`;
+        opts.forEach((opt, idx) => {
+          const isAnswer = opt === q.answerText;
+          h += `<div class="${isAnswer ? 'text-green-400 font-bold' : 'text-gray-500'}">${isAnswer ? '👉' : '  '} ${String.fromCharCode(65 + idx)}. ${esc(opt)}</div>`;
+        });
+        h += `</div>`;
+      }
     } else {
-      h += `<div class="ans-red">❌ (Chưa có đáp án)</div>`;
+      const formatted = normalizeMcqForDisplay(q.answer, opts);
+      if (formatted.valid) {
+        h += `<div class="ans-green">✅ ${esc(formatted.display)}</div>`;
+      } else if (q.answer !== null && q.answer !== undefined) {
+        h += `<div class="ans-green">✅ ${esc(String(q.answer))}</div>`;
+      } else {
+        h += `<div class="ans-red">❌ (Chưa có đáp án)</div>`;
+      }
     }
   }
-  // ═══════════════════════════════════════════════════════════
-  // TF — 🆕 v17: Use universal formatter
-  // ═══════════════════════════════════════════════════════════
   else if (T === 'tf') {
     stmts.forEach((s, j) => {
       let a;
       if (typeof s === 'object' && s !== null && 'answer' in s) a = s.answer;
       else a = ansArr[j];
-
       const formatted = normalizeTfForDisplay(a);
       const isTrue = formatted.value === true;
       const cls = isTrue ? 'ans-green' : (formatted.value === false ? 'ans-red' : 'ans-yellow');
-
       const txt = typeof s === 'string' ? s : (s.text || s.statement || '');
       h += `<div class="${cls} text-xs">${String.fromCharCode(97 + j)}) ${esc(formatted.display)} — <span class="text-gray-400">${esc(txt.substring(0, 60))}${txt.length > 60 ? '...' : ''}</span></div>`;
     });
   }
-  // ═══════════════════════════════════════════════════════════
-  // SHORT — 🆕 v17: Use universal formatter
-  // ═══════════════════════════════════════════════════════════
   else if (T === 'short') {
     const formatted = localFormatAnswer(q.answer, null, 'short');
     h += `<div class="ans-green">✅ ${esc(formatted.display)}</div>`;
   }
-  // ═══════════════════════════════════════════════════════════
-  // UNKNOWN TYPE — try to display what we have
-  // ═══════════════════════════════════════════════════════════
   else {
     if (q.answer !== null && q.answer !== undefined) {
       h += `<div class="text-yellow-400 text-xs">⚠️ Loại "${esc(T)}" — Đáp án: ${esc(String(q.answer))}</div>`;
@@ -210,10 +205,6 @@ function renderTabs() {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 🆕 v17: copyAllText FIXED
-// ═══════════════════════════════════════════════════════════════
-
 function copyAllText() {
   if (!_decks) return '';
   let t = '';
@@ -225,10 +216,12 @@ function copyAllText() {
       const opts = q.options || [];
       const stmts = q.statements || [];
       const ansArr = q.answers || [];
-
       if (T === 'mcq') {
-        const formatted = normalizeMcqForDisplay(q.answer, opts);
-        t += formatted.valid ? `${formatted.display}\n` : `${String(q.answer)}\n`;
+        if (q.answerWarning && q.answerText) t += `${q.answerText}\n`;
+        else {
+          const formatted = normalizeMcqForDisplay(q.answer, opts);
+          t += formatted.valid ? `${formatted.display}\n` : `${String(q.answer)}\n`;
+        }
       } else if (T === 'tf') {
         stmts.forEach((s, j) => {
           let a;
@@ -241,19 +234,54 @@ function copyAllText() {
       } else if (T === 'short') {
         const formatted = localFormatAnswer(q.answer, null, 'short');
         t += formatted.display + '\n';
-      } else {
-        t += String(q.answer || '') + '\n';
-      }
+      } else t += String(q.answer || '') + '\n';
     });
   });
   return t;
 }
 
-function showResults(decks, sourceLabel) {
+function renderShuffleBanner(meta) {
+  const el = $('shuffle-banner');
+  if (!el) return;
+  if (!meta || !meta.shuffle || !meta.shuffle.detected) { el.innerHTML = ''; return; }
+
+  const s = meta.shuffle;
+  const conf = s.confidence || 0;
+  const patterns = (s.patterns || []).slice(0, 4).join(', ');
+  const warnedCount = (meta.awareness && meta.awareness.warned) || 0;
+  const mode = meta.mode || 'script';
+  const cross = meta.crossCheck;
+
+  let h = `<div class="shuffle-warning">
+    <div class="icon">⚠️</div>
+    <div class="text">
+      <b>Phát hiện HTML có shuffle đáp án!</b> (confidence: ${conf}%)<br>
+      Pattern: <code style="color:#fbbf24">${esc(patterns)}</code><br>
+      Mode: <b>${mode === 'iframe' ? '🔴 Iframe Live (chính xác)' : '📡 Static Script'}</b>`;
+
+  if (cross) {
+    h += `<br>Cross-check: overlap <b>${(cross.overlapRatio * 100).toFixed(0)}%</b> — Decision: <b>${cross.decision}</b>`;
+  }
+  h += `<br><span style="color:#fcd34d">→ Đáp án bên dưới đối chiếu theo <b>TEXT</b>, không phải letter A/B/C/D.</span>`;
+  if (warnedCount > 0) h += `<br>⚠️ <b>${warnedCount} câu</b> có cảnh báo — chú ý đối chiếu theo TEXT.`;
+  h += `</div></div>`;
+  el.innerHTML = h;
+}
+
+function showResults(decks, sourceLabel, meta) {
   _decks = decks;
+  _lastMeta = meta || null;
   if (!_decks || !_decks.length) { showStatus('❌ Không có đề nào', 'error'); return; }
   const total = _decks.reduce((s, d) => s + d.questions.length, 0);
-  showStatus(`✅ <b>Thành công!</b> ${sourceLabel ? `<code>${esc(sourceLabel)}</code> — ` : ''}${_decks.length} đề, ${total} câu`, 'success');
+
+  const shuffleTag = meta?.shuffle?.detected ? ' <span class="text-yellow-400">[⚠️ SHUFFLE]</span>' : '';
+  const modeTag = meta?.mode === 'iframe' ? ' <span class="text-cyan-400">[🔴 LIVE]</span>' : '';
+  const warnedCount = meta?.awareness?.warned || 0;
+  const warnTag = warnedCount > 0 ? ` <span class="text-orange-400">[${warnedCount} cảnh báo]</span>` : '';
+
+  showStatus(`✅ <b>Thành công!</b> ${sourceLabel ? `<code>${esc(sourceLabel)}</code>` : ''}${shuffleTag}${modeTag}${warnTag} — ${_decks.length} đề, ${total} câu`, 'success');
+
+  renderShuffleBanner(meta);
   $('rs').classList.remove('hidden');
   renderTabs();
   renderDeck(0);
@@ -261,7 +289,7 @@ function showResults(decks, sourceLabel) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// CHEAT PAGE
+// CHEAT PAGE — v18.3
 // ═══════════════════════════════════════════════════════════════════
 
 let _file = null;
@@ -285,11 +313,20 @@ function initCheatPage() {
   ['dragenter','dragover'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
   ['dragleave','drop'].forEach(ev => dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
   dz?.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) pickFile(f); });
+
   $('bf')?.addEventListener('click', handleFile);
   $('bu')?.addEventListener('click', handleUrl);
   $('bh')?.addEventListener('click', handleHtml);
   $('bc')?.addEventListener('click', copyAll);
   $('bd')?.addEventListener('click', loadDemo);
+
+  // Quick URL
+  $('bu2')?.addEventListener('click', handleUrl);
+  $('ui2')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleUrl(); });
+
+  // 🆕 v18.3: Multi URL
+  $('bu3')?.addEventListener('click', handleMultiUrl);
+
   $('open-lms360')?.addEventListener('click', (e) => {
     e.preventDefault();
     window.open(CONFIG.lms360Url, '_blank', 'noopener,noreferrer');
@@ -314,55 +351,122 @@ async function handleFile() {
   showLoading(true, 'Đang đọc file...');
   try {
     const text = await _file.text();
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 300));
     showLoading(false);
-    try {
-      const { data, source } = QuizParser.extractQuizData(text);
-      showResults(QuizParser.normalizeDecks(data), source);
-    } catch (e) { showStatus('❌ ' + e.message, 'error'); }
+    runParse(text, `File: ${_file.name}`);
   } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
 }
 
-async function fetchWithProxies(url) {
-  // 🆕 v17: Warn if file:// protocol
-  if (window.location.protocol === 'file:') {
-    showStatus('⚠️ Đang chạy từ <code>file://</code> — fetch URL sẽ bị CORS chặn. Hãy dùng tab <b>HTML</b> hoặc chạy local server.', 'warn');
-  }
-
-  const proxies = [
-    u => u,
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-    u => `https://thingproxy.freeboard.io/fetch/${u}`,
-    u => `https://cors-anywhere.herokuapp.com/${u}`,
-  ];
-  for (const p of proxies) {
-    try {
-      const res = await fetch(p(url), { mode: 'cors' });
-      if (res.ok) {
-        const t = await res.text();
-        if (t && t.length > 100) return t;
-      }
-    } catch {}
-  }
-  throw new Error('Không tải được HTML (CORS) — thử tab File hoặc HTML');
-}
-
+// 🆕 v18.3: Handle URL — Smart Script + Iframe
 async function handleUrl() {
-  const url = $('ui')?.value.trim();
+  const url = ($('ui')?.value || $('ui2')?.value || '').trim();
   if (!url) { showStatus('⚠️ Chưa có link', 'warn'); return; }
   if (!isUrl(url)) { showStatus('❌ Link không hợp lệ', 'error'); return; }
-  showLoading(true, 'Đang tải HTML...');
+
+  if (window.location.protocol === 'file:') {
+    showStatus('⚠️ Đang chạy từ <code>file://</code> — fetch URL sẽ bị CORS chặn. Hãy dùng tab <b>HTML</b>.', 'warn');
+  }
+
+  showLoading(true, 'Đang phân tích...');
   try {
-    const html = await fetchWithProxies(url);
-    await new Promise(r => setTimeout(r, 500));
+    let result;
+    if (typeof QuizParser.smartFetchAndParse === 'function') {
+      result = await QuizParser.smartFetchAndParse(url, {
+        onProgress: (msg) => {
+          const lt = $('lt'); if (lt) lt.textContent = msg;
+          const ls = $('lsub'); if (ls) ls.textContent = 'Vui lòng chờ...';
+        },
+      });
+      showLoading(false);
+
+      const modeLabel = result.mode === 'iframe' ? '🔴 LIVE' : '📡 Static';
+      const crossInfo = result.crossCheck ? ` (overlap ${(result.crossCheck.overlapRatio * 100).toFixed(0)}%)` : '';
+      showResults(result.decks, `${modeLabel} · ${url.substring(0, 50)}...${crossInfo}`, {
+        shuffle: result.shuffle,
+        awareness: result.awareness,
+        source: result.source,
+        method: result.method,
+        mode: result.mode,
+        crossCheck: result.crossCheck,
+      });
+      return;
+    }
+
+    if (typeof QuizParser.fetchAndParse === 'function') {
+      result = await QuizParser.fetchAndParse(url, {
+        onProgress: (msg) => { const lt = $('lt'); if (lt) lt.textContent = msg; },
+      });
+      showLoading(false);
+      showResults(result.decks, `📡 ${url.substring(0, 60)}`, {
+        shuffle: result.shuffle,
+        awareness: result.awareness,
+      });
+      return;
+    }
+
+    const html = await QuizParser.fetchUrlWithProxies(url);
+    const extracted = QuizParser.extractQuizData(html.html || html);
     showLoading(false);
+    showResults(QuizParser.normalizeDecks(extracted.data), url);
+  } catch (e) {
+    showLoading(false);
+    showStatus('❌ ' + e.message, 'error');
+  }
+}
+
+// 🆕 v18.3: Multi URL
+async function handleMultiUrl() {
+  const text = $('multiUrls')?.value.trim() || '';
+  if (!text) { showStatus('⚠️ Chưa có link nào', 'warn'); return; }
+
+  const urls = text.split('\n').map(l => l.trim()).filter(l => l && isUrl(l));
+  if (urls.length === 0) { showStatus('❌ Không có link hợp lệ', 'error'); return; }
+  if (urls.length > 10) { showStatus('⚠️ Tối đa 10 link 1 lần', 'warn'); return; }
+
+  showLoading(true, `Đang xử lý ${urls.length} link...`);
+  const allDecks = [];
+  let successCount = 0;
+  let failCount = 0;
+
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i];
+    const lt = $('lt'); if (lt) lt.textContent = `[${i + 1}/${urls.length}] ${url.substring(0, 50)}...`;
+    const ls = $('lsub'); if (ls) ls.textContent = `Đã xong ${successCount} / ${urls.length}`;
+
     try {
-      const { data, source } = QuizParser.extractQuizData(html);
-      showResults(QuizParser.normalizeDecks(data), source);
-    } catch (e) { showStatus('❌ ' + e.message, 'error'); }
-  } catch (e) { showLoading(false); showStatus('❌ ' + e.message, 'error'); }
+      const result = await QuizParser.smartFetchAndParse(url, {
+        onProgress: () => {},
+        iframeWaitMs: 2500,
+        iframeTimeoutMs: 12000,
+      });
+      if (result && result.decks && result.decks.length > 0) {
+        result.decks.forEach(deck => {
+          deck.name = `[${i + 1}] ${deck.name}`;
+          allDecks.push(deck);
+        });
+        successCount++;
+      } else failCount++;
+    } catch (e) {
+      console.warn(`Link ${i + 1} lỗi:`, e.message);
+      failCount++;
+    }
+  }
+
+  showLoading(false);
+
+  if (allDecks.length === 0) {
+    showStatus(`❌ Không extract được link nào (${failCount} lỗi)`, 'error');
+    return;
+  }
+
+  const totalQ = allDecks.reduce((s, d) => s + d.questions.length, 0);
+  showStatus(`✅ <b>Hoàn tất!</b> ${successCount}/${urls.length} link · ${allDecks.length} đề · ${totalQ} câu`, 'success');
+
+  _decks = allDecks;
+  $('rs').classList.remove('hidden');
+  renderTabs();
+  renderDeck(0);
+  setTimeout(() => $('rs').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
 async function handleHtml() {
@@ -370,12 +474,33 @@ async function handleHtml() {
   if (!html) { showStatus('⚠️ Chưa có HTML', 'warn'); return; }
   if (!isHtml(html)) { showStatus('❌ Không phải HTML', 'error'); return; }
   showLoading(true, 'Đang parse...');
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 300));
   showLoading(false);
+  runParse(html, 'HTML dán');
+}
+
+function runParse(html, label) {
   try {
-    const { data, source } = QuizParser.extractQuizData(html);
-    showResults(QuizParser.normalizeDecks(data), source);
-  } catch (e) { showStatus('❌ ' + e.message, 'error'); }
+    if (typeof QuizParser === 'undefined') throw new Error('QuizParser chưa load');
+    const result = QuizParser.extractQuizData(html);
+    const decks = QuizParser.normalizeDecks(result.data);
+    let finalDecks = decks;
+    let awareness = null;
+    if (typeof QuizParser.applyShuffleAwareness === 'function') {
+      const a = QuizParser.applyShuffleAwareness(decks, result.shuffle);
+      finalDecks = a.decks;
+      awareness = a.stats;
+    }
+    showResults(finalDecks, label, {
+      shuffle: result.shuffle,
+      awareness,
+      source: result.source,
+      method: result.method,
+      mode: 'script',
+    });
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  }
 }
 
 function copyAll() {
@@ -403,20 +528,15 @@ function loadDemo() {
     { id: 'vet-thuong', title: 'Vết Thương', artist: 'fishy', type: 'youtube', videoId: 'LIKOvbJ-DZg' },
     { id: 'giac-mo', title: 'Giấc Mơ Từng Rất Thơ', artist: 'MER ft. QUANGHUY', type: 'youtube', videoId: 'w9qxn5Kw3-I' },
   ];
-
   let config = { currentIndex: 0, volume: 40, customTracks: [], enabled: false };
   try { const raw = localStorage.getItem(MUSIC_KEY); if (raw) config = { ...config, ...JSON.parse(raw) }; } catch {}
-
   function saveConfig() { try { localStorage.setItem(MUSIC_KEY, JSON.stringify(config)); } catch {} }
   function getPlaylist() { return [...DEFAULT_PLAYLIST, ...(config.customTracks || [])]; }
-
   let player = null, audioEl = null, scWidget = null;
   let isPlaying = false, playerReady = false, pendingPlay = false, currentTrack = null, errorCount = 0;
   const MAX_ERRORS = 3;
-
   const widget = $('music-widget'), btnToggle = $('music-toggle'), btnSettings = $('music-settings-btn'), settingsPanel = $('music-settings'), btnSettingsClose = $('music-settings-close'), playlistEl = $('music-playlist'), customInput = $('music-custom-url'), btnCustomAdd = $('music-custom-add'), volumeSlider = $('music-volume'), volumeValue = $('music-volume-value'), titleEl = $('music-title'), artistEl = $('music-artist');
   if (!widget || !btnToggle) return;
-
   function applyVolume(vol) {
     vol = Math.max(0, Math.min(100, parseInt(vol, 10) || 0));
     config.volume = vol;
@@ -426,7 +546,6 @@ function loadDemo() {
     if (audioEl) audioEl.volume = vol / 100;
     if (scWidget && typeof scWidget.setVolume === 'function') { try { scWidget.setVolume(vol); } catch(e) {} }
   }
-
   function createPlayer() {
     if (player) return;
     const container = $('yt-player');
@@ -444,13 +563,11 @@ function loadDemo() {
       });
     } catch (err) {}
   }
-
   function waitForYT(retries = 100) {
     if (window.YT && typeof window.YT.Player === 'function') { createPlayer(); return; }
     if (retries <= 0) return;
     setTimeout(() => waitForYT(retries - 1), 100);
   }
-
   if (window.YT && typeof window.YT.Player === 'function') { createPlayer(); }
   else if (window.YT && window.YT.loaded) { waitForYT(); }
   else {
@@ -467,7 +584,6 @@ function loadDemo() {
       }
     }, 500);
   }
-
   function ensureSoundCloudAPI(cb) {
     if (window.SC && window.SC.Widget) { cb(); return; }
     if (window.__scLoading) { const oldReady = window.__scReady || []; oldReady.push(cb); return; }
@@ -478,7 +594,6 @@ function loadDemo() {
     s.onload = () => { (window.__scReady || []).forEach(fn => { try { fn(); } catch(e){} }); window.__scReady = []; };
     document.head.appendChild(s);
   }
-
   function playSoundCloud(track) {
     const old = $('sc-player');
     if (old) old.remove();
@@ -507,7 +622,6 @@ function loadDemo() {
       } catch(e) {}
     });
   }
-
   function stopAll() {
     if (player && typeof player.stopVideo === 'function') { try { player.stopVideo(); } catch(e){} }
     if (audioEl) { audioEl.pause(); audioEl.src = ''; }
@@ -515,7 +629,6 @@ function loadDemo() {
     const sc = $('sc-container'); if (sc) sc.remove();
     scWidget = null;
   }
-
   function playTrackAtIndex(index) {
     const playlist = getPlaylist();
     if (index < 0 || index >= playlist.length) return;
@@ -527,53 +640,44 @@ function loadDemo() {
     else if (track.type === 'soundcloud') { playSoundCloud(track); }
     renderPlaylist(); updateWidgetUI();
   }
-
   function playYouTube(track) {
     if (!player || typeof player.loadVideoById !== 'function') return;
     try { player.loadVideoById({ videoId: track.videoId, startSeconds: 0 }); player.setVolume(config.volume); player.playVideo(); } catch(e) { nextTrackOnError(); }
   }
-
   function playAudio(track) {
     if (!audioEl) return;
     try { audioEl.src = track.url; audioEl.volume = config.volume / 100; audioEl.play().then(() => { isPlaying = true; updateWidgetUI(); }).catch(() => nextTrackOnError()); } catch(e) {}
   }
-
   function nextTrackOnError() {
     errorCount++;
     if (errorCount >= MAX_ERRORS) { isPlaying = false; updateWidgetUI(); return; }
     const playlist = getPlaylist();
     if (playlist.length > 1) { const nextIdx = (config.currentIndex + 1) % playlist.length; setTimeout(() => playTrackAtIndex(nextIdx), 800); }
   }
-
   function togglePlay() { if (!currentTrack) { errorCount = 0; playTrackAtIndex(config.currentIndex || 0); return; } isPlaying ? pauseMusic() : resumeMusic(); }
-
   function pauseMusic() {
     if (currentTrack?.type === 'youtube' && player && typeof player.pauseVideo === 'function') { try { player.pauseVideo(); } catch(e){} }
     if (currentTrack?.type === 'audio' && audioEl) audioEl.pause();
     if (currentTrack?.type === 'soundcloud' && scWidget && typeof scWidget.pause === 'function') { try { scWidget.pause(); } catch(e){} }
     isPlaying = false; updateWidgetUI(); renderPlaylist();
   }
-
   function resumeMusic() {
     if (currentTrack?.type === 'youtube' && player && typeof player.playVideo === 'function') { try { player.playVideo(); } catch(e){} }
     if (currentTrack?.type === 'audio' && audioEl) audioEl.play().catch(() => {});
     if (currentTrack?.type === 'soundcloud' && scWidget && typeof scWidget.play === 'function') { try { scWidget.play(); } catch(e){} }
     isPlaying = true; updateWidgetUI(); renderPlaylist();
   }
-
   function renderPlaylist() {
     if (!playlistEl) return;
     const playlist = getPlaylist(); const currentId = currentTrack?.id;
     playlistEl.innerHTML = playlist.map((track, i) => `<div class="playlist-item ${track.id === currentId ? 'active' : ''}" data-track-index="${i}"><div class="play-icon">${track.id === currentId && isPlaying ? '⏸' : '▶'}</div><div class="info"><div class="title">${esc(track.title)}</div><div class="artist">${esc(track.artist)}</div></div></div>`).join('');
     playlistEl.querySelectorAll('[data-track-index]').forEach(el => { el.addEventListener('click', () => { const idx = parseInt(el.dataset.trackIndex, 10); errorCount = 0; playTrackAtIndex(idx); }); });
   }
-
   function updateWidgetUI() {
     if (isPlaying) { widget.classList.add('playing'); btnToggle.textContent = '⏸'; btnToggle.title = 'Tắt nhạc'; }
     else { widget.classList.remove('playing'); btnToggle.textContent = '🔇'; btnToggle.title = 'Bật nhạc'; }
     if (currentTrack) { if (titleEl) titleEl.textContent = currentTrack.title; if (artistEl) artistEl.textContent = currentTrack.artist; }
   }
-
   function parseMusicUrl(url) {
     url = url.trim(); if (!url) return null;
     const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
@@ -586,7 +690,6 @@ function loadDemo() {
     if (/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(url) || url.startsWith('data:audio')) return { id: 'audio-' + Date.now(), title: 'Audio File', artist: 'Custom', type: 'audio', url };
     return { id: 'audio-' + Date.now(), title: 'Custom Audio', artist: 'Custom', type: 'audio', url };
   }
-
   btnToggle.addEventListener('click', togglePlay);
   btnSettings?.addEventListener('click', () => { settingsPanel.classList.toggle('hidden'); if (!settingsPanel.classList.contains('hidden')) renderPlaylist(); });
   btnSettingsClose?.addEventListener('click', () => { settingsPanel.classList.add('hidden'); });
@@ -599,7 +702,6 @@ function loadDemo() {
     config.customTracks.push(track); saveConfig(); customInput.value = ''; renderPlaylist();
     showStatus('✅ Đã thêm: ' + track.title, 'success');
   });
-
   if (volumeSlider) {
     volumeSlider.value = config.volume;
     if (volumeValue) volumeValue.textContent = config.volume;
@@ -607,34 +709,24 @@ function loadDemo() {
     volumeSlider.addEventListener('input', handler);
     volumeSlider.addEventListener('change', handler);
   }
-
   document.addEventListener('click', (e) => {
     if (!settingsPanel || settingsPanel.classList.contains('hidden')) return;
     if (settingsPanel.contains(e.target)) return;
     if (btnSettings?.contains(e.target)) return;
     settingsPanel.classList.add('hidden');
   });
-
   audioEl = $('audio-player');
   if (audioEl) { audioEl.addEventListener('ended', () => { isPlaying = false; updateWidgetUI(); nextTrackOnError(); }); }
-
   renderPlaylist();
 })();
 
 // ═══════════════════════════════════════════════════════════════════
-// MINIGAME MATH (giữ nguyên)
+// MINIGAME MATH
 // ═══════════════════════════════════════════════════════════════════
 
 const MathGame = (function(){
   const STORAGE_KEY = 'ac:mathgame_v2';
-  let state = {
-    playing: false, level: 1, maxLevel: 1, score: 0, correct: 0,
-    streak: 0, maxStreak: 0, timeLeft: 0, timerInterval: null,
-    question: null, answered: false, tabSwitchPenalty: false, lives: 1,
-  };
-
-  let tabHiddenTime = 0;
-
+  let state = { playing: false, level: 1, maxLevel: 1, score: 0, correct: 0, streak: 0, maxStreak: 0, timeLeft: 0, timerInterval: null, question: null, answered: false, tabSwitchPenalty: false, lives: 1 };
   function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
   function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
   function simplify(num, den) { const g = gcd(num, den); return [num / g, den / g]; }
@@ -645,163 +737,54 @@ const MathGame = (function(){
     for (const p of shuffle(pool)) { if (opts.size >= 4) break; if (String(p) !== String(correct)) opts.add(String(p)); }
     return shuffle([...opts]);
   }
-
-  function getDifficulty() {
-    if (state.level <= 2) return 'easy';
-    if (state.level <= 4) return 'medium';
-    if (state.level <= 6) return 'hard';
-    return 'insane';
-  }
-  function getTimeForLevel() {
-    const base = { easy: 20, medium: 15, hard: 12, insane: 8 };
-    const diff = getDifficulty();
-    return Math.max(5, base[diff] - Math.floor((state.level - 1) / 3));
-  }
-
+  function getDifficulty() { if (state.level <= 2) return 'easy'; if (state.level <= 4) return 'medium'; if (state.level <= 6) return 'hard'; return 'insane'; }
+  function getTimeForLevel() { const base = { easy: 20, medium: 15, hard: 12, insane: 8 }; const diff = getDifficulty(); return Math.max(5, base[diff] - Math.floor((state.level - 1) / 3)); }
   function genAlgebra(diff) {
     const levels = { easy: 1, medium: 2, hard: 3, insane: 4 };
     const lv = levels[diff] || 1;
     const type = randInt(1, lv >= 3 ? 5 : 3);
-    if (type === 1) {
-      const a = randInt(2, 5 + lv * 3), b = randInt(1, 10 + lv * 5), c = randInt(1, 20 + lv * 10);
-      const x = (c - b) / a;
-      if (!Number.isInteger(x)) return genAlgebra(diff);
-      return { question: `${a}x + ${b} = ${c}. Tìm x?`, options: buildOptionsFromPool(x, [x + 1, x - 1, x + 2, x - 2, x + 3, -x, x * 2]), correct: String(x), topic: 'algebra' };
-    }
-    if (type === 2) {
-      const r1 = randInt(-5, 5), r2 = randInt(-5, 5);
-      if (r1 === r2) return genAlgebra(diff);
-      const b = -(r1 + r2), c = r1 * r2;
-      const sign = b >= 0 ? `+${b}` : `${b}`;
-      const opts = buildOptionsFromPool(`x = ${r1} hoặc x = ${r2}`, [`x = ${r1 + 1} hoặc x = ${r2}`, `x = ${r1} hoặc x = ${r2 + 1}`, `x = ${-r1} hoặc x = ${-r2}`, `x = ${r1 * 2} hoặc x = ${r2}`]);
-      return { question: `x² ${sign}x ${c >= 0 ? '+' + c : c} = 0. Nghiệm nào đúng?`, options: opts, correct: `x = ${r1} hoặc x = ${r2}`, topic: 'algebra' };
-    }
-    if (type === 3) {
-      const x = randInt(-5, 5), y = randInt(-5, 5);
-      const a1 = randInt(1, 4), b1 = randInt(1, 4), c1 = a1 * x + b1 * y;
-      const a2 = randInt(1, 4), b2 = randInt(1, 4), c2 = a2 * x + b2 * y;
-      if (a1 * b2 === a2 * b1) return genAlgebra(diff);
-      const opts = buildOptionsFromPool(`(${x}, ${y})`, [`(${y}, ${x})`, `(${x + 1}, ${y})`, `(${x}, ${y + 1})`, `(${-x}, ${-y})`, `(${x + 2}, ${y - 1})`]);
-      return { question: `Hệ: ${a1}x + ${b1}y = ${c1}; ${a2}x + ${b2}y = ${c2}. Nghiệm (x,y)?`, options: opts, correct: `(${x}, ${y})`, topic: 'algebra' };
-    }
-    if (type === 4) {
-      const base = [2, 3, 5][randInt(0, 2)];
-      const exp = randInt(1, 4 + lv);
-      const val = Math.pow(base, exp);
-      return { question: `log_${base}(${val}) = ?`, options: buildOptionsFromPool(exp, [exp + 1, exp - 1, exp + 2, exp * 2, val, val / base]), correct: String(exp), topic: 'calculus' };
-    }
-    if (type === 5) {
-      const a = randInt(1, 5 + lv), n = randInt(2, 4 + lv);
-      const correct = `${a * n}x^${n - 1}`;
-      return { question: `Đạo hàm của f(x) = ${a}x^${n}?`, options: buildOptionsFromPool(correct, [`${a * n}x^${n}`, `${a}x^${n - 1}`, `${a * n}x^${n + 1}`, `${a + n}x^${n - 1}`, `${a * n * n}x^${n - 1}`]), correct, topic: 'calculus' };
-    }
+    if (type === 1) { const a = randInt(2, 5 + lv * 3), b = randInt(1, 10 + lv * 5), c = randInt(1, 20 + lv * 10); const x = (c - b) / a; if (!Number.isInteger(x)) return genAlgebra(diff); return { question: `${a}x + ${b} = ${c}. Tìm x?`, options: buildOptionsFromPool(x, [x + 1, x - 1, x + 2, x - 2, x + 3, -x, x * 2]), correct: String(x), topic: 'algebra' }; }
+    if (type === 2) { const r1 = randInt(-5, 5), r2 = randInt(-5, 5); if (r1 === r2) return genAlgebra(diff); const b = -(r1 + r2), c = r1 * r2; const sign = b >= 0 ? `+${b}` : `${b}`; const opts = buildOptionsFromPool(`x = ${r1} hoặc x = ${r2}`, [`x = ${r1 + 1} hoặc x = ${r2}`, `x = ${r1} hoặc x = ${r2 + 1}`, `x = ${-r1} hoặc x = ${-r2}`, `x = ${r1 * 2} hoặc x = ${r2}`]); return { question: `x² ${sign}x ${c >= 0 ? '+' + c : c} = 0. Nghiệm nào đúng?`, options: opts, correct: `x = ${r1} hoặc x = ${r2}`, topic: 'algebra' }; }
+    if (type === 3) { const x = randInt(-5, 5), y = randInt(-5, 5); const a1 = randInt(1, 4), b1 = randInt(1, 4), c1 = a1 * x + b1 * y; const a2 = randInt(1, 4), b2 = randInt(1, 4), c2 = a2 * x + b2 * y; if (a1 * b2 === a2 * b1) return genAlgebra(diff); const opts = buildOptionsFromPool(`(${x}, ${y})`, [`(${y}, ${x})`, `(${x + 1}, ${y})`, `(${x}, ${y + 1})`, `(${-x}, ${-y})`, `(${x + 2}, ${y - 1})`]); return { question: `Hệ: ${a1}x + ${b1}y = ${c1}; ${a2}x + ${b2}y = ${c2}. Nghiệm (x,y)?`, options: opts, correct: `(${x}, ${y})`, topic: 'algebra' }; }
+    if (type === 4) { const base = [2, 3, 5][randInt(0, 2)]; const exp = randInt(1, 4 + lv); const val = Math.pow(base, exp); return { question: `log_${base}(${val}) = ?`, options: buildOptionsFromPool(exp, [exp + 1, exp - 1, exp + 2, exp * 2, val, val / base]), correct: String(exp), topic: 'calculus' }; }
+    if (type === 5) { const a = randInt(1, 5 + lv), n = randInt(2, 4 + lv); const correct = `${a * n}x^${n - 1}`; return { question: `Đạo hàm của f(x) = ${a}x^${n}?`, options: buildOptionsFromPool(correct, [`${a * n}x^${n}`, `${a}x^${n - 1}`, `${a * n}x^${n + 1}`, `${a + n}x^${n - 1}`, `${a * n * n}x^${n - 1}`]), correct, topic: 'calculus' }; }
     return genAlgebra(diff);
   }
-
   function genFraction(diff) {
     const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
     const type = randInt(1, lv >= 3 ? 4 : 3);
-    if (type === 1) {
-      const d1 = randInt(2, 4 + lv * 2), d2 = randInt(2, 4 + lv * 2);
-      const n1 = randInt(1, d1 - 1), n2 = randInt(1, d2 - 1);
-      const num = n1 * d2 + n2 * d1, den = d1 * d2;
-      const correct = fracStr(num, den);
-      const wrongs = [fracStr(num + 1, den), fracStr(num, den + 1), fracStr(num - 1, den), fracStr(n1 + n2, d1 + d2)];
-      return { question: `${n1}/${d1} + ${n2}/${d2} = ?`, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' };
-    }
-    if (type === 2) {
-      const n1 = randInt(1, 6 + lv), d1 = randInt(2, 6 + lv), n2 = randInt(1, 6 + lv), d2 = randInt(2, 6 + lv);
-      const correct = fracStr(n1 * n2, d1 * d2);
-      const wrongs = [fracStr(n1 + n2, d1 + d2), fracStr(n1 * d2, d1 * n2), fracStr(n1 + n2, d1 * d2), fracStr(n1 * n2, d1 + d2)];
-      return { question: `${n1}/${d1} × ${n2}/${d2} = ?`, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' };
-    }
-    if (type === 3) {
-      const d1 = randInt(2, 8), n1 = randInt(1, d1 - 1), d2 = randInt(2, 8), n2 = randInt(1, d2 - 1);
-      const v1 = n1 / d1, v2 = n2 / d2;
-      const correct = v1 > v2 ? '>' : v1 < v2 ? '<' : '=';
-      return { question: `${n1}/${d1} ... ${n2}/${d2} (điền dấu)`, options: shuffle(['>', '<', '=', '≥']), correct, topic: 'fraction' };
-    }
-    if (type === 4) {
-      const n1 = randInt(1, 5), d1 = randInt(2, 6), n2 = randInt(1, 5), d2 = randInt(2, 6);
-      const correct = fracStr(n1 * d2, d1 * n2);
-      const wrongs = [fracStr(n1 * n2, d1 * d2), fracStr(d1 * n2, n1 * d2), fracStr(n1 + d2, d1 + n2), fracStr(n1 * d2, d1 + n2)];
-      return { question: `${n1}/${d1} ÷ ${n2}/${d2} = ?`, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' };
-    }
+    if (type === 1) { const d1 = randInt(2, 4 + lv * 2), d2 = randInt(2, 4 + lv * 2); const n1 = randInt(1, d1 - 1), n2 = randInt(1, d2 - 1); const num = n1 * d2 + n2 * d1, den = d1 * d2; const correct = fracStr(num, den); const wrongs = [fracStr(num + 1, den), fracStr(num, den + 1), fracStr(num - 1, den), fracStr(n1 + n2, d1 + d2)]; return { question: `${n1}/${d1} + ${n2}/${d2} = ?`, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' }; }
+    if (type === 2) { const n1 = randInt(1, 6 + lv), d1 = randInt(2, 6 + lv), n2 = randInt(1, 6 + lv), d2 = randInt(2, 6 + lv); const correct = fracStr(n1 * n2, d1 * d2); const wrongs = [fracStr(n1 + n2, d1 + d2), fracStr(n1 * d2, d1 * n2), fracStr(n1 + n2, d1 * d2), fracStr(n1 * n2, d1 + d2)]; return { question: `${n1}/${d1} × ${n2}/${d2} = ?`, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' }; }
+    if (type === 3) { const d1 = randInt(2, 8), n1 = randInt(1, d1 - 1), d2 = randInt(2, 8), n2 = randInt(1, d2 - 1); const v1 = n1 / d1, v2 = n2 / d2; const correct = v1 > v2 ? '>' : v1 < v2 ? '<' : '='; return { question: `${n1}/${d1} ... ${n2}/${d2} (điền dấu)`, options: shuffle(['>', '<', '=', '≥']), correct, topic: 'fraction' }; }
+    if (type === 4) { const n1 = randInt(1, 5), d1 = randInt(2, 6), n2 = randInt(1, 5), d2 = randInt(2, 6); const correct = fracStr(n1 * d2, d1 * n2); const wrongs = [fracStr(n1 * n2, d1 * d2), fracStr(d1 * n2, n1 * d2), fracStr(n1 + d2, d1 + n2), fracStr(n1 * d2, d1 + n2)]; return { question: `${n1}/${d1} ÷ ${n2}/${d2} = ?`, options: shuffle([correct, ...wrongs]), correct, topic: 'fraction' }; }
     return genFraction(diff);
   }
-
   function genCalculus(diff) {
     const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
     const type = randInt(1, 3);
-    if (type === 1) {
-      const a = randInt(1, 5);
-      const correct = String(2 * a);
-      return { question: `lim(x→${a}) (x² - ${a * a})/(x - ${a}) = ?`, options: buildOptionsFromPool(correct, [String(a), String(a * a), String(2 * a + 1), String(2 * a - 1), '0', '∞']), correct, topic: 'calculus' };
-    }
-    if (type === 2) {
-      const n = randInt(2, 4 + lv);
-      const correct = `x^${n} + C`;
-      return { question: `∫ ${n}x^${n - 1} dx = ?`, options: buildOptionsFromPool(correct, [`x^${n + 1} + C`, `${n}x^${n} + C`, `x^${n - 1} + C`, `${n * n}x^${n - 1} + C`]), correct, topic: 'calculus' };
-    }
-    if (type === 3) {
-      const a = randInt(2, 5), b = randInt(1, 5);
-      const correct = `${2 * a}(${a}x + ${b})`;
-      return { question: `Đạo hàm f(x) = (${a}x + ${b})²?`, options: buildOptionsFromPool(correct, [`2(${a}x + ${b})`, `${a}(${a}x + ${b})`, `${2 * a}x`, `2${a}x + ${b}`, `${a * a}x + ${b}`]), correct, topic: 'calculus' };
-    }
+    if (type === 1) { const a = randInt(1, 5); const correct = String(2 * a); return { question: `lim(x→${a}) (x² - ${a * a})/(x - ${a}) = ?`, options: buildOptionsFromPool(correct, [String(a), String(a * a), String(2 * a + 1), String(2 * a - 1), '0', '∞']), correct, topic: 'calculus' }; }
+    if (type === 2) { const n = randInt(2, 4 + lv); const correct = `x^${n} + C`; return { question: `∫ ${n}x^${n - 1} dx = ?`, options: buildOptionsFromPool(correct, [`x^${n + 1} + C`, `${n}x^${n} + C`, `x^${n - 1} + C`, `${n * n}x^${n - 1} + C`]), correct, topic: 'calculus' }; }
+    if (type === 3) { const a = randInt(2, 5), b = randInt(1, 5); const correct = `${2 * a}(${a}x + ${b})`; return { question: `Đạo hàm f(x) = (${a}x + ${b})²?`, options: buildOptionsFromPool(correct, [`2(${a}x + ${b})`, `${a}(${a}x + ${b})`, `${2 * a}x`, `2${a}x + ${b}`, `${a * a}x + ${b}`]), correct, topic: 'calculus' }; }
     return genCalculus(diff);
   }
-
   function genGeometry(diff) {
     const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
     const type = randInt(1, 4);
-    if (type === 1) {
-      const r = randInt(1, 3 + lv * 2);
-      const correct = (Math.PI * r * r).toFixed(2);
-      return { question: `Diện tích hình tròn bán kính r = ${r}? (π ≈ 3.14)`, options: buildOptionsFromPool(correct, [(2 * Math.PI * r).toFixed(2), (Math.PI * r).toFixed(2), (Math.PI * r * r * 2).toFixed(2), (Math.PI * r * r / 2).toFixed(2)]), correct, topic: 'geometry', graphType: 'circle', graphData: { r } };
-    }
-    if (type === 2) {
-      const a = randInt(3, 6 + lv), b = randInt(4, 8 + lv);
-      const c = Math.sqrt(a * a + b * b);
-      if (!Number.isInteger(c)) return genGeometry(diff);
-      return { question: `Tam giác vuông: a=${a}, b=${b}. Cạnh huyền c?`, options: buildOptionsFromPool(String(c), [String(a + b), String(c + 1), String(c - 1), String(Math.round(c * 1.5))]), correct: String(c), topic: 'geometry', graphType: 'triangle', graphData: { a, b, c } };
-    }
-    if (type === 3) {
-      const r = randInt(1, 3 + lv);
-      const correct = ((4 / 3) * Math.PI * r * r * r).toFixed(2);
-      return { question: `Thể tích hình cầu bán kính r = ${r}? (π ≈ 3.14)`, options: buildOptionsFromPool(correct, [(Math.PI * r * r * r).toFixed(2), ((4 / 3) * Math.PI * r * r).toFixed(2), (4 * Math.PI * r * r).toFixed(2), ((2 / 3) * Math.PI * r * r * r).toFixed(2)]), correct, topic: 'geometry', graphType: 'sphere', graphData: { r } };
-    }
-    if (type === 4) {
-      const b = randInt(3, 10 + lv * 2), h = randInt(2, 8 + lv * 2);
-      const correct = String((b * h) / 2);
-      return { question: `Tam giác có đáy = ${b}, chiều cao = ${h}. Diện tích?`, options: buildOptionsFromPool(correct, [String(b * h), String(b + h), String(b * h / 4), String(b * h * 2)]), correct, topic: 'geometry', graphType: 'triangleArea', graphData: { b, h } };
-    }
+    if (type === 1) { const r = randInt(1, 3 + lv * 2); const correct = (Math.PI * r * r).toFixed(2); return { question: `Diện tích hình tròn bán kính r = ${r}? (π ≈ 3.14)`, options: buildOptionsFromPool(correct, [(2 * Math.PI * r).toFixed(2), (Math.PI * r).toFixed(2), (Math.PI * r * r * 2).toFixed(2), (Math.PI * r * r / 2).toFixed(2)]), correct, topic: 'geometry', graphType: 'circle', graphData: { r } }; }
+    if (type === 2) { const a = randInt(3, 6 + lv), b = randInt(4, 8 + lv); const c = Math.sqrt(a * a + b * b); if (!Number.isInteger(c)) return genGeometry(diff); return { question: `Tam giác vuông: a=${a}, b=${b}. Cạnh huyền c?`, options: buildOptionsFromPool(String(c), [String(a + b), String(c + 1), String(c - 1), String(Math.round(c * 1.5))]), correct: String(c), topic: 'geometry', graphType: 'triangle', graphData: { a, b, c } }; }
+    if (type === 3) { const r = randInt(1, 3 + lv); const correct = ((4 / 3) * Math.PI * r * r * r).toFixed(2); return { question: `Thể tích hình cầu bán kính r = ${r}? (π ≈ 3.14)`, options: buildOptionsFromPool(correct, [(Math.PI * r * r * r).toFixed(2), ((4 / 3) * Math.PI * r * r).toFixed(2), (4 * Math.PI * r * r).toFixed(2), ((2 / 3) * Math.PI * r * r * r).toFixed(2)]), correct, topic: 'geometry', graphType: 'sphere', graphData: { r } }; }
+    if (type === 4) { const b = randInt(3, 10 + lv * 2), h = randInt(2, 8 + lv * 2); const correct = String((b * h) / 2); return { question: `Tam giác có đáy = ${b}, chiều cao = ${h}. Diện tích?`, options: buildOptionsFromPool(correct, [String(b * h), String(b + h), String(b * h / 4), String(b * h * 2)]), correct, topic: 'geometry', graphType: 'triangleArea', graphData: { b, h } }; }
     return genGeometry(diff);
   }
-
   function genLogic(diff) {
     const lv = { easy: 1, medium: 2, hard: 3, insane: 4 }[diff] || 1;
     const type = randInt(1, 3);
-    if (type === 1) {
-      const start = randInt(1, 5 + lv), step = randInt(2, 5 + lv);
-      const seq = [start, start + step, start + 2 * step, start + 3 * step];
-      const correct = start + 4 * step;
-      return { question: `Dãy số: ${seq.join(', ')}, ... Số tiếp theo?`, options: buildOptionsFromPool(String(correct), [String(correct + step), String(correct - step), String(correct + 1), String(correct * 2)]), correct: String(correct), topic: 'logic' };
-    }
-    if (type === 2) {
-      const p = randInt(10, 90), val = randInt(50, 500 + lv * 100);
-      const correct = Math.round(val * p / 100);
-      return { question: `${p}% của ${val} = ?`, options: buildOptionsFromPool(String(correct), [String(Math.round(val * (p + 10) / 100)), String(Math.round(val * (p - 10) / 100)), String(Math.round(val * p / 200)), String(val - p)]), correct: String(correct), topic: 'logic' };
-    }
-    if (type === 3) {
-      const a = randInt(10, 100), m = randInt(3, 9);
-      const correct = a % m;
-      return { question: `${a} mod ${m} = ?`, options: buildOptionsFromPool(String(correct), [String((correct + 1) % m), String((correct + 2) % m), String((correct + 3) % m), String(a - m)]), correct: String(correct), topic: 'logic' };
-    }
+    if (type === 1) { const start = randInt(1, 5 + lv), step = randInt(2, 5 + lv); const seq = [start, start + step, start + 2 * step, start + 3 * step]; const correct = start + 4 * step; return { question: `Dãy số: ${seq.join(', ')}, ... Số tiếp theo?`, options: buildOptionsFromPool(String(correct), [String(correct + step), String(correct - step), String(correct + 1), String(correct * 2)]), correct: String(correct), topic: 'logic' }; }
+    if (type === 2) { const p = randInt(10, 90), val = randInt(50, 500 + lv * 100); const correct = Math.round(val * p / 100); return { question: `${p}% của ${val} = ?`, options: buildOptionsFromPool(String(correct), [String(Math.round(val * (p + 10) / 100)), String(Math.round(val * (p - 10) / 100)), String(Math.round(val * p / 200)), String(val - p)]), correct: String(correct), topic: 'logic' }; }
+    if (type === 3) { const a = randInt(10, 100), m = randInt(3, 9); const correct = a % m; return { question: `${a} mod ${m} = ?`, options: buildOptionsFromPool(String(correct), [String((correct + 1) % m), String((correct + 2) % m), String((correct + 3) % m), String(a - m)]), correct: String(correct), topic: 'logic' }; }
     return genLogic(diff);
   }
-
   const GENERATORS = { algebra: genAlgebra, fraction: genFraction, calculus: genCalculus, geometry: genGeometry, logic: genLogic };
-
   function generateQuestion() {
     const diff = getDifficulty();
     const keys = Object.keys(GENERATORS);
@@ -814,7 +797,6 @@ const MathGame = (function(){
     do { q = gen(diff); attempts++; } while ((!q || !q.options || q.options.length < 4) && attempts < 30);
     return q;
   }
-
   function drawGraph(question) {
     const canvas = $('math-canvas');
     const container = $('graph-container');
@@ -824,7 +806,6 @@ const MathGame = (function(){
     const isGraphable = type || /x²|Đạo hàm|∫|lim|f\(x\)|parabol/.test(qText);
     if (!isGraphable) { container.classList.add('hidden'); return; }
     container.classList.remove('hidden');
-
     const ctx = canvas.getContext('2d');
     const rect = canvas.parentElement.getBoundingClientRect();
     canvas.width = rect.width * (window.devicePixelRatio || 1);
@@ -833,19 +814,15 @@ const MathGame = (function(){
     canvas.style.height = rect.height + 'px';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-
     const w = rect.width, h = rect.height;
     ctx.clearRect(0, 0, w, h);
-
     ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= 12; i++) {
       ctx.beginPath(); ctx.moveTo(i * w / 12, 0); ctx.lineTo(i * w / 12, h); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, i * h / 12); ctx.lineTo(w, i * h / 12); ctx.stroke();
     }
-
     const cx = w / 2, cy = h / 2;
-
     if (type === 'circle') {
       const r = question.graphData.r;
       const pxR = Math.min(w, h) * 0.32;
@@ -863,7 +840,6 @@ const MathGame = (function(){
       ctx.shadowBlur = 0;
       return;
     }
-
     if (type === 'triangle') {
       const { a, b, c } = question.graphData;
       const scale = Math.min(w, h) * 0.55 / Math.max(a, b);
@@ -882,7 +858,6 @@ const MathGame = (function(){
       ctx.shadowBlur = 0;
       return;
     }
-
     if (type === 'sphere') {
       const r = question.graphData.r;
       const pxR = Math.min(w, h) * 0.3;
@@ -905,7 +880,6 @@ const MathGame = (function(){
       ctx.shadowBlur = 0;
       return;
     }
-
     if (type === 'triangleArea') {
       const { b, h } = question.graphData;
       const scale = Math.min(w, h) * 0.55 / Math.max(b, h);
@@ -924,15 +898,12 @@ const MathGame = (function(){
       ctx.shadowBlur = 0;
       return;
     }
-
-    // Function graph
     ctx.strokeStyle = '#3a3a52'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
     ctx.fillStyle = '#3a3a52';
     ctx.beginPath(); ctx.moveTo(w - 2, cy); ctx.lineTo(w - 10, cy - 4); ctx.lineTo(w - 10, cy + 4); ctx.fill();
     ctx.beginPath(); ctx.moveTo(cx, 2); ctx.lineTo(cx - 4, 10); ctx.lineTo(cx + 4, 10); ctx.fill();
-
     ctx.strokeStyle = '#ff6ac1'; ctx.lineWidth = 2.5; ctx.shadowColor = '#ff6ac1'; ctx.shadowBlur = 12;
     ctx.beginPath();
     if (qText.includes('x²') || qText.includes('parabol')) {
@@ -947,12 +918,10 @@ const MathGame = (function(){
       for (let px = 0; px <= w; px += 2) { const x = (px - cx) / (w / 10); const y = Math.sin(x) * 2; const py = cy - y * (h / 10); if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); }
     }
     ctx.stroke(); ctx.shadowBlur = 0;
-
     ctx.fillStyle = '#666'; ctx.font = '10px "Be Vietnam Pro", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('x', w - 8, cy - 8);
     ctx.fillText('y', cx + 12, 12);
   }
-
   function updateHUD() {
     const lb = $('level-badge'); if (lb) lb.textContent = `⭐ Cấp ${state.level}`;
     const sd = $('score-display'); if (sd) sd.textContent = `${state.score} điểm`;
@@ -972,7 +941,6 @@ const MathGame = (function(){
     const livesDisplay = $('lives-display');
     if (livesDisplay) livesDisplay.innerHTML = `<span class="life">❤️</span>`;
   }
-
   function updateTimer() {
     const timeText = $('timer-text');
     const ring = $('timer-ring');
@@ -987,7 +955,6 @@ const MathGame = (function(){
     else if (state.timeLeft <= maxTime * 0.4) { timeText.classList.add('warning'); ring.setAttribute('stroke', '#f1c40f'); }
     else { ring.setAttribute('stroke', '#ff6ac1'); }
   }
-
   function renderQuestion() {
     if (!state.question) return;
     const qText = $('question-text');
@@ -1016,29 +983,24 @@ const MathGame = (function(){
       else { updateTimer(); }
     }, 100);
   }
-
   function handleAnswer(selected, btn) {
     if (state.answered) return;
     state.answered = true;
     clearInterval(state.timerInterval);
-
     const correct = state.question.correct;
     const isCorrect = selected === correct;
     const allBtns = document.querySelectorAll('#options-container .option-btn');
-
     allBtns.forEach(b => {
       b.disabled = true;
       const text = b.querySelector('span:last-child')?.textContent || '';
       if (text === correct) b.classList.add('correct');
       else if (text === selected && !isCorrect) b.classList.add('wrong');
     });
-
     const feedback = $('game-feedback');
     const timeBonus = Math.round(state.timeLeft * 5);
     const basePoints = state.level * 100;
     const streakBonus = state.streak * 50;
     const points = basePoints + streakBonus + timeBonus;
-
     if (isCorrect) {
       state.correct++;
       state.streak++;
@@ -1061,7 +1023,6 @@ const MathGame = (function(){
       setTimeout(() => { endGame(); }, 1800);
     }
   }
-
   function handleTimeout() {
     if (state.answered) return;
     state.answered = true;
@@ -1077,28 +1038,23 @@ const MathGame = (function(){
     updateHUD();
     setTimeout(() => { endGame(); }, 1800);
   }
-
   function initTabDetection() {
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (state.playing) {
-          tabHiddenTime = Date.now();
-          state.tabSwitchPenalty = true;
-          clearInterval(state.timerInterval);
-          $('tab-warning').classList.remove('hidden');
-          state.playing = false;
-        }
+      if (document.hidden && state.playing) {
+        state.tabSwitchPenalty = true;
+        clearInterval(state.timerInterval);
+        $('tab-warning')?.classList.remove('hidden');
+        state.playing = false;
       }
     });
-
     $('tab-warning-btn')?.addEventListener('click', () => {
-      $('tab-warning').classList.add('hidden');
+      $('tab-warning')?.classList.add('hidden');
       if (state.tabSwitchPenalty) {
         state.tabSwitchPenalty = false;
         state.playing = false;
         clearInterval(state.timerInterval);
-        $('game-play').classList.add('hidden');
-        $('game-result').classList.remove('hidden');
+        $('game-play')?.classList.add('hidden');
+        $('game-result')?.classList.remove('hidden');
         const re = $('result-emoji'), rt = $('result-title'), rsub = $('result-sub');
         if (re) re.textContent = '⚠️';
         if (rt) rt.textContent = 'Mất lượt!';
@@ -1113,13 +1069,11 @@ const MathGame = (function(){
       }
     });
   }
-
   function endGame() {
     clearInterval(state.timerInterval);
     state.playing = false;
-    $('game-play').classList.add('hidden');
-    $('game-result').classList.remove('hidden');
-
+    $('game-play')?.classList.add('hidden');
+    $('game-result')?.classList.remove('hidden');
     const rs = $('result-score'), rc = $('result-correct'), rl = $('result-level'), rst = $('result-streak'), re = $('result-emoji'), rt = $('result-title'), rsub = $('result-sub');
     if (rs) rs.textContent = state.score;
     if (rc) rc.textContent = state.correct;
@@ -1128,11 +1082,9 @@ const MathGame = (function(){
     if (re) re.textContent = state.correct >= 10 ? '🏆' : state.correct >= 5 ? '🎉' : state.correct >= 2 ? '👍' : '💪';
     if (rt) rt.textContent = state.correct >= 10 ? 'Huyền thoại!' : state.correct >= 5 ? 'Xuất sắc!' : state.correct >= 2 ? 'Khá tốt!' : 'Cố gắng thêm!';
     if (rsub) rsub.textContent = `Bạn sống sót ${state.correct} câu — Cấp ${state.level}`;
-
     saveHighscores();
     loadHighscores();
   }
-
   function saveHighscores() {
     try {
       const hs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -1143,7 +1095,6 @@ const MathGame = (function(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(hs));
     } catch {}
   }
-
   function loadHighscores() {
     try {
       const hs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -1153,36 +1104,28 @@ const MathGame = (function(){
       if (bl) bl.textContent = hs.bestLevel || 1;
     } catch {}
   }
-
   function startGame() {
     state = { playing: true, level: 1, maxLevel: 1, score: 0, correct: 0, streak: 0, maxStreak: 0, timeLeft: 0, timerInterval: null, question: null, answered: false, tabSwitchPenalty: false, lives: 1 };
-    $('game-start').classList.add('hidden');
-    $('game-result').classList.add('hidden');
-    $('game-play').classList.remove('hidden');
-    $('tab-warning').classList.add('hidden');
+    $('game-start')?.classList.add('hidden');
+    $('game-result')?.classList.add('hidden');
+    $('game-play')?.classList.remove('hidden');
+    $('tab-warning')?.classList.add('hidden');
     state.question = generateQuestion();
     renderQuestion();
     updateHUD();
   }
-
   function init() {
-    const startBtn = $('game-start-btn');
-    const restartBtn = $('game-restart');
-    const homeBtn = $('game-home');
-
-    startBtn?.addEventListener('click', startGame);
-    restartBtn?.addEventListener('click', startGame);
-    homeBtn?.addEventListener('click', () => { go('home'); });
-
+    $('game-start-btn')?.addEventListener('click', startGame);
+    $('game-restart')?.addEventListener('click', startGame);
+    $('game-home')?.addEventListener('click', () => { go('home'); });
     initTabDetection();
     loadHighscores();
   }
-
   return { init, state };
 })();
 
 // ═══════════════════════════════════════════════════════════════════
-// BUG REPORT (giữ nguyên)
+// BUG REPORT
 // ═══════════════════════════════════════════════════════════════════
 
 function openBugModal() { Modal.open('bug-modal'); setTimeout(() => $('bug-name')?.focus(), 100); }
@@ -1204,7 +1147,7 @@ async function submitBugReport() {
   let success = false;
   if (CONFIG.bugWebhook && CONFIG.bugWebhook.includes('/api/webhooks/') && !CONFIG.bugWebhook.includes('CHANGE_ME')) {
     try {
-      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Âm lượng không hoạt động': 0x9b59b6, 'Giao diện lỗi': 0x3498db, 'Minigame lỗi': 0xe67e22, 'Khác': 0x95a5a6 };
+      const colorMap = { 'Không tìm thấy đáp án': 0xe74c3c, 'Đáp án sai': 0xe67e22, 'Đáp án sai do shuffle': 0xf39c12, 'Không đọc được file': 0xf39c12, 'Lỗi CORS khi dán link': 0x9b59b6, 'Nhạc không phát': 0x4caf50, 'Âm lượng không hoạt động': 0x9b59b6, 'Giao diện lỗi': 0x3498db, 'Minigame lỗi': 0xe67e22, 'Khác': 0x95a5a6 };
       const embed = { title: `🐛 Báo lỗi mới — ${type}`, color: colorMap[type] || 0xff6ac1, fields: [{ name: '👤 Người báo', value: escMd(name), inline: true }, { name: '📁 Context', value: escMd(ctx).substring(0, 200), inline: true }, { name: '📝 Mô tả', value: escMd(desc).substring(0, 1000) }], footer: { text: `${CONFIG.brand.name} v${CONFIG.brand.version}` }, timestamp: payload.timestamp };
       const res = await fetch(CONFIG.bugWebhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'Answer Checker 🐱', embeds: [embed] }) });
       if (res.ok || res.status === 204) { success = true; statusEl.innerHTML = '<span style="color:#22c55e">✅ Đã gửi!</span>'; }
@@ -1232,18 +1175,31 @@ function initAll() {
   console.log(`%c🐱 ${CONFIG.brand.name} v${CONFIG.brand.version}`, 'color:#fff;background:#5865F2;padding:4px 10px;border-radius:4px;font-weight:bold');
   console.log(`%c✨ Made with 💖 by ${CONFIG.brand.author}`, 'color:#ff6ac1;font-weight:bold');
   console.log(`%c🔧 Parser loaded: v${QuizParser.version || 'unknown'}`, 'color:#8bc34a');
-  console.log(`%c📋 Parser functions: ${Object.keys(QuizParser).join(', ')}`, 'color:#8bc34a;font-size:11px');
 
-  // Check if formatAnswerDisplay is available
-  if (typeof QuizParser.formatAnswerDisplay === 'function') {
-    console.log('%c✅ formatAnswerDisplay available — MCQ sẽ hiện A/B/C/D đúng', 'color:#2ecc71;font-weight:bold');
-  } else {
-    console.warn('%c⚠️ formatAnswerDisplay không có — dùng fallback local', 'color:#f39c12;font-weight:bold');
-  }
+  const parserStats = QuizParser.getStats ? QuizParser.getStats() : {};
+  console.log(`%c📋 Parser stats: ${JSON.stringify(parserStats, null, 2)}`, 'color:#8bc34a;font-size:11px');
+
+  const features = {
+    'Extract quiz': typeof QuizParser.extractQuizData === 'function',
+    'Chain vars': typeof QuizParser.collectChainVariables === 'function',
+    'Normalize decks': typeof QuizParser.normalizeDecks === 'function',
+    'URL fetch': typeof QuizParser.fetchUrlWithProxies === 'function',
+    'Fetch + Parse': typeof QuizParser.fetchAndParse === 'function',
+    'Smart fetch': typeof QuizParser.smartFetchAndParse === 'function',
+    'Iframe live': typeof QuizParser.extractFromIframe === 'function',
+    'Shuffle detect': typeof QuizParser.detectShufflePattern === 'function',
+    'Shuffle-aware': typeof QuizParser.resolveAnswerWithShuffleAwareness === 'function',
+    'Chemistry mode': typeof QuizParser.extractChemistryQuiz === 'function',
+  };
+  console.log('%c🔍 Feature check:', 'color:#3498db;font-weight:bold');
+  Object.entries(features).forEach(([k, v]) => {
+    console.log(`%c  ${v ? '✅' : '❌'} ${k}`, `color:${v ? '#2ecc71' : '#e74c3c'}`);
+  });
 
   initNavbar();
   initCheatPage();
   MathGame.init();
+
   $('fab-bug')?.addEventListener('click', openBugModal);
   $('bug-submit')?.addEventListener('click', submitBugReport);
   $('bug-desc')?.addEventListener('input', e => { const c = $('bug-count'); if (c) c.textContent = e.target.value.length; });
@@ -1261,7 +1217,6 @@ function initAll() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll);
 else initAll();
 
-// Expose để HTML có thể gọi
 window.AnswerChecker = { go, showStatus, showLoading, Modal };
 
 })();
