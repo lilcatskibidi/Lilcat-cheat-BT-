@@ -1,27 +1,16 @@
 // ═══════════════════════════════════════════════════════════════════
-// 🐱 ANSWER CHECKER — QUIZ PARSER v31
-// "Universal Chain Resolver + Bulletproof Extraction"
-//
-// 🆕 v31 MAJOR UPGRADES:
-//   ✦ CHAIN VAR COLLECTOR — auto-detect de1_mcq, de2_tf, set1_short, ...
-//   ✦ PRE-COLLECT all vars BEFORE eval main data
-//   ✦ AUTO-BUILD decks from chain vars if main eval fails
-//   ✦ INJECT chain vars into eval scope
-//   ✦ UNIVERSAL ANSWER FORMATTER (fixed "?" bug)
-//   ✦ Helper pattern for ANY variable structure
-//   ✦ Deep fallback chain 5 levels
-//   ✦ Recursive deck construction from any structure
-//   ✦ Enhanced error reporting
+// 🐱 ANSWER CHECKER — QUIZ PARSER v35 (FULL)
+// "Smart Multi-Source: Script + Iframe + Chemistry + Chain"
 // ═══════════════════════════════════════════════════════════════════
 
 (function(global) {
   'use strict';
 
-  const VERSION = '31.0.0';
+  const VERSION = '35.0.0';
   const DEBUG = false;
 
   // ═══════════════════════════════════════════════════════════════
-  // HELPER WHITELIST
+  // HELPERS
   // ═══════════════════════════════════════════════════════════════
 
   const HELPER_NAME_WHITELIST = [
@@ -44,10 +33,6 @@
     st: (text, correct, level) => ({ text: text, answer: correct, level: level, x: text, c: correct, l: level }),
     ds: (text, correct, level) => ({ text: text, answer: correct, level: level, x: text, c: correct, l: level }),
   };
-
-  // ═══════════════════════════════════════════════════════════════
-  // FIELD ALIASES — Extended for Chương 6 style
-  // ═══════════════════════════════════════════════════════════════
 
   const FIELD_ALIASES = {
     question: ['question', 'q', 'text', 'prompt', 'title', 'stem', 'content'],
@@ -75,9 +60,7 @@
     'cauHoi', 'deThi', 'deKiemTra', 'baiThi', 'tracNghiem',
   ];
 
-  // 🆕 v31: Chain var patterns
   const CHAIN_VAR_PATTERNS = [
-    // de1_mcq, de2_tf, de3_short, de4_sa
     /^de\d+_(mcq|mc|tf|short|sa)$/i,
     /^deck\d+_(mcq|mc|tf|short|sa)$/i,
     /^set\d+_(mcq|mc|tf|short|sa)$/i,
@@ -86,11 +69,8 @@
     /^quiz\d+_(mcq|mc|tf|short|sa)$/i,
     /^đề\d+_(mcq|mc|tf|short|sa)$/i,
     /^bộ\d+_(mcq|mc|tf|short|sa)$/i,
-    // de1mcq, de2tf (no underscore)
     /^de\d+(mcq|tf|short|sa)$/i,
-    // _de1_mcq, $de2_tf
     /^[_$][a-z]+\d+_[a-z]+$/i,
-    // questions1, items2
     /^(questions|items|list|bank|pool)\d+$/i,
   ];
 
@@ -113,7 +93,7 @@
   };
 
   // ═══════════════════════════════════════════════════════════════
-  // 🆕 v31: UNIVERSAL ANSWER FORMATTER
+  // UNIVERSAL FORMATTER
   // ═══════════════════════════════════════════════════════════════
 
   function formatAnswerDisplay(answer, options = null, type = 'mcq') {
@@ -132,7 +112,6 @@
       result.valid = true;
       return result;
     }
-    // MCQ
     let idx = -1;
     if (typeof answer === 'number') { if (answer >= 0 && answer < 26) idx = answer; }
     else if (typeof answer === 'string') {
@@ -148,14 +127,8 @@
       result.index = idx; result.letter = letter; result.value = letter;
       result.display = optText ? `${letter}. ${optText}` : letter;
       result.valid = true;
-    } else {
-      result.display = String(answer);
-    }
+    } else result.display = String(answer);
     return result;
-  }
-
-  function normalizeMcqAnswer(answer, options) {
-    return formatAnswerDisplay(answer, options, 'mcq').index;
   }
 
   function toBoolean(val) {
@@ -171,7 +144,282 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // HELPER DETECTION / COMPILE
+  // 🆕 v35: IFRAME LIVE EXTRACTOR
+  // ═══════════════════════════════════════════════════════════════
+
+  async function extractFromIframe(url, options = {}) {
+    if (typeof document === 'undefined') return { success: false, error: 'No DOM available' };
+    const { waitMs = 3000, timeoutMs = 15000, onProgress = null } = options;
+
+    return new Promise((resolve) => {
+      let iframe = null, timeoutTimer = null, resolved = false;
+
+      const cleanup = () => {
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        if (iframe && iframe.parentNode) { try { iframe.parentNode.removeChild(iframe); } catch (e) {} }
+      };
+      const finish = (result) => {
+        if (resolved) return;
+        resolved = true;
+        cleanup();
+        resolve(result);
+      };
+
+      try {
+        if (onProgress) onProgress('Đang tạo iframe ẩn...');
+        iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;left:-99999px;top:-99999px;width:1200px;height:900px;border:0;visibility:hidden;';
+        iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms');
+        iframe.src = url;
+
+        iframe.onload = () => {
+          if (onProgress) onProgress('Iframe loaded, chờ render...');
+          setTimeout(() => {
+            try {
+              if (onProgress) onProgress('Đang đọc DOM từ iframe...');
+              const doc = iframe.contentDocument || iframe.contentWindow?.document;
+              if (!doc) return finish({ success: false, error: 'Không truy cập được iframe document (CORS)' });
+              const html = doc.documentElement.outerHTML;
+              if (!html || html.length < 100) return finish({ success: false, error: 'Iframe DOM rỗng' });
+              try {
+                const result = extractQuizData(html);
+                const decks = normalizeDecks(result.data);
+                finish({ success: true, decks, html, shuffle: result.shuffle, source: 'iframe-live' });
+              } catch (e) {
+                finish({ success: false, error: 'Parse iframe HTML lỗi: ' + e.message });
+              }
+            } catch (e) {
+              finish({ success: false, error: 'Iframe read error: ' + e.message });
+            }
+          }, waitMs);
+        };
+        iframe.onerror = () => finish({ success: false, error: 'Iframe load error' });
+        document.body.appendChild(iframe);
+        timeoutTimer = setTimeout(() => finish({ success: false, error: 'Iframe timeout sau ' + (timeoutMs / 1000) + 's' }), timeoutMs);
+      } catch (e) {
+        finish({ success: false, error: e.message });
+      }
+    });
+  }
+
+  function crossCheckResults(scriptResult, iframeResult) {
+    if (!scriptResult && !iframeResult) return { data: null, method: 'none', confidence: 0 };
+    if (!scriptResult) return { data: iframeResult.decks, method: 'iframe-only', confidence: 80 };
+    if (!iframeResult || !iframeResult.success) return { data: scriptResult.decks, method: 'script-only', confidence: 70 };
+
+    const scriptDecks = scriptResult.decks || [];
+    const iframeDecks = iframeResult.decks || [];
+    const scriptCount = scriptDecks.reduce((s, d) => s + d.questions.length, 0);
+    const iframeCount = iframeDecks.reduce((s, d) => s + d.questions.length, 0);
+
+    const scriptTexts = new Set();
+    scriptDecks.forEach(d => d.questions.forEach(q => scriptTexts.add((q.question || '').substring(0, 60))));
+    const iframeTexts = new Set();
+    iframeDecks.forEach(d => d.questions.forEach(q => iframeTexts.add((q.question || '').substring(0, 60))));
+
+    let overlap = 0;
+    iframeTexts.forEach(t => { if (scriptTexts.has(t)) overlap++; });
+    const overlapRatio = iframeTexts.size > 0 ? overlap / iframeTexts.size : 0;
+
+    if (overlapRatio > 0.8) {
+      return { data: scriptDecks, method: 'script-preferred', confidence: 95, crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'script' } };
+    }
+    if (iframeCount >= scriptCount * 0.5) {
+      return { data: iframeDecks, method: 'iframe-preferred', confidence: 100, crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'iframe' } };
+    }
+    const merged = [...scriptDecks];
+    iframeDecks.forEach(d => {
+      const exists = merged.some(m => m.name === d.name);
+      if (!exists) merged.push(d);
+    });
+    return { data: merged, method: 'merged', confidence: 85, crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'merge' } };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // CHEMISTRY DATA → QUIZ
+  // ═══════════════════════════════════════════════════════════════
+
+  function detectChemistryData(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return { isChem: false };
+    const keys = Object.keys(obj);
+    if (keys.length < 2) return { isChem: false };
+
+    let potentialCount = 0, elementCount = 0, reactionCount = 0;
+    for (const key of keys) {
+      const item = obj[key];
+      if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+      const itemKeys = Object.keys(item);
+      if (itemKeys.some(k => /^E_?0$|^Eo$|^e0$|potential/i.test(k)) &&
+          itemKeys.some(k => /ion|symbol|name/i.test(k))) potentialCount++;
+      if (itemKeys.some(k => /^Z$|atomicNumber|atomicMass/i.test(k)) &&
+          itemKeys.some(k => /symbol|name/i.test(k))) elementCount++;
+      if (itemKeys.some(k => /reactants|equation/i.test(k)) &&
+          itemKeys.some(k => /products|deltaH/i.test(k))) reactionCount++;
+    }
+
+    if (potentialCount >= 2 && potentialCount / keys.length > 0.5) return { isChem: true, type: 'electrode_potential', confidence: potentialCount / keys.length };
+    if (elementCount >= 3 && elementCount / keys.length > 0.5) return { isChem: true, type: 'element', confidence: elementCount / keys.length };
+    if (reactionCount >= 2 && reactionCount / keys.length > 0.5) return { isChem: true, type: 'reaction', confidence: reactionCount / keys.length };
+    return { isChem: false };
+  }
+
+  function generateQuizFromElectrodes(data) {
+    const symbols = Object.keys(data).filter(k => {
+      const item = data[k];
+      return item && typeof item === 'object' && Object.keys(item).some(k => /^E_?0$|^Eo$|potential/i.test(k));
+    });
+    if (symbols.length < 2) return [];
+
+    const questions = [];
+    const getE0 = (sym) => {
+      const item = data[sym];
+      for (const k of Object.keys(item)) if (/^E_?0$|^Eo$|potential/i.test(k)) return Number(item[k]);
+      return 0;
+    };
+    const getName = (sym) => {
+      const item = data[sym];
+      for (const k of Object.keys(item)) if (/^name$/i.test(k)) return String(item[k]);
+      return sym;
+    };
+    const getIon = (sym) => {
+      const item = data[sym];
+      for (const k of Object.keys(item)) if (/^ion$/i.test(k)) return String(item[k]);
+      return sym + 'ⁿ⁺';
+    };
+
+    for (const sym of symbols) {
+      const correct = getE0(sym);
+      const others = symbols.filter(s => s !== sym).map(s => getE0(s));
+      const opts = [correct];
+      for (const o of [...others].sort(() => Math.random() - 0.5)) {
+        if (opts.length >= 4) break;
+        if (!opts.includes(o)) opts.push(o);
+      }
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+      questions.push({
+        type: 'mcq',
+        question: `Thế điện cực chuẩn E° của cặp ${getIon(sym)}/${sym} ở 25°C là bao nhiêu?`,
+        options: opts.map((v, i) => `${String.fromCharCode(65 + i)}. ${v.toFixed(2)} V`),
+        answer: String.fromCharCode(65 + opts.indexOf(correct)),
+        topic: 'electrode_potential',
+        _generated: true,
+      });
+    }
+
+    const pairs = [];
+    for (let i = 0; i < symbols.length; i++)
+      for (let j = i + 1; j < symbols.length; j++) pairs.push([symbols[i], symbols[j]]);
+
+    for (const [s1, s2] of pairs.sort(() => Math.random() - 0.5).slice(0, 5)) {
+      const e1 = getE0(s1), e2 = getE0(s2);
+      if (Math.abs(e1 - e2) < 0.01) continue;
+      const cathode = e1 > e2 ? s1 : s2;
+      const Ecell = Math.abs(e1 - e2);
+
+      questions.push({
+        type: 'mcq',
+        question: `Pin Galvani ${getName(s1)} (${s1}) — ${getName(s2)} (${s2}). Điện cực nào là CATHODE?`,
+        options: [
+          `A. ${getName(s1)} (${s1})`,
+          `B. ${getName(s2)} (${s2})`,
+          `C. Cả hai đều là cathode`,
+          `D. Không xác định được`,
+        ],
+        answer: cathode === s1 ? 'A' : 'B',
+        topic: 'galvani_cell',
+        _generated: true,
+      });
+
+      const correctEcell = Ecell.toFixed(2);
+      const wrongs = [
+        (Ecell + 0.5).toFixed(2),
+        Math.abs(Ecell - 0.5).toFixed(2),
+        (Ecell * 2).toFixed(2),
+      ].filter(v => v !== correctEcell).slice(0, 3);
+      const opts = [correctEcell, ...wrongs].sort(() => Math.random() - 0.5);
+      const answerIdx = opts.indexOf(correctEcell);
+
+      questions.push({
+        type: 'mcq',
+        question: `Tính sức điện động chuẩn E°pin của pin Galvani tạo bởi ${s1} và ${s2}.`,
+        options: opts.map((v, i) => `${String.fromCharCode(65 + i)}. ${v} V`),
+        answer: String.fromCharCode(65 + answerIdx),
+        topic: 'galvani_cell',
+        _generated: true,
+      });
+    }
+
+    const sortedByE = [...symbols].sort((a, b) => getE0(a) - getE0(b));
+    if (sortedByE.length >= 2) {
+      const lowest = sortedByE[0];
+      const highest = sortedByE[sortedByE.length - 1];
+      questions.push({
+        type: 'mcq',
+        question: `Trong dãy điện hóa, kim loại nào có tính khử mạnh nhất (E° thấp nhất)?`,
+        options: [
+          `A. ${getName(lowest)} (${lowest})`,
+          `B. ${getName(highest)} (${highest})`,
+          `C. ${getName(sortedByE[Math.floor(sortedByE.length / 2)])}`,
+          `D. Tất cả đều bằng nhau`,
+        ],
+        answer: 'A',
+        topic: 'electrode_potential',
+        _generated: true,
+      });
+    }
+
+    return questions;
+  }
+
+  function extractChemistryQuiz(html) {
+    if (!html || typeof html !== 'string') return null;
+    const re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+    const scripts = [];
+    let m;
+    while ((m = re.exec(html)) !== null) scripts.push(m[1]);
+    if (!scripts.length) scripts.push(html);
+    const js = scripts.join('\n');
+
+    const results = [];
+    const reObj = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(\{[\s\S]*?\n\s*\}|\[[\s\S]*?\n\s*\])/g;
+    while ((m = reObj.exec(js)) !== null) {
+      const name = m[1];
+      const code = m[2];
+      if (code.length > 500_000) continue;
+      const parsed = safeEval(code);
+      if (!parsed) continue;
+      const chemInfo = detectChemistryData(parsed);
+      if (!chemInfo.isChem) continue;
+      results.push({ name, data: parsed, chemInfo });
+    }
+
+    if (results.length === 0) return null;
+    const allQuestions = [];
+    const dataSummary = [];
+    for (const { name, data, chemInfo } of results) {
+      if (chemInfo.type === 'electrode_potential') {
+        const q = generateQuizFromElectrodes(data);
+        if (q.length) {
+          allQuestions.push(...q);
+          dataSummary.push({ name, type: chemInfo.type, questionCount: q.length });
+        }
+      }
+    }
+    if (allQuestions.length === 0) return null;
+
+    return {
+      data: [{ name: '🧪 Data → Quiz tự sinh', questions: allQuestions }],
+      source: 'chemistry-data',
+      method: 'auto-generated',
+      chemInfo: dataSummary,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // HELPER DETECTION / COMPILE (FULL v34)
   // ═══════════════════════════════════════════════════════════════
 
   function isHelperCandidate(name, body) {
@@ -234,24 +482,18 @@
         try { result = fn(...testArgs); } catch { try { result = fn('test'); } catch { continue; } }
         if (result && typeof result === 'object') compiled[h.name] = fn;
       } catch (e) {
-        if (DEBUG) console.warn('[Parser v31] Failed helper:', h.name, e.message);
+        if (DEBUG) console.warn('[Parser v35] Failed helper:', h.name, e.message);
       }
     }
     return Object.keys(compiled).length > 0 ? compiled : null;
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // 🆕 v31: CHAIN VARIABLE COLLECTOR
+  // 🆕 v35: CHAIN VARIABLE COLLECTOR (RESTORED)
   // ═══════════════════════════════════════════════════════════════
 
-  /**
-   * Collect all variables matching CHAIN_VAR_PATTERNS (de1_mcq, de2_tf, ...)
-   * Returns: Map<varName, parsedData>
-   */
   function collectChainVariables(js, helpers) {
     const collected = new Map();
-
-    // Find all variable declarations
     const re = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*/g;
     let m;
     while ((m = re.exec(js)) !== null) {
@@ -261,64 +503,40 @@
       while (p < js.length && /\s/.test(js[p])) p++;
       if (p >= js.length) continue;
       if (js[p] !== '[' && js[p] !== '{') continue;
-
       const end = matchBracket(js, p);
       if (end <= p) continue;
-
       const code = js.substring(p, end + 1);
       if (code.length > 5_000_000) continue;
-
       const isChain = CHAIN_VAR_PATTERNS.some(pat => pat.test(name));
       if (!isChain) continue;
-
       const parsed = safeEvalWithHelpers(code, helpers);
-      if (parsed !== null && parsed !== undefined) {
-        collected.set(name, parsed);
-        if (DEBUG) console.log(`[Parser v31] Collected chain var: ${name} (${Array.isArray(parsed) ? parsed.length + ' items' : 'object'})`);
-      }
+      if (parsed !== null && parsed !== undefined) collected.set(name, parsed);
     }
     return collected;
   }
 
-  /**
-   * 🆕 v31: Safe eval WITH helpers + chain vars
-   */
   function safeEvalWithChainVars(code, helpers, chainVars) {
     if (!code || typeof code !== 'string') return null;
-
-    // Strategy A: plain eval
     const plainResult = safeEval(code);
     if (plainResult !== null) return plainResult;
-
-    // Combine helpers + chainVars
     const allVars = Object.assign({}, helpers || {}, Object.fromEntries(chainVars || []));
     const varNames = Object.keys(allVars);
     const varValues = varNames.map(n => allVars[n]);
-
     if (varNames.length === 0) return null;
-
-    // Strategy B: spread args
     try {
       const fn = new Function(...varNames, `"use strict"; return (${code});`);
       const result = fn(...varValues);
       if (result !== null && result !== undefined) return result;
     } catch (e) {}
-
-    // Strategy C: helpers in arguments object
     try {
       const helperScript = varNames.map(n => `var ${n} = arguments[0][${JSON.stringify(n)}];`).join('\n');
       const fn = new Function(`"use strict"; ${helperScript}\nreturn (${code});`);
       const result = fn(allVars);
       if (result !== null && result !== undefined) return result;
     } catch (e) {}
-
-    // Strategy D: global scope injection
     try {
       const backup = {};
-      for (const n of varNames) {
-        backup[n] = global[n];
-        global[n] = allVars[n];
-      }
+      for (const n of varNames) { backup[n] = global[n]; global[n] = allVars[n]; }
       try {
         const result = eval('(' + code + ')');
         if (result !== null && result !== undefined) return result;
@@ -329,17 +547,12 @@
         }
       }
     } catch (e) {}
-
     return null;
   }
 
   function safeEvalWithHelpers(code, helpers) {
     return safeEvalWithChainVars(code, helpers, null);
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  // CORE HELPERS
-  // ═══════════════════════════════════════════════════════════════
 
   function safeEval(code) {
     if (!code || typeof code !== 'string') return null;
@@ -375,52 +588,13 @@
 
   function isQuestionLike(q) {
     if (!q || typeof q !== 'object' || Array.isArray(q)) return false;
-    return !!(
-      hasAnyField(q, ['question']) ||
-      hasAnyField(q, ['options']) ||
-      hasAnyField(q, ['answer']) ||
-      hasAnyField(q, ['statements'])
-    );
+    return !!(hasAnyField(q, ['question']) || hasAnyField(q, ['options']) || hasAnyField(q, ['answer']) || hasAnyField(q, ['statements']));
   }
 
-  function looksLikeQuiz(obj) {
-    if (!obj) return false;
-    if (Array.isArray(obj)) {
-      if (!obj.length) return false;
-      const first = obj[0];
-      if (Array.isArray(first) && first.length && isQuestionLike(first[0])) return true;
-      if (isQuestionLike(first)) return true;
-      if (first && typeof first === 'object') {
-        if (Array.isArray(first.questions)) return true;
-        if (Array.isArray(first.mcq)) return true;
-        if (Array.isArray(first.mc)) return true;
-        if (Array.isArray(first.partI)) return true;
-      }
-    }
-    if (typeof obj === 'object') {
-      const keys = Object.keys(obj);
-      const deckKeys = keys.filter(k => DYNAMIC_VAR_PATTERNS.some(p => p.test(k)));
-      if (deckKeys.length) {
-        const firstVal = obj[deckKeys[0]];
-        if (firstVal && typeof firstVal === 'object' && !Array.isArray(firstVal)) {
-          if (Array.isArray(firstVal.mc) || Array.isArray(firstVal.mcq) ||
-              Array.isArray(firstVal.partI) || Array.isArray(firstVal.tf) ||
-              Array.isArray(firstVal.short) || Array.isArray(firstVal.sa)) return true;
-          if (Array.isArray(firstVal.questions)) return true;
-        }
-        if (Array.isArray(firstVal) && firstVal.length) {
-          if (isQuestionLike(firstVal[0])) return true;
-        }
-      }
-      if (Array.isArray(obj.questions) && obj.questions.length && isQuestionLike(obj.questions[0])) return true;
-      if (Array.isArray(obj.mc) && obj.mc.length) return true;
-      if (Array.isArray(obj.mcq) && obj.mcq.length) return true;
-      if (Array.isArray(obj.partI) && obj.partI.length) return true;
-      if (Array.isArray(obj.tf) && obj.tf.length) return true;
-      if (Array.isArray(obj.short) && obj.short.length) return true;
-      if (Array.isArray(obj.sa) && obj.sa.length) return true;
-    }
-    return false;
+  function isDeckObject(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+    const keys = Object.keys(obj).map(k => k.toLowerCase());
+    return ['mc','mcq','tf','truefalse','sa','short','parti','part1','partii','part2','partiii','part3'].some(k => keys.includes(k));
   }
 
   function findOpen(s, idx) {
@@ -434,69 +608,38 @@
   function matchBracket(s, start) {
     const open = s[start];
     const close = open === '[' ? ']' : open === '{' ? '}' : ')';
-    let depth = 0;
-    let inStr = null;
-    let esc = false;
-    let inTemplate = false;
-    let inLineComment = false;
-    let inBlockComment = false;
-
+    let depth = 0, inStr = null, esc = false, inTemplate = false, inLineComment = false, inBlockComment = false;
     for (let i = start; i < s.length; i++) {
-      const c = s[i];
-      const next = s[i + 1];
-
+      const c = s[i], next = s[i + 1];
       if (!inStr && !inTemplate && !inLineComment && !inBlockComment && c === '/' && next !== '/' && next !== '*') {
         let j = i - 1;
         while (j >= 0 && /\s/.test(s[j])) j--;
         const prevChar = j >= 0 ? s[j] : '';
         if (/[=(,:!&|?+\-*%^~[\]{};]/.test(prevChar) || j < 0) {
-          let k = i + 1;
-          let rEsc = false;
+          let k = i + 1, rEsc = false;
           while (k < s.length) {
             if (rEsc) { rEsc = false; k++; continue; }
             if (s[k] === '\\') { rEsc = true; k++; continue; }
-            if (s[k] === '/') break;
-            if (s[k] === '\n') break;
+            if (s[k] === '/' || s[k] === '\n') break;
             k++;
           }
-          if (k < s.length && s[k] === '/') {
-            i = k;
-            while (i + 1 < s.length && /[gimsuy]/.test(s[i + 1])) i++;
-            continue;
-          }
+          if (k < s.length && s[k] === '/') { i = k; while (i + 1 < s.length && /[gimsuy]/.test(s[i + 1])) i++; continue; }
         }
       }
-
-      if (!inStr && !inTemplate && !inBlockComment && c === '/' && next === '/') {
-        inLineComment = true; i++; continue;
-      }
+      if (!inStr && !inTemplate && !inBlockComment && c === '/' && next === '/') { inLineComment = true; i++; continue; }
       if (inLineComment) { if (c === '\n') inLineComment = false; continue; }
-
-      if (!inStr && !inTemplate && !inLineComment && c === '/' && next === '*') {
-        inBlockComment = true; i++; continue;
-      }
+      if (!inStr && !inTemplate && !inLineComment && c === '/' && next === '*') { inBlockComment = true; i++; continue; }
       if (inBlockComment) { if (c === '*' && next === '/') { inBlockComment = false; i++; } continue; }
-
-      if (inStr) {
-        if (esc) { esc = false; continue; }
-        if (c === '\\') { esc = true; continue; }
-        if (c === inStr) inStr = null;
-        continue;
-      }
+      if (inStr) { if (esc) { esc = false; continue; } if (c === '\\') { esc = true; continue; } if (c === inStr) inStr = null; continue; }
       if (inTemplate) {
         if (esc) { esc = false; continue; }
         if (c === '\\') { esc = true; continue; }
         if (c === '`') { inTemplate = false; continue; }
-        if (c === '$' && next === '{') {
-          const end = matchBracket(s, i + 1);
-          if (end > i) { i = end; continue; }
-        }
+        if (c === '$' && next === '{') { const end = matchBracket(s, i + 1); if (end > i) { i = end; continue; } }
         continue;
       }
-
       if (c === '"' || c === "'") { inStr = c; continue; }
       if (c === '`') { inTemplate = true; continue; }
-
       if (c === open) depth++;
       else if (c === close && --depth === 0) return i;
     }
@@ -504,19 +647,16 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT NORMALIZER
+  // NORMALIZE
   // ═══════════════════════════════════════════════════════════════
 
   function decodeChemEntities(str) {
     if (typeof str !== 'string') return str;
-    return str
-      .replace(/&sup2;/g, '²').replace(/&sup3;/g, '³')
+    return str.replace(/&sup2;/g, '²').replace(/&sup3;/g, '³')
       .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-      .replace(/<[^>]*>/g, '')
-      .replace(/\u00A0/g, ' ')
-      .replace(/\uFEFF/g, '');
+      .replace(/<[^>]*>/g, '').replace(/\u00A0/g, ' ').replace(/\uFEFF/g, '');
   }
 
   function collapseWhitespace(str) {
@@ -529,28 +669,18 @@
     return collapseWhitespace(decodeChemEntities(str));
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // NORMALIZE QUESTION
-  // ═══════════════════════════════════════════════════════════════
-
   function normalizeQuestion(q) {
     if (!q || typeof q !== 'object') return null;
-
     const out = { _original: q };
     out.question = normalizeText(String(getField(q, 'question', '') || ''));
     out.type = String(getField(q, 'type', '') || '').toLowerCase();
 
     const rawOpts = getField(q, 'options', null);
-    if (Array.isArray(rawOpts)) {
-      out.options = rawOpts.map(o => normalizeText(String(o || '')));
-    } else if (rawOpts && typeof rawOpts === 'object') {
-      out.options = Object.values(rawOpts).map(o => normalizeText(String(o || '')));
-    } else {
-      out.options = null;
-    }
+    if (Array.isArray(rawOpts)) out.options = rawOpts.map(o => normalizeText(String(o || '')));
+    else if (rawOpts && typeof rawOpts === 'object') out.options = Object.values(rawOpts).map(o => normalizeText(String(o || '')));
+    else out.options = null;
 
     const rawAnswer = getField(q, 'answer', null);
-
     const rawStmts = getField(q, 'statements', null);
     if (Array.isArray(rawStmts) && rawStmts.length) {
       out.statements = rawStmts.map(s => {
@@ -564,9 +694,7 @@
         }
         return null;
       }).filter(Boolean);
-    } else {
-      out.statements = null;
-    }
+    } else out.statements = null;
 
     out.explanation = normalizeText(String(getField(q, 'explanation', '') || ''));
     out.topic = String(getField(q, 'topic', '') || '');
@@ -580,10 +708,7 @@
 
     const typeNorm = out.type.toLowerCase().replace(/[_\s-]/g, '');
     for (const [canon, aliases] of Object.entries(TYPE_ALIASES)) {
-      if (aliases.some(a => a.toLowerCase().replace(/[_\s-]/g, '') === typeNorm)) {
-        out.type = canon;
-        break;
-      }
+      if (aliases.some(a => a.toLowerCase().replace(/[_\s-]/g, '') === typeNorm)) { out.type = canon; break; }
     }
 
     if (out.type === 'mcq' && Array.isArray(out.options)) {
@@ -592,21 +717,14 @@
       out.answerIndex = formatted.index;
       out.answerDisplay = formatted.display;
       out.answerValid = formatted.valid;
+      if (formatted.index >= 0 && out.options[formatted.index]) out.answerText = out.options[formatted.index];
     } else if (out.type === 'short') {
       if (typeof rawAnswer === 'string') out.answer = rawAnswer.trim();
       else if (rawAnswer !== null && rawAnswer !== undefined) out.answer = String(rawAnswer).trim();
       else out.answer = null;
-    } else {
-      out.answer = rawAnswer;
-    }
+    } else out.answer = rawAnswer;
 
     return out;
-  }
-
-  function isDeckObject(obj) {
-    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
-    const keys = Object.keys(obj).map(k => k.toLowerCase());
-    return ['mc','mcq','tf','truefalse','sa','short','parti','part1','partii','part2','partiii','part3'].some(k => keys.includes(k));
   }
 
   function flattenDeckObject(deckObj, deckName) {
@@ -639,21 +757,18 @@
       const normalized = questions.map(normalizeQuestion).filter(Boolean);
       if (normalized.length) decks.push({ name, questions: normalized });
     };
-
-    function extractAllDecks(obj, prefix = '', depth = 0) {
+    function walk(obj, prefix = '', depth = 0) {
       if (depth > 8) return;
       if (!obj || typeof obj !== 'object') return;
-
       if (Array.isArray(obj)) {
         if (obj.length && obj[0] && typeof obj[0] === 'object') {
-          let allAreDecks = true;
-          let allAreQuestions = true;
+          let allDecks = true, allQ = true;
           for (const item of obj) {
-            if (!isDeckObject(item)) allAreDecks = false;
-            if (!isQuestionLike(item)) allAreQuestions = false;
-            if (!allAreDecks && !allAreQuestions) break;
+            if (!isDeckObject(item)) allDecks = false;
+            if (!isQuestionLike(item)) allQ = false;
+            if (!allDecks && !allQ) break;
           }
-          if (allAreDecks) {
+          if (allDecks) {
             obj.forEach((deckObj, i) => {
               const name = getField(deckObj, 'name', null) || (prefix ? `${prefix} ${i + 1}` : 'Đề ' + (i + 1));
               const flat = flattenDeckObject(deckObj, name);
@@ -661,13 +776,12 @@
             });
             return;
           }
-          if (allAreQuestions) { addDeck(prefix || 'Đề 1', obj); return; }
-          obj.forEach((item, i) => extractAllDecks(item, prefix ? `${prefix}.${i + 1}` : `Đề ${i + 1}`, depth + 1));
+          if (allQ) { addDeck(prefix || 'Đề 1', obj); return; }
+          obj.forEach((item, i) => walk(item, prefix ? `${prefix}.${i + 1}` : `Đề ${i + 1}`, depth + 1));
           return;
         }
         return;
       }
-
       const keys = Object.keys(obj);
       if (isDeckObject(obj)) {
         const flat = flattenDeckObject(obj, getField(obj, 'name', null) || prefix || 'Đề 1');
@@ -676,13 +790,12 @@
       }
       if (Array.isArray(obj.questions)) { addDeck(getField(obj, 'name', null) || prefix || 'Đề 1', obj.questions); return; }
       if (Array.isArray(obj.items)) { addDeck(getField(obj, 'name', null) || prefix || 'Đề 1', obj.items); return; }
-
       for (const key of keys) {
         const val = obj[key];
         if (Array.isArray(val) && val.length && typeof val[0] === 'object') {
-          let allAreDecks = true;
-          for (const item of val) if (!isDeckObject(item)) { allAreDecks = false; break; }
-          if (allAreDecks) {
+          let allDecks = true;
+          for (const item of val) if (!isDeckObject(item)) { allDecks = false; break; }
+          if (allDecks) {
             val.forEach((deckObj, i) => {
               const name = getField(deckObj, 'name', null) || `Đề ${key}-${i + 1}`;
               const flat = flattenDeckObject(deckObj, name);
@@ -695,14 +808,10 @@
             continue;
           }
         }
-        if (val && typeof val === 'object' && !Array.isArray(val)) {
-          extractAllDecks(val, prefix ? `${prefix}.${key}` : key, depth + 1);
-        }
+        if (val && typeof val === 'object' && !Array.isArray(val)) walk(val, prefix ? `${prefix}.${key}` : key, depth + 1);
       }
     }
-
-    extractAllDecks(raw);
-
+    walk(raw);
     const seen = new Set();
     const unique = [];
     for (const deck of decks) {
@@ -715,7 +824,140 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // 🆕 v31: MASTER EXTRACTOR — Multi-strategy with chain vars
+  // SHUFFLE DETECTION
+  // ═══════════════════════════════════════════════════════════════
+
+  function detectShufflePattern(js) {
+    const patterns = {
+      sortRandom: /\.sort\s*\(\s*\(\s*\)\s*=>\s*Math\.random\s*\(\s*\)\s*-\s*0\.5\s*\)/,
+      sortRandomVar: /\.sort\s*\(\s*\(\s*[a-z]\s*,\s*[a-z]\s*\)\s*=>\s*Math\.random\s*\(\s*\)\s*-\s*0\.5\s*\)/i,
+      shuffleFn: /function\s+(shuffle|xaoTron|xao_tron|randomize|mix|tron|đảo|dao)\s*\(/i,
+      shuffleArrow: /(?:const|let|var)\s+(shuffle|xaoTron|xao_tron|randomize|mix|tron)\s*=\s*\(/i,
+      lodashShuffle: /_\.shuffle\s*\(/,
+      fisherYates: /for\s*\([^)]*i\s*=\s*[^;]+;\s*i\s*>\s*0[^)]*\)[^}]*Math\.random/i,
+      randomIndex: /Math\.floor\s*\(\s*Math\.random\s*\(\s*\)\s*\*\s*[a-z]/i,
+      sliceSort: /\.slice\s*\(\s*\)\s*\.sort/i,
+    };
+    const found = [];
+    for (const [key, re] of Object.entries(patterns)) if (re.test(js)) found.push(key);
+    let confidence = 0;
+    if (found.includes('sortRandom') || found.includes('sortRandomVar')) confidence += 40;
+    if (found.includes('shuffleFn') || found.includes('shuffleArrow')) confidence += 30;
+    if (found.includes('fisherYates')) confidence += 35;
+    if (found.includes('lodashShuffle')) confidence += 30;
+    if (found.includes('randomIndex')) confidence += 20;
+    if (found.includes('sliceSort')) confidence += 15;
+    if (confidence > 100) confidence = 100;
+    return { detected: found.length > 0, patterns: found, confidence };
+  }
+
+  function resolveAnswerWithShuffleAwareness(q, shuffleInfo) {
+    if (!q || !q.options || !Array.isArray(q.options)) return q;
+    const answer = q.answer;
+    if (answer === null || answer === undefined) return q;
+    const answerStr = String(answer).trim();
+    const options = q.options.map(o => String(o).trim());
+
+    const textMatchIdx = options.findIndex(o => {
+      const cleanOpt = o.replace(/^[A-Z]\s*[.):\-]\s*/i, '').trim();
+      return o === answerStr || cleanOpt === answerStr;
+    });
+    if (textMatchIdx >= 0) {
+      q.answerIndex = textMatchIdx;
+      q.answerText = options[textMatchIdx];
+      q.answerResolved = true;
+      q.answerMethod = 'text-match';
+      q.answerSafe = true;
+      return q;
+    }
+
+    const letterPrefix = answerStr.match(/^([A-Z])\s*[.):\-]\s*(.+)$/i);
+    if (letterPrefix) {
+      const textAfter = letterPrefix[2].trim();
+      const idx = options.findIndex(o => {
+        const cleanOpt = o.replace(/^[A-Z]\s*[.):\-]\s*/i, '').trim();
+        return cleanOpt === textAfter || o === textAfter;
+      });
+      if (idx >= 0) {
+        q.answerIndex = idx;
+        q.answerText = options[idx];
+        q.answerResolved = true;
+        q.answerMethod = 'letter-text-match';
+        q.answerSafe = true;
+        return q;
+      }
+    }
+
+    const letterOnly = answerStr.match(/^([A-Z])$/i);
+    if (letterOnly) {
+      const idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(letterOnly[1].toUpperCase());
+      if (idx >= 0 && idx < options.length) {
+        q.answerIndex = idx;
+        q.answerText = options[idx];
+        q.answerResolved = true;
+        q.answerMethod = 'letter-direct';
+        if (shuffleInfo && shuffleInfo.detected) {
+          q.answerWarning = `HTML có shuffle — letter "${letterOnly[1].toUpperCase()}" có thể đã đổi vị trí. Đối chiếu theo TEXT.`;
+          q.answerSafe = false;
+        } else q.answerSafe = true;
+        return q;
+      }
+    }
+
+    q.answerDisplay = answerStr;
+    q.answerResolved = false;
+    q.answerSafe = false;
+    return q;
+  }
+
+  function applyShuffleAwareness(decks, shuffleInfo) {
+    if (!decks || !Array.isArray(decks)) return { decks, stats: { resolved: 0, warned: 0, total: 0 } };
+    let resolved = 0, warned = 0, total = 0;
+    for (const deck of decks) {
+      for (const q of deck.questions) {
+        total++;
+        if (q.type === 'mcq') {
+          resolveAnswerWithShuffleAwareness(q, shuffleInfo);
+          if (q.answerResolved) resolved++;
+          if (q.answerWarning) warned++;
+        }
+      }
+    }
+    return { decks, stats: { resolved, warned, total } };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v35: VERIFY CANDIDATE (RESTORED)
+  // ═══════════════════════════════════════════════════════════════
+
+  function verifyCandidate(candidate) {
+    if (!candidate || !candidate.data) return { valid: false, reason: 'empty' };
+    try {
+      const decks = normalizeDecks(candidate.data);
+      if (!decks.length) return { valid: false, reason: 'no-decks' };
+      const totalQ = decks.reduce((s, d) => s + d.questions.length, 0);
+      if (totalQ === 0) return { valid: false, reason: 'no-questions' };
+      let validQ = 0;
+      let hasAnswer = false;
+      for (const d of decks) {
+        for (const q of d.questions) {
+          if (q.question || q.answer !== null || q.options) validQ++;
+          if (q.answer !== null && q.answer !== undefined) hasAnswer = true;
+          if (q.type === 'tf' && Array.isArray(q.statements)) {
+            for (const st of q.statements) {
+              if (st.answer !== null) hasAnswer = true;
+            }
+          }
+        }
+      }
+      return { valid: validQ > 0 && hasAnswer, deckCount: decks.length, totalQuestions: totalQ, validQuestions: validQ };
+    } catch (e) {
+      return { valid: false, reason: e.message };
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v35: MASTER EXTRACTOR (FULL — with chain vars)
   // ═══════════════════════════════════════════════════════════════
 
   function extractQuizData(html, options = {}) {
@@ -729,12 +971,13 @@
       helperNames: [],
       chainVarsFound: 0,
       chainVarNames: [],
+      chemistryDataFound: 0,
+      generatedQuestions: 0,
       verified: 0,
       timeMs: 0,
       errors: [],
     };
-
-    const startTime = performance.now();
+    const startTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const candidates = [];
 
     const addCandidate = (data, source, method, bonus = 0) => {
@@ -748,7 +991,6 @@
       }
     };
 
-    // Extract scripts
     const re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
     const scripts = [];
     let m;
@@ -756,31 +998,25 @@
     if (!scripts.length) scripts.push(html);
     const js = scripts.join('\n');
 
+    const shuffleInfo = detectShufflePattern(js);
+
     // Compile helpers
     let helpers = null;
     try {
       helpers = compileHelperFunctions(js);
       stats.helpersFound = helpers ? Object.keys(helpers).length : 0;
       stats.helperNames = helpers ? Object.keys(helpers) : [];
-      if (DEBUG) console.log('[v31] Helpers:', stats.helperNames);
-    } catch (e) {
-      stats.errors.push('helper: ' + e.message);
-    }
+    } catch (e) { stats.errors.push('helper: ' + e.message); }
 
-    // 🆕 v31: Collect chain vars (de1_mcq, de2_tf, ...)
+    // Collect chain vars
     let chainVars = new Map();
     try {
       chainVars = collectChainVariables(js, helpers);
       stats.chainVarsFound = chainVars.size;
       stats.chainVarNames = [...chainVars.keys()];
-      if (DEBUG) console.log('[v31] Chain vars:', stats.chainVarNames);
-    } catch (e) {
-      stats.errors.push('chain-collect: ' + e.message);
-    }
+    } catch (e) { stats.errors.push('chain-collect: ' + e.message); }
 
-    // ═══════════════════════════════════════════════════════════
-    // STRATEGY 1: Named vars WITH chain vars injected
-    // ═══════════════════════════════════════════════════════════
+    // Strategy 1: Named vars WITH chain vars
     try {
       for (const name of VAR_NAMES) {
         const re1 = new RegExp('(?:const|var|let)\\s+' + name + '\\s*=\\s*', 'g');
@@ -802,16 +1038,12 @@
     } catch (e) { stats.errors.push('named: ' + e.message); }
     stats.strategiesRun++;
 
-    // ═══════════════════════════════════════════════════════════
-    // STRATEGY 2: 🆕 v31 — Build decks from chain vars directly
-    // ═══════════════════════════════════════════════════════════
+    // Strategy 2: Chain vars → build decks
     try {
       if (chainVars.size > 0) {
-        // Group chain vars by prefix (de1, de2, de3)
         const byPrefix = {};
         for (const [name, data] of chainVars.entries()) {
-          // Match: de1_mcq, de1mcq, de1-tf, ...
-          const match = name.match(/^([a-z_$]+\d+)_([a-z]+)$/i) || 
+          const match = name.match(/^([a-z_$]+\d+)_([a-z]+)$/i) ||
                         name.match(/^([a-z_$]+\d+)-([a-z]+)$/i) ||
                         name.match(/^([a-z_$]+\d+)(mcq|tf|short|sa|mc)$/i);
           if (!match) continue;
@@ -821,7 +1053,6 @@
           byPrefix[prefix][type] = data;
         }
 
-        // Build individual deck objects
         for (const prefix in byPrefix) {
           const parts = byPrefix[prefix];
           const deckObj = {};
@@ -830,13 +1061,11 @@
           if (parts.tf) deckObj.tf = parts.tf;
           if (parts.short) deckObj.short = parts.short;
           else if (parts.sa) deckObj.short = parts.sa;
-
-          if (Object.keys(deckObj).length >= 2) {
+          if (Object.keys(deckObj).length >= 1) {
             addCandidate([deckObj], `chain:${prefix}`, 'chain-deck', 60);
           }
         }
 
-        // Build combined DATA object
         if (Object.keys(byPrefix).length >= 2) {
           const combinedDATA = {};
           const prefixes = Object.keys(byPrefix).sort((a, b) => {
@@ -852,7 +1081,7 @@
             if (parts.tf) deckObj.tf = parts.tf;
             if (parts.short) deckObj.short = parts.short;
             else if (parts.sa) deckObj.short = parts.sa;
-            if (Object.keys(deckObj).length >= 2) combinedDATA[i + 1] = deckObj;
+            if (Object.keys(deckObj).length >= 1) combinedDATA[i + 1] = deckObj;
           });
           if (Object.keys(combinedDATA).length >= 2) {
             addCandidate(combinedDATA, 'chain:combined', 'chain-combined', 70);
@@ -862,9 +1091,7 @@
     } catch (e) { stats.errors.push('chain-build: ' + e.message); }
     stats.strategiesRun++;
 
-    // ═══════════════════════════════════════════════════════════
-    // STRATEGY 3: Generic scan with chain vars
-    // ═══════════════════════════════════════════════════════════
+    // Strategy 3: Generic scan
     try {
       const reObj = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*/g;
       let count = 0;
@@ -889,9 +1116,7 @@
     } catch (e) { stats.errors.push('generic: ' + e.message); }
     stats.strategiesRun++;
 
-    // ═══════════════════════════════════════════════════════════
-    // STRATEGY 4: 🆕 v31 — Direct chain var collection fallback
-    // ═══════════════════════════════════════════════════════════
+    // Strategy 4: Chain fallback
     try {
       if (candidates.length === 0 && chainVars.size > 0) {
         const byNum = {};
@@ -909,50 +1134,38 @@
           const d = byNum[num];
           if (Object.keys(d).length >= 1) decks.push(d);
         });
-        if (decks.length > 0) {
-          addCandidate(decks, 'chain-fallback', 'chain-fallback', 50);
-        }
+        if (decks.length > 0) addCandidate(decks, 'chain-fallback', 'chain-fallback', 50);
       }
     } catch (e) { stats.errors.push('chain-fallback: ' + e.message); }
     stats.strategiesRun++;
 
-    // ═══════════════════════════════════════════════════════════
-    // STRATEGY 5: 🆕 v31 — Merge chain vars with main data
-    // ═══════════════════════════════════════════════════════════
+    // Strategy 5: Chemistry
     try {
-      if (chainVars.size > 0 && candidates.length > 0) {
-        // Try to inject chain vars into best candidate if it's incomplete
-        const bestCandidate = candidates[0];
-        if (bestCandidate && typeof bestCandidate.data === 'object') {
-          // Check if DATA has unresolved refs
-          const resolvedData = resolveUnresolvedRefs(bestCandidate.data, chainVars);
-          if (resolvedData && resolvedData !== bestCandidate.data) {
-            addCandidate(resolvedData, 'resolved', 'resolve-refs', 80);
-          }
-        }
+      const chemResult = extractChemistryQuiz(html);
+      if (chemResult && chemResult.data && chemResult.data.length > 0) {
+        stats.chemistryDataFound = (chemResult.chemInfo || []).length;
+        stats.generatedQuestions = chemResult.data[0].questions.length;
+        addCandidate(chemResult.data, 'chemistry-data', 'auto-generated', 100);
       }
-    } catch (e) { stats.errors.push('resolve: ' + e.message); }
+    } catch (e) { stats.errors.push('chemistry: ' + e.message); }
     stats.strategiesRun++;
 
     if (!candidates.length) {
       throw new Error(
-        'Không tìm thấy dữ liệu. ' +
+        'Không tìm thấy dữ liệu quiz hoặc data hóa học. ' +
         'Helpers: ' + stats.helperNames.slice(0, 10).join(', ') + '. ' +
         'Chain vars: ' + stats.chainVarNames.slice(0, 10).join(', ') + '. ' +
         'Errors: ' + stats.errors.join('; ')
       );
     }
 
-    // Cross-check
+    // Cross-check duplicates
     for (let i = 0; i < candidates.length; i++) {
       for (let j = i + 1; j < candidates.length; j++) {
         try {
           const sigA = JSON.stringify(candidates[i].data).substring(0, 500);
           const sigB = JSON.stringify(candidates[j].data).substring(0, 500);
-          if (sigA === sigB) {
-            candidates[i].score += 50;
-            candidates[j].score += 50;
-          }
+          if (sigA === sigB) { candidates[i].score += 50; candidates[j].score += 50; }
         } catch {}
       }
     }
@@ -985,11 +1198,9 @@
       }
     }
 
-    if (!best) {
-      throw new Error('Không có candidate hợp lệ. Total: ' + candidates.length);
-    }
+    if (!best) throw new Error('Không có candidate hợp lệ. Total: ' + candidates.length);
 
-    stats.timeMs = Math.round(performance.now() - startTime);
+    stats.timeMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime);
 
     return {
       data: best.data,
@@ -998,56 +1209,15 @@
       confidence: best.score,
       verification: bestVerification,
       stats,
-      allCandidates: candidates.slice(0, 10).map(c => ({
-        source: c.source,
-        method: c.method,
-        score: c.score,
-        questionCount: estimateQuestionCount(c.data),
-      })),
+      shuffle: shuffleInfo,
+      allCandidates: candidates.slice(0, 10).map(c => ({ source: c.source, method: c.method, score: c.score })),
     };
-  }
-
-  /**
-   * 🆕 v31: Resolve unresolved references in DATA
-   */
-  function resolveUnresolvedRefs(data, chainVars) {
-    if (!data || typeof data !== 'object') return data;
-    let changed = false;
-    const result = Array.isArray(data) ? [] : {};
-
-    for (const key in data) {
-      const val = data[key];
-      if (typeof val === 'string' && chainVars.has(val)) {
-        result[key] = chainVars.get(val);
-        changed = true;
-      } else if (val && typeof val === 'object') {
-        const resolved = resolveUnresolvedRefs(val, chainVars);
-        result[key] = resolved;
-        if (resolved !== val) changed = true;
-      } else {
-        result[key] = val;
-      }
-    }
-    return changed ? result : data;
-  }
-
-  function estimateQuestionCount(obj) {
-    if (!obj) return 0;
-    if (Array.isArray(obj)) return obj.length;
-    if (typeof obj === 'object') {
-      let total = 0;
-      for (const k of Object.keys(obj)) {
-        if (Array.isArray(obj[k])) total += obj[k].length;
-      }
-      return total;
-    }
-    return 0;
   }
 
   function scoreQuizObject(obj) {
     if (!obj) return 0;
     let score = 0;
-    const scoreQuestion = (q) => {
+    const scoreQ = (q) => {
       if (!q || typeof q !== 'object') return 0;
       let s = 0;
       if (hasAnyField(q, ['question'])) s += 10;
@@ -1056,29 +1226,23 @@
       if (hasAnyField(q, ['statements'])) s += 6;
       return s;
     };
-    const scoreArray = (arr) => {
+    const scoreArr = (arr) => {
       if (!Array.isArray(arr) || !arr.length) return 0;
       let s = 0;
       const sample = arr.slice(0, 5);
-      for (const item of sample) {
-        if (Array.isArray(item)) s += scoreArray(item) * 0.5;
-        else if (item && typeof item === 'object') s += scoreQuestion(item);
-      }
+      for (const item of sample) if (item && typeof item === 'object') s += scoreQ(item);
       if (arr.length >= 5) s += 5;
       return s / sample.length * Math.min(arr.length, 10);
     };
-    if (Array.isArray(obj)) {
-      score = scoreArray(obj);
-    } else if (typeof obj === 'object') {
+    if (Array.isArray(obj)) score = scoreArr(obj);
+    else if (typeof obj === 'object') {
       for (const key of Object.keys(obj)) {
         const val = obj[key];
-        if (Array.isArray(val)) score += scoreArray(val);
+        if (Array.isArray(val)) score += scoreArr(val);
         else if (val && typeof val === 'object') {
-          if (Array.isArray(val.questions)) score += scoreArray(val.questions);
+          if (Array.isArray(val.questions)) score += scoreArr(val.questions);
           else if (isDeckObject(val)) {
-            for (const ik of Object.keys(val)) {
-              if (Array.isArray(val[ik])) score += scoreArray(val[ik]);
-            }
+            for (const ik of Object.keys(val)) if (Array.isArray(val[ik])) score += scoreArr(val[ik]);
           }
         }
       }
@@ -1086,35 +1250,95 @@
     return Math.round(score);
   }
 
-  function verifyCandidate(candidate) {
-    if (!candidate || !candidate.data) return { valid: false, reason: 'empty' };
-    try {
-      const decks = normalizeDecks(candidate.data);
-      if (!decks.length) return { valid: false, reason: 'no-decks' };
-      const totalQ = decks.reduce((s, d) => s + d.questions.length, 0);
-      if (totalQ === 0) return { valid: false, reason: 'no-questions' };
-      let validQ = 0;
-      let hasAnswer = false;
-      for (const d of decks) {
-        for (const q of d.questions) {
-          if (q.question || q.answer !== null || q.options) validQ++;
-          if (q.answer !== null && q.answer !== undefined) hasAnswer = true;
-          if (q.type === 'tf' && Array.isArray(q.statements)) {
-            for (const st of q.statements) {
-              if (st.answer !== null) hasAnswer = true;
-            }
-          }
+  // ═══════════════════════════════════════════════════════════════
+  // URL FETCH
+  // ═══════════════════════════════════════════════════════════════
+
+  async function fetchUrlWithProxies(url, options = {}) {
+    const { onProgress = null, timeoutMs = 15000 } = options;
+    const proxies = [
+      { name: 'direct', build: u => u },
+      { name: 'allorigins', build: u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
+      { name: 'corsproxy', build: u => `https://corsproxy.io/?${encodeURIComponent(u)}` },
+      { name: 'codetabs', build: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` },
+      { name: 'thingproxy', build: u => `https://thingproxy.freeboard.io/fetch/${u}` },
+    ];
+    for (const proxy of proxies) {
+      try {
+        if (onProgress) onProgress(`Đang thử ${proxy.name}...`);
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        const res = await fetch(proxy.build(url), { mode: 'cors', signal: controller.signal });
+        clearTimeout(timer);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.length > 100) return { html: text, proxy: proxy.name, url };
         }
-      }
-      return {
-        valid: validQ > 0 && hasAnswer,
-        deckCount: decks.length,
-        totalQuestions: totalQ,
-        validQuestions: validQ,
-      };
-    } catch (e) {
-      return { valid: false, reason: e.message };
+      } catch (e) {}
     }
+    throw new Error('Không tải được HTML qua proxies');
+  }
+
+  async function fetchAndParse(url, options = {}) {
+    const { html, proxy } = await fetchUrlWithProxies(url, options);
+    const result = extractQuizData(html, options);
+    const decks = normalizeDecks(result.data);
+    const awareness = applyShuffleAwareness(decks, result.shuffle);
+    result.fetchedFrom = url;
+    result.proxyUsed = proxy;
+    result.decks = awareness.decks;
+    result.awareness = awareness.stats;
+    return result;
+  }
+
+  async function smartFetchAndParse(url, options = {}) {
+    const { onProgress = null } = options;
+
+    // STEP 1: Try static fetch
+    let scriptResult = null;
+    let scriptError = null;
+    try {
+      if (onProgress) onProgress('📡 Đang fetch HTML tĩnh...');
+      const { html, proxy } = await fetchUrlWithProxies(url, options);
+      scriptResult = extractQuizData(html);
+      scriptResult.proxyUsed = proxy;
+      const decks = normalizeDecks(scriptResult.data);
+      const awareness = applyShuffleAwareness(decks, scriptResult.shuffle);
+      scriptResult.decks = awareness.decks;
+      scriptResult.awareness = awareness.stats;
+    } catch (e) {
+      scriptError = e.message;
+    }
+
+    const needIframe = !scriptResult ||
+                       (scriptResult.shuffle && scriptResult.shuffle.detected && scriptResult.shuffle.confidence >= 40);
+
+    if (!needIframe && scriptResult) {
+      return { ...scriptResult, mode: 'script', source: 'script-only' };
+    }
+
+    if (onProgress) onProgress('🔴 Phát hiện shuffle — thử iframe live...');
+
+    const iframeResult = await extractFromIframe(url, {
+      waitMs: options.iframeWaitMs || 3000,
+      timeoutMs: options.iframeTimeoutMs || 15000,
+      onProgress,
+    });
+
+    const finalResult = crossCheckResults(scriptResult, iframeResult);
+
+    return {
+      decks: finalResult.data,
+      mode: iframeResult.success ? 'iframe' : 'script',
+      source: finalResult.method,
+      confidence: finalResult.confidence,
+      crossCheck: finalResult.crossCheck,
+      shuffle: scriptResult ? scriptResult.shuffle : null,
+      awareness: scriptResult ? scriptResult.awareness : null,
+      scriptError,
+      iframeError: iframeResult.success ? null : iframeResult.error,
+      proxyUsed: scriptResult ? scriptResult.proxyUsed : null,
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -1124,28 +1348,34 @@
   global.QuizParser = {
     version: VERSION,
     extractQuizData,
+    extractFromIframe,
+    crossCheckResults,
+    smartFetchAndParse,
+    fetchUrlWithProxies,
+    fetchAndParse,
+    extractChemistryQuiz,
+    detectChemistryData,
+    generateQuizFromElectrodes,
     normalizeDecks,
     normalizeQuestion,
     normalizeText,
-    normalizeMcqAnswer,
     formatAnswerDisplay,
     toBoolean,
-    looksLikeQuiz,
-    scoreQuizObject,
-    verifyCandidate,
-    estimateQuestionCount,
+    detectShufflePattern,
+    resolveAnswerWithShuffleAwareness,
+    applyShuffleAwareness,
     detectHelperFunctions,
     compileHelperFunctions,
+    collectChainVariables,
     safeEvalWithHelpers,
     safeEvalWithChainVars,
-    collectChainVariables,
-    resolveUnresolvedRefs,
+    verifyCandidate,
+    scoreQuizObject,
     getStats: () => ({
       version: VERSION,
       varNames: VAR_NAMES.length,
-      helperWhitelist: HELPER_NAME_WHITELIST.length,
-      genericHelpers: Object.keys(GENERIC_HELPERS).length,
       chainPatterns: CHAIN_VAR_PATTERNS.length,
+      helperWhitelist: HELPER_NAME_WHITELIST.length,
     }),
     _internal: {
       safeEval, matchBracket, findOpen,
