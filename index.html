@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐱 Answer Checker — Made by Lilcat</title>
+  <title>🐱 Answer Checker v18.3 — Made by Lilcat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
@@ -114,6 +114,26 @@
     .lms-btn{background:linear-gradient(135deg,#4caf50,#8bc34a);color:#0a0a12;font-weight:800;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all .25s;font-family:inherit}
     .lms-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.5)}
 
+    .quick-url-banner{background:linear-gradient(135deg,rgba(0,188,212,.12),rgba(0,151,167,.06));border:1.5px solid rgba(0,188,212,.45);border-radius:14px;padding:20px;margin-bottom:16px}
+    .quick-url-banner .title{color:#22d3ee;font-weight:900;font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .quick-url-banner .subtitle{font-size:12px;color:#67e8f9;line-height:1.6;margin-top:10px}
+    .quick-btn{background:linear-gradient(135deg,#00bcd4,#0097a7);color:#0a0a12;font-weight:800;padding:12px 28px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all .25s;font-family:inherit;white-space:nowrap}
+    .quick-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,188,212,.5)}
+    .quick-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    .multi-url-panel{background:linear-gradient(135deg,rgba(139,127,199,.1),rgba(107,95,160,.05));border:1.5px solid rgba(139,127,199,.4);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+    .multi-url-panel .title{color:#a78bfa;font-weight:900;font-size:15px;display:flex;align-items:center;gap:8px}
+    .multi-url-panel summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .multi-url-panel summary::-webkit-details-marker{display:none}
+    .multi-btn{background:linear-gradient(135deg,#8E7FC7,#6B5FA0);color:#fff;font-weight:800;padding:12px 28px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all .25s;font-family:inherit;white-space:nowrap}
+    .multi-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(142,127,199,.5)}
+
+    .shuffle-warning{background:linear-gradient(135deg,rgba(241,196,15,.15),rgba(230,126,34,.1));border:1.5px solid rgba(241,196,15,.5);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start}
+    .shuffle-warning .icon{font-size:22px;flex-shrink:0}
+    .shuffle-warning .text{font-size:12px;color:#fef3c7;line-height:1.6}
+    .shuffle-warning b{color:#fbbf24}
+    .shuffle-warning code{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px}
+
     #music-widget{position:fixed;bottom:24px;left:24px;z-index:9100;display:flex;align-items:center;gap:10px;background:rgba(20,20,31,.95);backdrop-filter:blur(12px);border:1.5px solid var(--border);border-radius:999px;padding:8px 8px 8px 16px;box-shadow:0 8px 32px rgba(0,0,0,.6);transition:all .3s cubic-bezier(.4,0,.2,1);user-select:none;max-width:calc(100vw - 48px)}
     #music-widget:hover{border-color:rgba(255,106,193,.5);transform:translateY(-2px)}
     #music-widget.playing{border-color:rgba(76,175,80,.6);background:rgba(20,31,20,.95)}
@@ -181,9 +201,6 @@
     .game-start-btn{background:linear-gradient(135deg,#ff6ac1,#c44dff,#3498db);background-size:200% 200%;animation:gradientShift 3s ease infinite;color:#0a0a12;font-weight:900;padding:16px 48px;border-radius:16px;border:none;font-size:18px;cursor:pointer;transition:all .3s;font-family:inherit;box-shadow:0 8px 32px rgba(255,106,193,.4)}
     .game-start-btn:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 16px 48px rgba(255,106,193,.6)}
     .game-start-btn:active{transform:scale(.97)}
-    .difficulty-pill{padding:10px 22px;border-radius:999px;border:2px solid var(--border);background:#1c1c26;color:#aaa;font-weight:700;font-size:14px;cursor:pointer;transition:all .25s;font-family:inherit}
-    .difficulty-pill:hover{border-color:rgba(255,106,193,.4);color:#fff;transform:translateY(-2px)}
-    .difficulty-pill.active{background:linear-gradient(135deg,#ff6ac1,#c44dff);color:#0a0a12;border-color:transparent;box-shadow:0 6px 20px rgba(255,106,193,.4)}
     .math-graph{width:100%;height:160px;border-radius:12px;background:#0a0a12;border:1.5px solid var(--border);position:relative;overflow:hidden;margin-top:16px}
     .math-graph canvas{width:100%;height:100%;display:block}
     .topic-tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(52,152,219,.15);color:#3498db;border:1px solid rgba(52,152,219,.3)}
@@ -245,8 +262,8 @@
   <div class="max-w-6xl mx-auto p-4 md:p-8 relative z-10">
     <section class="hero anim-slideDown">
       <div class="text-6xl mb-4 anim-float">🐱</div>
-      <h1 class="hero-title">Answer Checker<br>Siêu công cụ học tập</h1>
-      <p class="hero-sub">Dán link, chọn file, hoặc dán HTML bài quiz — nhận ngay toàn bộ đáp án. Made with 💖 by <b class="neon">Lilcat</b>.</p>
+      <h1 class="hero-title">Answer Checker v18.3<br>Siêu công cụ học tập</h1>
+      <p class="hero-sub">Chỉ cần <b class="neon">dán link</b> — tool tự fetch HTML, tự phát hiện shuffle, tự xử lý và trả về đáp án chính xác. Hỗ trợ <b class="neon">nhiều link cùng lúc</b>. Made with 💖 by <b class="neon">Lilcat</b>.</p>
       <div class="hero-buttons">
         <button class="hero-btn hero-btn-primary" data-nav="cheat">🚀 Bắt đầu ngay</button>
         <button class="hero-btn hero-btn-outline" data-nav="minigame">🧮 Minigame Toán</button>
@@ -255,44 +272,82 @@
     </section>
     <section class="anim-fadeInUp" style="animation-delay:.15s">
       <div class="stats">
-        <div class="stat"><div class="stat-number">3</div><div class="stat-label">Cách nhập liệu</div></div>
+        <div class="stat"><div class="stat-number">4</div><div class="stat-label">Cách nhập liệu</div></div>
         <div class="stat"><div class="stat-number">∞</div><div class="stat-label">Đề parse</div></div>
-        <div class="stat"><div class="stat-number">🧮</div><div class="stat-label">Minigame Toán</div></div>
+        <div class="stat"><div class="stat-number">🎯</div><div class="stat-label">Shuffle-aware</div></div>
         <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Miễn phí</div></div>
       </div>
     </section>
     <section class="mt-12 anim-fadeInUp" style="animation-delay:.25s">
       <h2 class="text-2xl font-black neon glow mb-6">✨ Tính năng nổi bật</h2>
       <div class="feature-grid">
+        <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Tự xử lý shuffle</div><div class="feature-desc">Tự phát hiện HTML có xáo trộn đáp án — map lại đáp án theo TEXT, chính xác tuyệt đối.</div></div>
+        <div class="feature-card"><div class="feature-icon">📚</div><div class="feature-title">Phân tích nhiều link</div><div class="feature-desc">Dán tối đa 10 link cùng lúc — tool tự merge kết quả thành nhiều đề.</div></div>
         <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Hỗ trợ LMS360</div><div class="feature-desc">Chuyển nhanh sang lms360hack.pages.dev để lấy đáp án LMS360.</div></div>
         <div class="feature-card"><div class="feature-icon">📁</div><div class="feature-title">Chọn file linh hoạt</div><div class="feature-desc">Kéo thả file HTML từ máy — parse ngay, không cần upload server.</div></div>
-        <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">Dán link tự động</div><div class="feature-desc">Fetch HTML qua 4 proxy CORS fallback, tự động chuyển nếu proxy lỗi.</div></div>
-        <div class="feature-card"><div class="feature-icon">🧮</div><div class="feature-title">Minigame Toán học</div><div class="feature-desc">Giải toán từ cơ bản đến giải tích, phân số, đồ thị — streak system!</div></div>
+        <div class="feature-card"><div class="feature-icon">📋</div><div class="feature-title">Dán HTML thủ công</div><div class="feature-desc">Với trang chặn CORS — copy HTML rồi dán vào ô, tool vẫn parse được.</div></div>
         <div class="feature-card"><div class="feature-icon">🎵</div><div class="feature-title">Nhạc nền</div><div class="feature-desc">Playlist YouTube + SoundCloud, tùy chỉnh âm lượng, thêm link tùy ý.</div></div>
-        <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Nhẹ và nhanh</div><div class="feature-desc">Không cần đăng ký, không quảng cáo, chạy ngay trên trình duyệt.</div></div>
       </div>
     </section>
   </div>
 </div>
 
-<!-- ═══════════════ PAGE CHEAT ═══════════════ -->
+<!-- ═══════════════ PAGE CHEAT (v18.3) ═══════════════ -->
 <div class="page" id="page-cheat">
   <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
     <header class="text-center mb-8 anim-slideDown">
-      <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">🐱 Cheat bài tập</h1>
-      <p class="text-gray-400 text-sm">Chọn nguồn → Nhận đáp án</p>
+      <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">🐱 Cheat bài tập v18.3</h1>
+      <p class="text-gray-400 text-sm">Dán link → Tự động xử lý shuffle → Nhận đáp án</p>
     </header>
+
+    <!-- Quick URL input -->
+    <div class="quick-url-banner anim-fadeInUp">
+      <div class="title">
+        <span style="font-size:20px">🔗</span>
+        DÁN LINK QUIZ — TỰ ĐỘNG XỬ LÝ SHUFFLE
+      </div>
+      <div class="flex flex-col md:flex-row gap-3">
+        <input id="ui2" type="url" placeholder="https://example.com/quiz.html" class="input-field flex-1" style="border-color:rgba(0,188,212,.35)">
+        <button id="bu2" class="quick-btn">🚀 Phân tích</button>
+      </div>
+      <div class="subtitle">💡 Tool sẽ tự fetch HTML, tự phát hiện shuffle, tự map lại đáp án theo TEXT. Không cần thao tác gì thêm.</div>
+    </div>
+
+    <!-- 🆕 v18.3: Multi URL -->
+    <details class="multi-url-panel anim-fadeInUp">
+      <summary>
+        <div class="title">
+          <span style="font-size:20px">📚</span>
+          PHÂN TÍCH NHIỀU LINK CÙNG LÚC
+        </div>
+        <span class="text-gray-500 text-xs">▼ mở rộng</span>
+      </summary>
+      <div class="mt-4">
+        <textarea id="multiUrls" rows="5"
+          placeholder="Mỗi dòng 1 link:&#10;https://example.com/de1.html&#10;https://example.com/de2.html&#10;https://example.com/de3.html"
+          class="input-field font-mono text-xs"
+          style="border-color:rgba(139,127,199,.35)"></textarea>
+        <div class="flex gap-2 mt-3 flex-wrap">
+          <button id="bu3" class="multi-btn">📚 Phân tích tất cả</button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">💡 Tối đa 10 link. Tool sẽ fetch song song, tự động fallback iframe nếu có shuffle, và merge kết quả.</p>
+      </div>
+    </details>
+
     <div class="lms-banner anim-fadeInUp">
       <h3>🎯 Có link LMS360?</h3>
       <p>Dùng công cụ chuyên dụng <b>LMS360 Hack</b> để lấy đáp án nhanh hơn. Click nút bên dưới để mở trong tab mới.</p>
       <button class="lms-btn" id="open-lms360">🚀 Mở LMS360 Hack</button>
     </div>
+
     <div class="card p-6 mb-6 anim-fadeInUp">
       <div class="flex flex-wrap gap-2 mb-5 border-b border-[#2a2a3e] pb-4" id="cheat-tabs">
         <button data-m="f" class="tab active" type="button">📁 File</button>
         <button data-m="u" class="tab" type="button">🔗 Link</button>
         <button data-m="h" class="tab" type="button">📋 HTML</button>
       </div>
+
+      <!-- TAB FILE -->
       <div data-p="f">
         <div id="dz" class="drop-zone">
           <input type="file" id="fi" accept=".html,.htm,.txt" class="hidden">
@@ -304,6 +359,8 @@
         <div id="finfo" class="file-info-card hidden"></div>
         <button id="bf" class="btn-neon w-full py-3 rounded-xl">🔍 Kiểm tra file</button>
       </div>
+
+      <!-- TAB URL -->
       <div data-p="u" class="hidden">
         <label class="block text-sm font-bold mb-2 text-gray-300">🔗 Link web quiz:</label>
         <div class="flex flex-col md:flex-row gap-3">
@@ -312,6 +369,8 @@
         </div>
         <p class="text-xs text-gray-500 mt-3">⚠️ Trang phải cho phép <code>CORS</code>. Nếu không → dùng tab "File" hoặc "HTML".</p>
       </div>
+
+      <!-- TAB HTML -->
       <div data-p="h" class="hidden">
         <label class="block text-sm font-bold mb-2 text-gray-300">📋 Dán mã HTML:</label>
         <textarea id="hi" rows="6" placeholder="Dán toàn bộ HTML của trang quiz..." class="input-field font-mono"></textarea>
@@ -321,12 +380,14 @@
         </div>
       </div>
     </div>
+
     <div id="rs" class="hidden">
       <div class="card p-6 anim-fadeInUp">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-black neon glow">📋 Đáp án</h2>
           <button id="bc" class="btn-ghost px-3 py-1 rounded text-xs">📄 Copy</button>
         </div>
+        <div id="shuffle-banner"></div>
         <div id="tb" class="flex flex-wrap gap-2 mb-4"></div>
         <div id="ct"></div>
       </div>
@@ -342,7 +403,6 @@
       <p class="text-gray-400 text-sm">Sống còn — Mỗi câu đúng lên cấp — Sai là hết!</p>
     </header>
 
-    <!-- START SCREEN -->
     <div id="game-start" class="game-card text-center anim-popIn">
       <div class="text-6xl mb-4 anim-float">🧮</div>
       <h2 class="text-2xl font-black neon glow mb-3">Thử thách sinh tồn</h2>
@@ -367,9 +427,7 @@
       </div>
     </div>
 
-    <!-- GAME PLAY -->
     <div id="game-play" class="game-card hidden">
-      <!-- HUD -->
       <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div class="flex items-center gap-2">
           <span class="level-badge" id="level-badge">⭐ Cấp 1</span>
@@ -384,7 +442,6 @@
         </div>
       </div>
 
-      <!-- LIVES + STREAK INFO -->
       <div class="flex justify-between items-center mb-4 text-xs text-gray-500">
         <span>Câu hỏi: <b class="text-white" id="q-counter">1</b></span>
         <div class="lives-display" id="lives-display">
@@ -392,7 +449,6 @@
         </div>
       </div>
 
-      <!-- TIMER -->
       <div class="flex items-center gap-4 mb-6">
         <div class="relative flex-shrink-0">
           <svg width="64" height="64" class="progress-ring">
@@ -409,21 +465,15 @@
         </div>
       </div>
 
-      <!-- GRAPH (if applicable) -->
       <div id="graph-container" class="math-graph hidden">
         <canvas id="math-canvas"></canvas>
       </div>
 
-      <!-- OPTIONS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6" id="options-container">
-        <!-- filled dynamically -->
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6" id="options-container"></div>
 
-      <!-- FEEDBACK -->
       <div id="game-feedback" class="mt-4 text-center text-sm font-bold min-h-[24px]"></div>
     </div>
 
-    <!-- RESULT SCREEN -->
     <div id="game-result" class="game-card text-center hidden game-result">
       <div class="text-5xl mb-3" id="result-emoji">💀</div>
       <h2 class="text-2xl font-black neon glow mb-2" id="result-title">Game Over!</h2>
@@ -456,11 +506,42 @@
 <div class="page" id="page-guide">
   <div class="max-w-4xl mx-auto p-4 md:p-8 relative z-10">
     <header class="text-center mb-8 anim-slideDown">
-      <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">📚 Hướng dẫn</h1>
+      <h1 class="text-3xl md:text-4xl font-black neon glow mb-2">📚 Hướng dẫn v18.3</h1>
       <p class="text-gray-400 text-sm">Mọi thứ bạn cần biết — giải thích đơn giản</p>
     </header>
 
-    <div class="card p-6 mb-6 anim-fadeInUp">
+    <!-- Shuffle-aware section -->
+    <div class="card p-6 mb-6 anim-fadeInUp" style="border-color:rgba(0,188,212,.4)">
+      <h2 class="text-xl font-black mb-4" style="color:#22d3ee">🎯 Xử lý Shuffle tự động</h2>
+      <div class="mb-4 p-4 rounded-lg" style="background:rgba(0,188,212,.08);border-left:3px solid #00bcd4">
+        <p class="text-sm text-cyan-300 font-bold mb-2">🤔 Vấn đề</p>
+        <p class="text-xs text-gray-400 leading-relaxed">Nhiều trang quiz có tính năng <b>shuffle (xáo trộn) đáp án</b> — mỗi lần load lại, thứ tự A/B/C/D sẽ đổi. Parser đọc data gốc trong HTML sẽ hiển thị <b>sai vị trí đáp án</b> so với những gì bạn thấy trên màn hình.</p>
+      </div>
+      <div class="mb-4 p-4 rounded-lg" style="background:rgba(46,204,113,.08);border-left:3px solid #2ecc71">
+        <p class="text-sm text-green-300 font-bold mb-2">✅ Giải pháp — Chỉ cần dán link</p>
+        <p class="text-xs text-gray-400 leading-relaxed">Tool <b>tự động phát hiện shuffle</b> trong HTML, tự động map lại đáp án theo <b>TEXT</b> thay vì letter. Nếu cần, tool còn <b>tự load iframe</b> để đọc DOM thật — chính xác tuyệt đối!</p>
+      </div>
+      <div class="space-y-3">
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#00bcd4] to-[#0097a7] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Vào tab <b>Cheat</b> → dán link vào ô đầu trang</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#00bcd4] to-[#0097a7] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div>Bấm <b>"🚀 Phân tích"</b> — tool tự fetch HTML</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#00bcd4] to-[#0097a7] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div>Tool tự phát hiện shuffle → nếu cần, tự bật <b>iframe live</b> để đọc DOM</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white font-black flex items-center justify-center flex-shrink-0">✓</div><div>Đáp án hiển thị theo <b>TEXT</b> — chính xác kể cả khi shuffle</div></div>
+      </div>
+    </div>
+
+    <!-- 🆕 v18.3: Multi URL section -->
+    <div class="card p-6 mb-6 anim-fadeInUp" style="border-color:rgba(139,127,199,.4);animation-delay:.05s">
+      <h2 class="text-xl font-black mb-4" style="color:#a78bfa">📚 Phân tích nhiều link cùng lúc</h2>
+      <p class="text-sm text-gray-400 mb-4">Khi bạn có nhiều đề nhỏ rải rác ở nhiều link khác nhau — dán tất cả vào 1 ô, tool tự merge thành 1 bộ hoàn chỉnh.</p>
+      <div class="space-y-3">
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#8E7FC7] to-[#6B5FA0] text-white font-black flex items-center justify-center flex-shrink-0">1</div><div>Mở panel <b>📚 PHÂN TÍCH NHIỀU LINK</b> trong tab Cheat</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#8E7FC7] to-[#6B5FA0] text-white font-black flex items-center justify-center flex-shrink-0">2</div><div>Dán mỗi link 1 dòng (tối đa 10 link)</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#8E7FC7] to-[#6B5FA0] text-white font-black flex items-center justify-center flex-shrink-0">3</div><div>Bấm <b>"📚 Phân tích tất cả"</b> — tool xử lý từng link</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white font-black flex items-center justify-center flex-shrink-0">✓</div><div>Mỗi link = 1 tab riêng, dễ dàng chuyển đổi</div></div>
+      </div>
+    </div>
+
+    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.1s">
       <h2 class="text-xl font-black neon mb-4">🎯 Cách dùng với LMS360</h2>
       <div class="space-y-3">
         <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4caf50] to-[#8bc34a] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div>Vào tab <b>Cheat</b> → click nút <b>"🚀 Mở LMS360 Hack"</b></div></div>
@@ -469,7 +550,7 @@
       </div>
     </div>
 
-    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.1s">
+    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
       <h2 class="text-xl font-black neon mb-4">🧮 Minigame Sinh tồn</h2>
       <p class="text-sm text-gray-400 mb-4">Chế độ sinh tồn — không chọn độ khó, tự động tăng cấp khi bạn trả lời đúng!</p>
       <div class="space-y-3">
@@ -484,18 +565,23 @@
       </div>
     </div>
 
-    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.2s">
-      <h2 class="text-xl font-black neon mb-4">🐱 3 cách đưa bài quiz vào web</h2>
+    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.3s">
+      <h2 class="text-xl font-black neon mb-4">🐱 4 cách đưa bài quiz vào web</h2>
       <div class="space-y-3">
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div><b>Chọn file</b> — giống mở file Word trên máy tính. Bạn có sẵn file bài quiz trên máy thì dùng cách này. Kéo thả file vào ô vuông là xong.</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div><b>Dán link</b> — giống copy link YouTube dán vào Zalo. Copy đường link của trang bài quiz rồi dán vào ô trống.</div></div>
-        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div><b>Dán HTML</b> — giống copy toàn bộ văn bản của 1 trang web. Nhấn <b>Ctrl+U</b> trên trang quiz, chọn hết (<b>Ctrl+A</b>), copy (<b>Ctrl+C</b>) rồi dán vào ô to.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">1</div><div><b>Chọn file</b> — giống mở file Word trên máy tính. Bạn có sẵn file bài quiz trên máy thì dùng cách này.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">2</div><div><b>Dán link</b> — copy đường link của trang bài quiz rồi dán vào ô trống. <b class="text-cyan-400">Khuyến nghị cách này.</b></div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6ac1] to-[#c44dff] text-[#0a0a12] font-black flex items-center justify-center flex-shrink-0">3</div><div><b>Dán HTML</b> — nhấn <b>Ctrl+U</b> trên trang quiz, chọn hết (<b>Ctrl+A</b>), copy (<b>Ctrl+C</b>) rồi dán vào ô to.</div></div>
+        <div class="flex gap-4 p-4 bg-[#1c1c26] rounded-lg" style="border-left:3px solid #8E7FC7"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#8E7FC7] to-[#6B5FA0] text-white font-black flex items-center justify-center flex-shrink-0">4</div><div><b class="text-purple-400">Nhiều link</b> — dán danh sách link vào panel "📚 PHÂN TÍCH NHIỀU LINK", tool xử lý cùng lúc.</div></div>
       </div>
     </div>
 
-    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.3s">
+    <div class="card p-6 mb-6 anim-fadeInUp" style="animation-delay:.4s">
       <h2 class="text-xl font-black neon mb-4">❓ Câu hỏi thường gặp</h2>
       <div class="space-y-4">
+        <div class="p-4 bg-[#1c1c26] rounded-lg">
+          <div class="font-black text-yellow-400 mb-2">🤔 Quiz shuffle — tại sao đáp án sai?</div>
+          <div class="text-sm text-gray-400">Vì parser đọc data gốc trong HTML, nhưng quiz đã xáo trộn A/B/C/D khi load. <b>Tool v18.3 đã tự xử lý</b> — chỉ cần dán link, đáp án sẽ hiển thị theo TEXT chính xác.</div>
+        </div>
         <div class="p-4 bg-[#1c1c26] rounded-lg">
           <div class="font-black text-yellow-400 mb-2">🤔 Không tìm thấy đáp án?</div>
           <div class="text-sm text-gray-400">Có thể trang đó chặn web khác đọc nội dung. Cách chữa: Nhấn <b>Ctrl+U</b> để xem mã nguồn trang, chọn hết <b>Ctrl+A</b>, copy <b>Ctrl+C</b>, rồi dán vào tab "HTML".</div>
@@ -509,19 +595,15 @@
           <div class="text-sm text-gray-400">Có! Điểm cao nhất, streak và cấp cao nhất được lưu trong trình duyệt của bạn. Xóa dữ liệu trình duyệt sẽ reset.</div>
         </div>
         <div class="p-4 bg-[#1c1c26] rounded-lg">
-          <div class="font-black text-yellow-400 mb-2">⚠️ Tại sao rời tab lại mất lượt?</div>
-          <div class="text-sm text-gray-400">Để chống cheat — nếu bạn rời tab để tra Google hay dùng công cụ khác, game sẽ tự động kết thúc. Hãy tập trung giải toán!</div>
-        </div>
-        <div class="p-4 bg-[#1c1c26] rounded-lg">
           <div class="font-black text-yellow-400 mb-2">💾 Web có lưu dữ liệu của tôi không?</div>
           <div class="text-sm text-gray-400">Không. Mọi thứ chạy ngay trong trình duyệt của bạn. Web không gửi bài quiz của bạn lên máy chủ nào. Bạn có thể tắt mạng vẫn dùng được (trừ nhạc).</div>
         </div>
       </div>
     </div>
 
-    <div class="card p-6 anim-fadeInUp" style="animation-delay:.4s">
+    <div class="card p-6 anim-fadeInUp" style="animation-delay:.5s">
       <h2 class="text-xl font-black neon mb-3">💖 Về dự án</h2>
-      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v15.0</b> — Made with 💖 by <b class="neon">Lilcat</b>.</p>
+      <p class="text-sm text-gray-400 mb-2"><b>Answer Checker v18.3</b> — Parser v35. Made with 💖 by <b class="neon">Lilcat</b>.</p>
       <p class="text-xs text-gray-500 mb-4">Cảm hứng từ <a href="https://github.com/HiennNek/lms360hack" target="_blank" class="text-blue-400 hover:underline">LMS360 Hack</a>. Mã nguồn mở, miễn phí, không thu phí.</p>
       <button class="btn-neon px-6 py-2 rounded-lg text-sm" id="open-bug-from-guide">🐛 Báo lỗi / Góp ý</button>
     </div>
@@ -529,7 +611,7 @@
 </div>
 
 <footer class="text-center text-xs text-gray-600 py-8 relative z-10">
-  🐱 Answer Checker v15.0 — Made with 💖 by <b class="neon">Lilcat</b>
+  🐱 Answer Checker v18.3 — Parser v35 — Made with 💖 by <b class="neon">Lilcat</b>
 </footer>
 
 <button id="fab-bug" class="fab" title="Báo lỗi">🐛</button>
@@ -575,8 +657,10 @@
         <option value="">-- Chọn loại lỗi --</option>
         <option value="Không tìm thấy đáp án">Không tìm thấy đáp án</option>
         <option value="Đáp án sai">Đáp án sai</option>
+        <option value="Đáp án sai do shuffle">Đáp án sai do shuffle</option>
         <option value="Không đọc được file">Không đọc được file</option>
         <option value="Lỗi CORS khi dán link">Lỗi CORS khi dán link</option>
+        <option value="Lỗi multi link">Lỗi multi link</option>
         <option value="Nhạc không phát">Nhạc không phát</option>
         <option value="Âm lượng không hoạt động">Âm lượng không hoạt động</option>
         <option value="Giao diện lỗi">Giao diện lỗi/hiển thị sai</option>
@@ -605,3 +689,5 @@
 <!-- Load parser.js TRƯỚC app.js -->
 <script src="parser.js"></script>
 <script src="app.js"></script>
+</body>
+</html>
