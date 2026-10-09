@@ -1,16 +1,17 @@
 // ═══════════════════════════════════════════════════════════════════
-// 🐱 ANSWER CHECKER — QUIZ PARSER v35 (FULL)
-// "Smart Multi-Source: Script + Iframe + Chemistry + Chain"
+// 🐱 ANSWER CHECKER — QUIZ PARSER v37.0.1 (FULL + TF-ARRAY-FIX)
+// "Context-Aware + Bulletproof + Self-Verify"
 // ═══════════════════════════════════════════════════════════════════
 
 (function(global) {
   'use strict';
 
-  const VERSION = '35.0.0';
+  const VERSION = '37.0.1';
   const DEBUG = false;
+  const _startupTime = Date.now();
 
   // ═══════════════════════════════════════════════════════════════
-  // HELPERS
+  // CONSTANTS
   // ═══════════════════════════════════════════════════════════════
 
   const HELPER_NAME_WHITELIST = [
@@ -42,6 +43,8 @@
     statements: ['statements', 'subs', 'items', 's', 'claims', 'assertions'],
     stText: ['text', 'x', 'statement', 'content', 't'],
     stAnswer: ['answer', 'correct', 'c', 'v', 'val', 'a', 'isCorrect'],
+    // 🆕 v37.0.1: Mảng đáp án riêng cho câu hỏi Đúng/Sai
+    answersArray: ['answers', 'stAnswers', 'correctAnswers', 'answerArray', 'ansArray', 'answerList'],
     explanation: ['explanation', 'explain', 'solution', 'note', 'hint'],
     topic: ['topic', 't', 'subject', 'category', 'chapter', 'tag'],
     level: ['level', 'lvl', 'difficulty', 'l', 'bloom'],
@@ -72,12 +75,6 @@
     /^de\d+(mcq|tf|short|sa)$/i,
     /^[_$][a-z]+\d+_[a-z]+$/i,
     /^(questions|items|list|bank|pool)\d+$/i,
-  ];
-
-  const DYNAMIC_VAR_PATTERNS = [
-    /^de\d+$/i, /^deck\d+$/i, /^set\d+$/i,
-    /^part\d+$/i, /^phan\d+$/i, /^chapter\d+$/i,
-    /^\d+$/,
   ];
 
   const TYPE_ALIASES = {
@@ -144,15 +141,418 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // 🆕 v35: IFRAME LIVE EXTRACTOR
+  // VISIBLE DOM EXTRACTOR
   // ═══════════════════════════════════════════════════════════════
 
-  async function extractFromIframe(url, options = {}) {
-    if (typeof document === 'undefined') return { success: false, error: 'No DOM available' };
-    const { waitMs = 3000, timeoutMs = 15000, onProgress = null } = options;
+  function isElementVisible(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    try {
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return false;
+      const style = el.ownerDocument?.defaultView?.getComputedStyle(el);
+      if (!style) return true;
+      if (style.display === 'none') return false;
+      if (style.visibility === 'hidden') return false;
+      if (parseFloat(style.opacity) === 0) return false;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function extractVisibleQuestionDetail(el) {
+    if (!el) return null;
+    const doc = el.ownerDocument;
+    if (!doc) return null;
+
+    let questionText = '';
+    const qTextSelectors = ['.qtext', '.q-title', '.question-text', '.q-text', '.stem', '.question-title', '.question-content', 'h3', 'h4', 'p.q', '.q'];
+    for (const sel of qTextSelectors) {
+      try {
+        const found = el.querySelector(sel);
+        if (found && isElementVisible(found)) {
+          questionText = found.textContent.trim();
+          if (questionText) break;
+        }
+      } catch (e) {}
+    }
+    if (!questionText) {
+      const firstLine = el.textContent.trim().split('\n')[0];
+      if (firstLine && firstLine.length < 500) questionText = firstLine;
+    }
+
+    const options = [];
+    const radios = el.querySelectorAll('input[type="radio"]');
+    if (radios.length > 0) {
+      radios.forEach(radio => {
+        let label = null;
+        if (radio.id) { try { label = el.querySelector(`label[for="${radio.id}"]`); } catch (e) {} }
+        if (!label) label = radio.closest('label');
+        if (label && isElementVisible(label)) {
+          let optText = label.textContent.trim();
+          optText = optText.replace(/^\s*[A-Z]\s*[.):]\s*/i, '').trim();
+          if (optText) options.push(optText);
+        }
+      });
+    }
+    if (options.length === 0) {
+      const optSelectors = ['.opt', '.option', '.answer', '.choice', '.answer-option', 'li.option'];
+      for (const sel of optSelectors) {
+        const found = el.querySelectorAll(sel);
+        if (found.length >= 2) {
+          found.forEach(opt => {
+            if (isElementVisible(opt)) {
+              let optText = opt.textContent.trim();
+              optText = optText.replace(/^\s*[A-Z]\s*[.):]\s*/i, '').trim();
+              if (optText) options.push(optText);
+            }
+          });
+          break;
+        }
+      }
+    }
+
+    let answer = null, answerText = null;
+    const correctSelectors = ['.correct', '.correct-answer', '.right', '[class*="correct"]', '[data-correct="true"]'];
+    for (const sel of correctSelectors) {
+      try {
+        const correctEl = el.querySelector(sel);
+        if (correctEl && isElementVisible(correctEl)) {
+          const correctText = correctEl.textContent.replace(/^\s*[A-Z]\s*[.):]\s*/i, '').trim();
+          const idx = options.findIndex(o => o === correctText || correctText.includes(o) || o.includes(correctText));
+          if (idx >= 0) { answer = idx; answerText = options[idx]; break; }
+        }
+      } catch (e) {}
+    }
+
+    let type = 'mcq';
+    if (options.length === 0) type = 'short';
+    else if (options.length === 2 && options.every(o => /^(đúng|sai|true|false|t|f)$/i.test(o.trim()))) type = 'tf';
+
+    return { question: questionText, options: options.length > 0 ? options : null, answer, answerText, type, _fromVisual: true };
+  }
+
+  function extractVisibleQuestions(doc, options = {}) {
+    if (!doc) return [];
+    const {
+      containerSelectors = [
+        '.question', '.q-card', '.qcard', '.question-card', '.q-box',
+        '[data-question]', '[data-qid]', '.quiz-question', '.quiz-item',
+        '.question-item', 'fieldset', '.form-group', 'li.question',
+        '[class*="question"]', '[class*="q-"]',
+      ],
+      minTextLength = 10,
+    } = options;
+
+    const results = [];
+    const seen = new Set();
+    const candidates = new Set();
+    for (const sel of containerSelectors) {
+      try { doc.querySelectorAll(sel).forEach(el => candidates.add(el)); } catch (e) {}
+    }
+    const filtered = [...candidates].filter(el => ![...candidates].some(other => other !== el && other.contains(el)));
+
+    for (const el of filtered) {
+      if (!isElementVisible(el)) continue;
+      const text = (el.textContent || '').trim();
+      if (text.length < minTextLength) continue;
+      const hash = text.substring(0, 80);
+      if (seen.has(hash)) continue;
+      seen.add(hash);
+      const q = extractVisibleQuestionDetail(el);
+      if (q) results.push(q);
+    }
+    return results;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v37: SCREEN STATE DETECTOR
+  // ═══════════════════════════════════════════════════════════════
+
+  function detectScreenState(doc) {
+    if (!doc) return { state: 'unknown' };
+
+    const body = doc.body;
+    if (!body) return { state: 'unknown' };
+
+    const visibleQuestions = extractVisibleQuestions(doc);
+    const hasQuestions = visibleQuestions.length > 0;
+    const startBtn = detectStartButton(doc);
+    const hasStartBtn = startBtn !== null;
+    const deckButtons = detectDeckButtons(doc);
+    const hasResultText = /kết\s*quả|điểm\s*số|score|result|hoàn\s*thành|xem\s*lại/i.test(body.textContent.substring(0, 5000));
+    const progressMatch = body.textContent.match(/câu\s*(\d+)\s*[\/]\s*(\d+)/i) ||
+                          body.textContent.match(/question\s*(\d+)\s*[\/]\s*(\d+)/i);
+    const progress = progressMatch ? { current: parseInt(progressMatch[1]), total: parseInt(progressMatch[2]) } : null;
+
+    if (hasQuestions && progress) {
+      return { state: 'quiz-in-progress', questions: visibleQuestions, progress, hasStartBtn };
+    }
+    if (hasQuestions && !progress) {
+      return { state: 'quiz-all-visible', questions: visibleQuestions, hasStartBtn };
+    }
+    if (deckButtons.length > 0 && !hasQuestions) {
+      return { state: 'menu', decks: deckButtons, hasStartBtn };
+    }
+    if (hasStartBtn && !hasQuestions) {
+      return { state: 'start-screen', hasStartBtn: true };
+    }
+    if (hasResultText && !hasQuestions) {
+      return { state: 'result' };
+    }
+
+    return { state: 'unknown' };
+  }
+
+  function detectStartButton(doc) {
+    if (!doc) return null;
+    const patterns = [
+      /^(start|begin|bắt\s*đầu|làm\s*bài|vào\s*thi|bắt\s*đầu\s*làm|start\s*quiz|play|bắt\s*đầu\s*thử|thi\s*thử)$/i,
+      /^(bắt\s*đầu|start)/i,
+    ];
+    const buttons = doc.querySelectorAll('button, a[role="button"], .btn, [class*="btn"], [class*="button"]');
+    for (const btn of buttons) {
+      const text = (btn.textContent || '').trim().toLowerCase();
+      if (text.length > 30) continue;
+      if (patterns.some(p => p.test(text))) {
+        if (isElementVisible(btn)) return btn;
+      }
+    }
+    return null;
+  }
+
+  function detectDeckButtons(doc) {
+    if (!doc) return [];
+    const decks = [];
+    const patterns = [
+      /^(đề|de|chương|chapter|bài|bai|phần|phan|test|quiz|set)\s*[\dIVX]+$/i,
+      /^(đề|de)\s*\d+/i,
+      /^(chương|chapter)\s*\d+/i,
+      /^bài\s*\d+/i,
+    ];
+    const buttons = doc.querySelectorAll('button, a[role="button"], .btn, [class*="btn"], li[class*="item"], [class*="deck"]');
+    const seen = new Set();
+    for (const btn of buttons) {
+      const text = (btn.textContent || '').trim();
+      if (!text || text.length > 60) continue;
+      if (patterns.some(p => p.test(text))) {
+        if (!isElementVisible(btn)) continue;
+        const hash = text.substring(0, 40);
+        if (seen.has(hash)) continue;
+        seen.add(hash);
+        decks.push({
+          label: text,
+          element: btn,
+          dataAttrs: {
+            'data-id': btn.dataset?.id || null,
+            'data-deck': btn.dataset?.deck || null,
+            'data-href': btn.href || null,
+          },
+        });
+      }
+    }
+    return decks;
+  }
+
+  function detectActiveQuestion(doc) {
+    if (!doc) return null;
+
+    const activeSelectors = [
+      '.question.active', '.question.current', '.question.show',
+      '.q-card.active', '.q-card.current',
+      '[class*="question"][class*="active"]',
+      '[class*="question"][class*="current"]',
+      '[class*="q-"][class*="active"]',
+      '[aria-current="true"]',
+      '.active.question', '.slide.active .question',
+    ];
+
+    for (const sel of activeSelectors) {
+      try {
+        const found = doc.querySelectorAll(sel);
+        for (const el of found) {
+          if (!isElementVisible(el)) continue;
+          const q = extractVisibleQuestionDetail(el);
+          if (q && q.question) {
+            q._isActive = true;
+            return q;
+          }
+        }
+      } catch (e) {}
+    }
+
+    const visible = extractVisibleQuestions(doc);
+    if (visible.length === 1) {
+      visible[0]._isActive = true;
+      return visible[0];
+    }
+    return null;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v37: LIVE CONTEXT WATCHER
+  // ═══════════════════════════════════════════════════════════════
+
+  function createLiveContextWatcher(options = {}) {
+    const {
+      pollIntervalMs = 1500,
+      onChange = null,
+      onScreenChange = null,
+    } = options;
+
+    let lastState = null;
+    let lastActiveQuestion = null;
+    let timer = null;
+    let iframeRef = null;
+
+    function check() {
+      if (!iframeRef || !iframeRef.contentDocument) return;
+      try {
+        const doc = iframeRef.contentDocument;
+        const screenState = detectScreenState(doc);
+        const activeQ = detectActiveQuestion(doc);
+
+        const screenChanged = !lastState || lastState.state !== screenState.state;
+        const questionChanged = !lastActiveQuestion ||
+                                (activeQ && lastActiveQuestion.question !== activeQ.question);
+
+        if (screenChanged) {
+          lastState = screenState;
+          if (typeof onScreenChange === 'function') {
+            try { onScreenChange(screenState); } catch (e) {}
+          }
+        }
+        if (questionChanged && activeQ) {
+          lastActiveQuestion = activeQ;
+          if (typeof onChange === 'function') {
+            try { onChange({ screenState, activeQuestion: activeQ }); } catch (e) {}
+          }
+        }
+      } catch (e) {}
+    }
+
+    return {
+      attach(iframe) {
+        iframeRef = iframe;
+        lastState = null;
+        lastActiveQuestion = null;
+        if (timer) clearInterval(timer);
+        timer = setInterval(check, pollIntervalMs);
+        setTimeout(check, 500);
+      },
+      detach() {
+        if (timer) { clearInterval(timer); timer = null; }
+        iframeRef = null;
+        lastState = null;
+        lastActiveQuestion = null;
+      },
+      getState: () => lastState,
+      getActiveQuestion: () => lastActiveQuestion,
+    };
+  }
+
+  function watchCurrentPage(options = {}) {
+    const {
+      pollIntervalMs = 1500,
+      onChange = null,
+      onScreenChange = null,
+    } = options;
+
+    let lastState = null;
+    let lastActiveQuestion = null;
+    let timer = null;
+
+    function check() {
+      try {
+        const doc = document;
+        const screenState = detectScreenState(doc);
+        const activeQ = detectActiveQuestion(doc);
+
+        const screenChanged = !lastState || lastState.state !== screenState.state;
+        const questionChanged = !lastActiveQuestion ||
+                                (activeQ && lastActiveQuestion.question !== activeQ.question);
+
+        if (screenChanged) {
+          lastState = screenState;
+          if (typeof onScreenChange === 'function') {
+            try { onScreenChange(screenState); } catch (e) {}
+          }
+        }
+        if (questionChanged && activeQ) {
+          lastActiveQuestion = activeQ;
+          if (typeof onChange === 'function') {
+            try { onChange({ screenState, activeQuestion: activeQ }); } catch (e) {}
+          }
+        }
+      } catch (e) {}
+    }
+
+    return {
+      start() {
+        if (timer) clearInterval(timer);
+        timer = setInterval(check, pollIntervalMs);
+        setTimeout(check, 500);
+      },
+      stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+      },
+      getState: () => lastState,
+      getActiveQuestion: () => lastActiveQuestion,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // AUTO-CLICK START
+  // ═══════════════════════════════════════════════════════════════
+
+  async function autoStartQuizInIframe(iframe, options = {}) {
+    const { onProgress = null, maxWaitMs = 8000, pollIntervalMs = 500 } = options;
+    if (!iframe || !iframe.contentDocument) return { started: false };
+
+    const doc = iframe.contentDocument;
+    const startPatterns = [
+      /start/i, /begin/i, /bắt\s*đầu/i, /làm\s*bài/i, /vào\s*thi/i,
+      /bắt\s*đầu\s*làm/i, /start\s*quiz/i, /play/i, /bắt\s*đầu\s*thử/i,
+    ];
+    const buttons = doc.querySelectorAll('button, a[role="button"], .btn, [class*="btn"]');
+    let startBtn = null;
+    for (const btn of buttons) {
+      const text = (btn.textContent || '').trim();
+      if (startPatterns.some(p => p.test(text))) { startBtn = btn; break; }
+    }
+    if (startBtn && isElementVisible(startBtn)) {
+      if (onProgress) onProgress('🎬 Đang click nút Start...');
+      try { startBtn.click(); } catch (e) {}
+    }
+    if (onProgress) onProgress('⏳ Chờ quiz render...');
+    const startTime = Date.now();
+    while (Date.now() - startTime < maxWaitMs) {
+      await new Promise(r => setTimeout(r, pollIntervalMs));
+      try {
+        const questions = extractVisibleQuestions(doc);
+        if (questions.length > 0) {
+          if (onProgress) onProgress(`✅ Đã thấy ${questions.length} câu hỏi visible`);
+          return { started: true, questionCount: questions.length };
+        }
+      } catch (e) {}
+    }
+    return { started: !!startBtn, questionCount: 0, timeout: true };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // INSPECT IFRAME FULLY
+  // ═══════════════════════════════════════════════════════════════
+
+  async function inspectIframeFully(url, options = {}) {
+    if (typeof document === 'undefined') return { success: false, error: 'No DOM' };
+    const {
+      onProgress = null,
+      waitMs = 4000,
+      timeoutMs = 25000,
+      autoStart = true,
+    } = options;
 
     return new Promise((resolve) => {
       let iframe = null, timeoutTimer = null, resolved = false;
+      const captured = [];
 
       const cleanup = () => {
         if (timeoutTimer) clearTimeout(timeoutTimer);
@@ -166,84 +566,488 @@
       };
 
       try {
-        if (onProgress) onProgress('Đang tạo iframe ẩn...');
+        if (onProgress) onProgress('🔍 Đang load iframe (full inspect)...');
         iframe = document.createElement('iframe');
-        iframe.style.cssText = 'position:fixed;left:-99999px;top:-99999px;width:1200px;height:900px;border:0;visibility:hidden;';
-        iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms');
+        iframe.style.cssText = 'position:fixed;left:-99999px;top:-99999px;width:1400px;height:1000px;border:0;visibility:hidden;';
         iframe.src = url;
 
-        iframe.onload = () => {
-          if (onProgress) onProgress('Iframe loaded, chờ render...');
-          setTimeout(() => {
+        iframe.onload = async () => {
+          try {
+            if (onProgress) onProgress('✅ Iframe loaded');
+            const win = iframe.contentWindow;
+            const doc = iframe.contentDocument;
+            if (!doc) return finish({ success: false, error: 'Không truy cập DOM iframe (CORS)' });
+
             try {
-              if (onProgress) onProgress('Đang đọc DOM từ iframe...');
-              const doc = iframe.contentDocument || iframe.contentWindow?.document;
-              if (!doc) return finish({ success: false, error: 'Không truy cập được iframe document (CORS)' });
-              const html = doc.documentElement.outerHTML;
-              if (!html || html.length < 100) return finish({ success: false, error: 'Iframe DOM rỗng' });
-              try {
-                const result = extractQuizData(html);
-                const decks = normalizeDecks(result.data);
-                finish({ success: true, decks, html, shuffle: result.shuffle, source: 'iframe-live' });
-              } catch (e) {
-                finish({ success: false, error: 'Parse iframe HTML lỗi: ' + e.message });
-              }
+              const origFetch = win.fetch;
+              const origXHROpen = win.XMLHttpRequest.prototype.open;
+              const origXHRSend = win.XMLHttpRequest.prototype.send;
+
+              win.fetch = function(...args) {
+                const reqUrl = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+                return origFetch.apply(this, args).then(async (res) => {
+                  try {
+                    const clone = res.clone();
+                    const text = await clone.text();
+                    if (text && text.length > 50 && /"question"|"answer"|"options"|câu\s*hỏi|đáp\s*án/i.test(text)) {
+                      captured.push({ type: 'fetch', url: reqUrl, body: text, size: text.length });
+                      if (onProgress) onProgress(`🌐 NET: ${reqUrl.substring(0, 40)}... (${text.length}b)`);
+                    }
+                  } catch (e) {}
+                  return res;
+                });
+              };
+
+              win.XMLHttpRequest.prototype.open = function(method, reqUrl, ...rest) {
+                this.__ac_url = reqUrl;
+                return origXHROpen.call(this, method, reqUrl, ...rest);
+              };
+              win.XMLHttpRequest.prototype.send = function(...args) {
+                this.addEventListener('load', () => {
+                  try {
+                    const text = this.responseText || '';
+                    if (text && text.length > 50 && /"question"|"answer"|"options"|câu\s*hỏi|đáp\s*án/i.test(text)) {
+                      captured.push({ type: 'xhr', url: this.__ac_url || '', body: text, size: text.length });
+                    }
+                  } catch (e) {}
+                });
+                return origXHRSend.apply(this, args);
+              };
             } catch (e) {
-              finish({ success: false, error: 'Iframe read error: ' + e.message });
+              if (onProgress) onProgress('⚠️ Không hook được network: ' + e.message);
             }
-          }, waitMs);
+
+            if (autoStart) {
+              await autoStartQuizInIframe(iframe, { onProgress });
+            }
+
+            await new Promise(r => setTimeout(r, waitMs));
+
+            if (onProgress) onProgress('👁️ Đang đọc DOM visible...');
+            const visibleQs = extractVisibleQuestions(doc);
+
+            let fullHtml = '';
+            try { fullHtml = doc.documentElement.outerHTML; } catch (e) {}
+
+            let scriptDecks = [];
+            if (fullHtml && fullHtml.length > 100) {
+              try {
+                const r = extractQuizData(fullHtml);
+                if (r && r.data) {
+                  scriptDecks = normalizeDecks(r.data);
+                  scriptDecks.forEach(d => d.name = `📜 IFRAME: ${d.name}`);
+                }
+              } catch (e) {}
+            }
+
+            const networkDecks = [];
+            for (const cap of captured) {
+              try {
+                let json = null;
+                try { json = JSON.parse(cap.body); } catch {}
+                const dataToParse = json || cap.body;
+                const r = extractQuizData(typeof dataToParse === 'string' ? dataToParse : JSON.stringify(dataToParse));
+                if (r && r.data) {
+                  const decks = normalizeDecks(r.data);
+                  decks.forEach(d => { d.name = `🌐 NET: ${d.name}`; networkDecks.push(d); });
+                }
+              } catch (e) {}
+            }
+
+            const visualDecks = [];
+            if (visibleQs.length > 0) {
+              visualDecks.push({
+                name: '👁️ USER ĐANG THẤY (DOM visible)',
+                questions: visibleQs.map(q => ({
+                  type: q.type,
+                  question: q.question,
+                  options: q.options,
+                  answer: q.answer,
+                  answerText: q.answerText,
+                  _fromVisual: true,
+                })),
+              });
+            }
+
+            const screenState = detectScreenState(doc);
+
+            finish({
+              success: true,
+              visibleDecks: visualDecks,
+              scriptDecks,
+              networkDecks,
+              capturedCount: captured.length,
+              visibleCount: visibleQs.length,
+              html: fullHtml,
+              screenState,
+            });
+          } catch (e) {
+            finish({ success: false, error: 'Inspect error: ' + e.message });
+          }
         };
+
         iframe.onerror = () => finish({ success: false, error: 'Iframe load error' });
         document.body.appendChild(iframe);
-        timeoutTimer = setTimeout(() => finish({ success: false, error: 'Iframe timeout sau ' + (timeoutMs / 1000) + 's' }), timeoutMs);
+
+        timeoutTimer = setTimeout(() => {
+          finish({ success: false, error: `Timeout ${timeoutMs / 1000}s`, partial: { capturedCount: captured.length } });
+        }, timeoutMs);
       } catch (e) {
         finish({ success: false, error: e.message });
       }
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // CROSS-CHECK RESULTS
+  // ═══════════════════════════════════════════════════════════════
+
   function crossCheckResults(scriptResult, iframeResult) {
     if (!scriptResult && !iframeResult) return { data: null, method: 'none', confidence: 0 };
-    if (!scriptResult) return { data: iframeResult.decks, method: 'iframe-only', confidence: 80 };
-    if (!iframeResult || !iframeResult.success) return { data: scriptResult.decks, method: 'script-only', confidence: 70 };
+    if (!scriptResult) return { data: (iframeResult && iframeResult.decks) || [], method: 'iframe-only', confidence: 80 };
+    if (!iframeResult || !iframeResult.success) return { data: (scriptResult && scriptResult.decks) || [], method: 'script-only', confidence: 70 };
 
-    const scriptDecks = scriptResult.decks || [];
-    const iframeDecks = iframeResult.decks || [];
-    const scriptCount = scriptDecks.reduce((s, d) => s + d.questions.length, 0);
-    const iframeCount = iframeDecks.reduce((s, d) => s + d.questions.length, 0);
+    const scriptDecks = (scriptResult && scriptResult.decks) || [];
+    const iframeDecks = (iframeResult.decks || iframeResult.scriptDecks) || [];
+    const scriptCount = scriptDecks.reduce((s, d) => s + (d.questions ? d.questions.length : 0), 0);
+    const iframeCount = iframeDecks.reduce((s, d) => s + (d.questions ? d.questions.length : 0), 0);
 
     const scriptTexts = new Set();
-    scriptDecks.forEach(d => d.questions.forEach(q => scriptTexts.add((q.question || '').substring(0, 60))));
+    scriptDecks.forEach(d => (d.questions || []).forEach(q => scriptTexts.add((q.question || '').substring(0, 60))));
     const iframeTexts = new Set();
-    iframeDecks.forEach(d => d.questions.forEach(q => iframeTexts.add((q.question || '').substring(0, 60))));
+    iframeDecks.forEach(d => (d.questions || []).forEach(q => iframeTexts.add((q.question || '').substring(0, 60))));
 
     let overlap = 0;
     iframeTexts.forEach(t => { if (scriptTexts.has(t)) overlap++; });
     const overlapRatio = iframeTexts.size > 0 ? overlap / iframeTexts.size : 0;
 
     if (overlapRatio > 0.8) {
-      return { data: scriptDecks, method: 'script-preferred', confidence: 95, crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'script' } };
+      return {
+        data: scriptDecks,
+        method: 'script-preferred',
+        confidence: 95,
+        crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'script' },
+      };
     }
     if (iframeCount >= scriptCount * 0.5) {
-      return { data: iframeDecks, method: 'iframe-preferred', confidence: 100, crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'iframe' } };
+      return {
+        data: iframeDecks,
+        method: 'iframe-preferred',
+        confidence: 100,
+        crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'iframe' },
+      };
     }
     const merged = [...scriptDecks];
     iframeDecks.forEach(d => {
       const exists = merged.some(m => m.name === d.name);
       if (!exists) merged.push(d);
     });
-    return { data: merged, method: 'merged', confidence: 85, crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'merge' } };
+    return {
+      data: merged,
+      method: 'merged',
+      confidence: 85,
+      crossCheck: { overlapRatio, scriptCount, iframeCount, decision: 'merge' },
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // CHEMISTRY DATA → QUIZ
+  // GROUND TRUTH RESOLVER
+  // ═══════════════════════════════════════════════════════════════
+
+  function resolveGroundTruth(sources = {}) {
+    const {
+      scriptResult = null,
+      iframeResult = null,
+      networkDecks = [],
+      visibleDecks = [],
+      staticDecks = [],
+    } = sources;
+
+    if (networkDecks && networkDecks.length > 0) {
+      const total = networkDecks.reduce((s, d) => s + (d.questions ? d.questions.length : 0), 0);
+      return {
+        decks: networkDecks,
+        source: 'network',
+        confidence: 100,
+        reason: `Bắt được ${networkDecks.length} đề từ network (${total} câu)`,
+      };
+    }
+
+    if (visibleDecks && visibleDecks.length > 0) {
+      const total = visibleDecks.reduce((s, d) => s + (d.questions ? d.questions.length : 0), 0);
+      return {
+        decks: visibleDecks,
+        source: 'visible-dom',
+        confidence: 95,
+        reason: `Đọc ${total} câu trực tiếp từ DOM visible`,
+      };
+    }
+
+    if (iframeResult && iframeResult.scriptDecks && iframeResult.scriptDecks.length > 0) {
+      return {
+        decks: iframeResult.scriptDecks,
+        source: 'iframe-script',
+        confidence: 80,
+        reason: `Parse ${iframeResult.scriptDecks.length} đề từ iframe HTML`,
+      };
+    }
+
+    if (scriptResult && scriptResult.decks && scriptResult.decks.length > 0) {
+      return {
+        decks: scriptResult.decks,
+        source: 'static-script',
+        confidence: 60,
+        reason: `Parse ${scriptResult.decks.length} đề từ HTML tĩnh`,
+      };
+    }
+
+    return { decks: [], source: 'none', confidence: 0, reason: 'Không có nguồn nào khả dụng' };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SMART INSPECT (Script + Iframe + Network + Visible)
+  // ═══════════════════════════════════════════════════════════════
+
+  async function smartInspect(url, options = {}) {
+    const { onProgress = null } = options;
+    if (onProgress) onProgress('🚀 Bắt đầu phân tích đa tầng...');
+
+    let scriptResult = null;
+    let staticDecks = [];
+    try {
+      if (onProgress) onProgress('📡 Tầng 1/3: Fetch HTML tĩnh...');
+      const { html, proxy } = await fetchUrlWithProxies(url, options);
+      scriptResult = extractQuizData(html);
+      scriptResult.proxyUsed = proxy;
+      const decks = normalizeDecks(scriptResult.data);
+      const awareness = applyShuffleAwareness(decks, scriptResult.shuffle);
+      staticDecks = awareness.decks;
+      scriptResult.decks = staticDecks;
+      scriptResult.awareness = awareness.stats;
+    } catch (e) {
+      if (onProgress) onProgress('⚠️ Tầng 1 thất bại: ' + e.message);
+    }
+
+    let iframeResult = null;
+    try {
+      if (onProgress) onProgress('🔍 Tầng 2/3: Load iframe (auto-start + network + DOM)...');
+      iframeResult = await inspectIframeFully(url, {
+        onProgress,
+        waitMs: options.iframeWaitMs || 4000,
+        timeoutMs: options.iframeTimeoutMs || 25000,
+        autoStart: options.autoStart !== false,
+      });
+    } catch (e) {
+      if (onProgress) onProgress('⚠️ Tầng 2 thất bại: ' + e.message);
+    }
+
+    if (onProgress) onProgress('🎯 Tầng 3/3: Xác định ground truth...');
+    const networkDecks = (iframeResult && iframeResult.networkDecks) || [];
+    const visibleDecks = (iframeResult && iframeResult.visibleDecks) || [];
+
+    const groundTruth = resolveGroundTruth({
+      scriptResult,
+      iframeResult,
+      networkDecks,
+      visibleDecks,
+      staticDecks,
+    });
+
+    if (groundTruth.source === 'visible-dom' && staticDecks.length > 0) {
+      const scriptQuestions = new Map();
+      staticDecks.forEach(d => (d.questions || []).forEach(q => {
+        const key = (q.question || '').substring(0, 60);
+        scriptQuestions.set(key, q);
+      }));
+      groundTruth.decks.forEach(deck => {
+        (deck.questions || []).forEach(q => {
+          const key = (q.question || '').substring(0, 60);
+          const scriptQ = scriptQuestions.get(key);
+          if (scriptQ) {
+            q.answer = scriptQ.answer;
+            q.answerText = scriptQ.answerText;
+            q.answerIndex = scriptQ.answerIndex;
+            q.answerDisplay = scriptQ.answerDisplay;
+            q._mergedFromScript = true;
+          }
+        });
+      });
+    }
+
+    return {
+      ...groundTruth,
+      scriptResult,
+      iframeResult,
+      networkCount: networkDecks.length,
+      visibleCount: visibleDecks.length,
+      staticCount: staticDecks.length,
+      proxyUsed: scriptResult ? scriptResult.proxyUsed : null,
+      shuffle: scriptResult ? scriptResult.shuffle : null,
+      awareness: scriptResult ? scriptResult.awareness : null,
+      screenState: iframeResult && iframeResult.screenState ? iframeResult.screenState : null,
+      crossCheck: iframeResult ? {
+        capturedNetwork: (iframeResult.capturedCount || 0),
+        visibleQuestions: (iframeResult.visibleCount || 0),
+      } : null,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v37: SMART CONTEXT INSPECT
+  // Quyết định show gì tùy theo screen state
+  // ═══════════════════════════════════════════════════════════════
+
+  async function smartContextInspect(url, options = {}) {
+    const { onProgress = null, waitMs = 4000, timeoutMs = 25000, autoStart = true } = options;
+
+    return new Promise((resolve) => {
+      let iframe = null, timeoutTimer = null, resolved = false;
+      let liveWatcher = null;
+
+      const cleanup = () => {
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        if (liveWatcher) try { liveWatcher.detach(); } catch (e) {}
+        if (iframe && iframe.parentNode) { try { iframe.parentNode.removeChild(iframe); } catch (e) {}
+        }
+      };
+      const finish = (result) => {
+        if (resolved) return;
+        resolved = true;
+        cleanup();
+        resolve(result);
+      };
+
+      try {
+        if (onProgress) onProgress('🔍 Đang mở quiz...');
+
+        iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;left:-99999px;top:-99999px;width:1400px;height:1000px;border:0;visibility:hidden;';
+        iframe.src = url;
+
+        iframe.onload = async () => {
+          try {
+            if (onProgress) onProgress('✅ Quiz loaded');
+            const doc = iframe.contentDocument;
+            if (!doc) return finish({ success: false, error: 'Không truy cập DOM (CORS)' });
+
+            await new Promise(r => setTimeout(r, waitMs));
+
+            // Auto-start nếu cần
+            if (autoStart) {
+              const startState = detectScreenState(doc);
+              if (startState.state === 'start-screen' || startState.state === 'unknown') {
+                try { await autoStartQuizInIframe(iframe, { onProgress }); } catch (e) {}
+                await new Promise(r => setTimeout(r, 1500));
+              }
+            }
+
+            // Detect screen state
+            const screenState = detectScreenState(doc);
+            if (onProgress) onProgress(`📺 Screen state: ${screenState.state}`);
+
+            // Extract tất cả data từ HTML (nếu có)
+            let fullDecks = [];
+            try {
+              const html = doc.documentElement.outerHTML;
+              const r = extractQuizData(html);
+              if (r && r.data) fullDecks = normalizeDecks(r.data);
+            } catch (e) {}
+
+            // Mode MENU — user chưa chọn đề
+            if (screenState.state === 'menu' || screenState.state === 'start-screen') {
+              // Setup live watcher
+              liveWatcher = createLiveContextWatcher({
+                pollIntervalMs: 1500,
+                onScreenChange: (newState) => {
+                  if (onProgress) onProgress(`📺 Chuyển màn hình: ${newState.state}`);
+                },
+              });
+              liveWatcher.attach(iframe);
+
+              finish({
+                success: true,
+                mode: 'menu',
+                screenState,
+                decks: fullDecks,
+                reason: 'User chưa chọn đề — hiện menu tất cả đề',
+              });
+              return;
+            }
+
+            // Mode QUIZ ACTIVE — user đang làm
+            if (screenState.state === 'quiz-in-progress') {
+              const activeQ = detectActiveQuestion(doc);
+              const allVisible = extractVisibleQuestions(doc);
+
+              finish({
+                success: true,
+                mode: 'quiz-active',
+                screenState,
+                activeQuestion: activeQ,
+                visibleQuestions: allVisible,
+                progress: screenState.progress,
+                reason: `User đang làm câu ${screenState.progress?.current || '?'} / ${screenState.progress?.total || '?'}`,
+              });
+              return;
+            }
+
+            // Mode QUIZ ALL VISIBLE
+            if (screenState.state === 'quiz-all-visible') {
+              const allVisible = extractVisibleQuestions(doc);
+              finish({
+                success: true,
+                mode: 'quiz-all',
+                screenState,
+                visibleQuestions: allVisible,
+                reason: `User đang xem ${allVisible.length} câu`,
+              });
+              return;
+            }
+
+            // Mode RESULT
+            if (screenState.state === 'result') {
+              finish({
+                success: true,
+                mode: 'result',
+                screenState,
+                reason: 'User đang xem kết quả',
+              });
+              return;
+            }
+
+            // Unknown — fallback về menu
+            finish({
+              success: true,
+              mode: 'menu',
+              screenState,
+              decks: fullDecks,
+              reason: 'Không xác định được screen state — fallback menu',
+            });
+          } catch (e) {
+            finish({ success: false, error: 'Inspect error: ' + e.message });
+          }
+        };
+
+        iframe.onerror = () => finish({ success: false, error: 'Iframe load error' });
+        document.body.appendChild(iframe);
+
+        timeoutTimer = setTimeout(() => {
+          finish({ success: false, error: `Timeout ${timeoutMs / 1000}s` });
+        }, timeoutMs);
+      } catch (e) {
+        finish({ success: false, error: e.message });
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // CHEMISTRY
   // ═══════════════════════════════════════════════════════════════
 
   function detectChemistryData(obj) {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return { isChem: false };
     const keys = Object.keys(obj);
     if (keys.length < 2) return { isChem: false };
-
     let potentialCount = 0, elementCount = 0, reactionCount = 0;
     for (const key of keys) {
       const item = obj[key];
@@ -256,7 +1060,6 @@
       if (itemKeys.some(k => /reactants|equation/i.test(k)) &&
           itemKeys.some(k => /products|deltaH/i.test(k))) reactionCount++;
     }
-
     if (potentialCount >= 2 && potentialCount / keys.length > 0.5) return { isChem: true, type: 'electrode_potential', confidence: potentialCount / keys.length };
     if (elementCount >= 3 && elementCount / keys.length > 0.5) return { isChem: true, type: 'element', confidence: elementCount / keys.length };
     if (reactionCount >= 2 && reactionCount / keys.length > 0.5) return { isChem: true, type: 'reaction', confidence: reactionCount / keys.length };
@@ -269,7 +1072,6 @@
       return item && typeof item === 'object' && Object.keys(item).some(k => /^E_?0$|^Eo$|potential/i.test(k));
     });
     if (symbols.length < 2) return [];
-
     const questions = [];
     const getE0 = (sym) => {
       const item = data[sym];
@@ -286,7 +1088,6 @@
       for (const k of Object.keys(item)) if (/^ion$/i.test(k)) return String(item[k]);
       return sym + 'ⁿ⁺';
     };
-
     for (const sym of symbols) {
       const correct = getE0(sym);
       const others = symbols.filter(s => s !== sym).map(s => getE0(s));
@@ -305,20 +1106,16 @@
         options: opts.map((v, i) => `${String.fromCharCode(65 + i)}. ${v.toFixed(2)} V`),
         answer: String.fromCharCode(65 + opts.indexOf(correct)),
         topic: 'electrode_potential',
-        _generated: true,
       });
     }
-
     const pairs = [];
     for (let i = 0; i < symbols.length; i++)
       for (let j = i + 1; j < symbols.length; j++) pairs.push([symbols[i], symbols[j]]);
-
     for (const [s1, s2] of pairs.sort(() => Math.random() - 0.5).slice(0, 5)) {
       const e1 = getE0(s1), e2 = getE0(s2);
       if (Math.abs(e1 - e2) < 0.01) continue;
       const cathode = e1 > e2 ? s1 : s2;
       const Ecell = Math.abs(e1 - e2);
-
       questions.push({
         type: 'mcq',
         question: `Pin Galvani ${getName(s1)} (${s1}) — ${getName(s2)} (${s2}). Điện cực nào là CATHODE?`,
@@ -330,47 +1127,8 @@
         ],
         answer: cathode === s1 ? 'A' : 'B',
         topic: 'galvani_cell',
-        _generated: true,
-      });
-
-      const correctEcell = Ecell.toFixed(2);
-      const wrongs = [
-        (Ecell + 0.5).toFixed(2),
-        Math.abs(Ecell - 0.5).toFixed(2),
-        (Ecell * 2).toFixed(2),
-      ].filter(v => v !== correctEcell).slice(0, 3);
-      const opts = [correctEcell, ...wrongs].sort(() => Math.random() - 0.5);
-      const answerIdx = opts.indexOf(correctEcell);
-
-      questions.push({
-        type: 'mcq',
-        question: `Tính sức điện động chuẩn E°pin của pin Galvani tạo bởi ${s1} và ${s2}.`,
-        options: opts.map((v, i) => `${String.fromCharCode(65 + i)}. ${v} V`),
-        answer: String.fromCharCode(65 + answerIdx),
-        topic: 'galvani_cell',
-        _generated: true,
       });
     }
-
-    const sortedByE = [...symbols].sort((a, b) => getE0(a) - getE0(b));
-    if (sortedByE.length >= 2) {
-      const lowest = sortedByE[0];
-      const highest = sortedByE[sortedByE.length - 1];
-      questions.push({
-        type: 'mcq',
-        question: `Trong dãy điện hóa, kim loại nào có tính khử mạnh nhất (E° thấp nhất)?`,
-        options: [
-          `A. ${getName(lowest)} (${lowest})`,
-          `B. ${getName(highest)} (${highest})`,
-          `C. ${getName(sortedByE[Math.floor(sortedByE.length / 2)])}`,
-          `D. Tất cả đều bằng nhau`,
-        ],
-        answer: 'A',
-        topic: 'electrode_potential',
-        _generated: true,
-      });
-    }
-
     return questions;
   }
 
@@ -382,7 +1140,6 @@
     while ((m = re.exec(html)) !== null) scripts.push(m[1]);
     if (!scripts.length) scripts.push(html);
     const js = scripts.join('\n');
-
     const results = [];
     const reObj = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(\{[\s\S]*?\n\s*\}|\[[\s\S]*?\n\s*\])/g;
     while ((m = reObj.exec(js)) !== null) {
@@ -395,31 +1152,24 @@
       if (!chemInfo.isChem) continue;
       results.push({ name, data: parsed, chemInfo });
     }
-
     if (results.length === 0) return null;
     const allQuestions = [];
-    const dataSummary = [];
-    for (const { name, data, chemInfo } of results) {
+    for (const { data, chemInfo } of results) {
       if (chemInfo.type === 'electrode_potential') {
         const q = generateQuizFromElectrodes(data);
-        if (q.length) {
-          allQuestions.push(...q);
-          dataSummary.push({ name, type: chemInfo.type, questionCount: q.length });
-        }
+        if (q.length) allQuestions.push(...q);
       }
     }
     if (allQuestions.length === 0) return null;
-
     return {
       data: [{ name: '🧪 Data → Quiz tự sinh', questions: allQuestions }],
       source: 'chemistry-data',
       method: 'auto-generated',
-      chemInfo: dataSummary,
     };
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // HELPER DETECTION / COMPILE (FULL v34)
+  // HELPER DETECTION
   // ═══════════════════════════════════════════════════════════════
 
   function isHelperCandidate(name, body) {
@@ -481,16 +1231,10 @@
         let result;
         try { result = fn(...testArgs); } catch { try { result = fn('test'); } catch { continue; } }
         if (result && typeof result === 'object') compiled[h.name] = fn;
-      } catch (e) {
-        if (DEBUG) console.warn('[Parser v35] Failed helper:', h.name, e.message);
-      }
+      } catch (e) {}
     }
     return Object.keys(compiled).length > 0 ? compiled : null;
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 🆕 v35: CHAIN VARIABLE COLLECTOR (RESTORED)
-  // ═══════════════════════════════════════════════════════════════
 
   function collectChainVariables(js, helpers) {
     const collected = new Map();
@@ -533,19 +1277,6 @@
       const fn = new Function(`"use strict"; ${helperScript}\nreturn (${code});`);
       const result = fn(allVars);
       if (result !== null && result !== undefined) return result;
-    } catch (e) {}
-    try {
-      const backup = {};
-      for (const n of varNames) { backup[n] = global[n]; global[n] = allVars[n]; }
-      try {
-        const result = eval('(' + code + ')');
-        if (result !== null && result !== undefined) return result;
-      } finally {
-        for (const n of varNames) {
-          if (backup[n] === undefined) delete global[n];
-          else global[n] = backup[n];
-        }
-      }
     } catch (e) {}
     return null;
   }
@@ -595,14 +1326,6 @@
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
     const keys = Object.keys(obj).map(k => k.toLowerCase());
     return ['mc','mcq','tf','truefalse','sa','short','parti','part1','partii','part2','partiii','part3'].some(k => keys.includes(k));
-  }
-
-  function findOpen(s, idx) {
-    for (let i = idx; i >= 0; i--) {
-      if (s[i] === '[' || s[i] === '{') return i;
-      if ((s[i] === ';' || s[i] === '\n') && i < idx - 200) break;
-    }
-    return -1;
   }
 
   function matchBracket(s, start) {
@@ -669,36 +1392,66 @@
     return collapseWhitespace(decodeChemEntities(str));
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v37.0.1: NORMALIZE QUESTION (đã sửa hỗ trợ TF array answers)
+  // ═══════════════════════════════════════════════════════════════
+
   function normalizeQuestion(q) {
     if (!q || typeof q !== 'object') return null;
     const out = { _original: q };
     out.question = normalizeText(String(getField(q, 'question', '') || ''));
     out.type = String(getField(q, 'type', '') || '').toLowerCase();
 
+    // --- OPTIONS ---
     const rawOpts = getField(q, 'options', null);
     if (Array.isArray(rawOpts)) out.options = rawOpts.map(o => normalizeText(String(o || '')));
     else if (rawOpts && typeof rawOpts === 'object') out.options = Object.values(rawOpts).map(o => normalizeText(String(o || '')));
     else out.options = null;
 
+    // --- ANSWER (dùng cho mcq + short) ---
     const rawAnswer = getField(q, 'answer', null);
+
+    // --- STATEMENTS (dùng cho tf) ---
     const rawStmts = getField(q, 'statements', null);
+    // 🆕 v37.0.1: Lấy mảng answers riêng cho TF (định dạng HTML gốc của bạn)
+    const rawAnswersArray = getField(q, 'answersArray', null);
+
     if (Array.isArray(rawStmts) && rawStmts.length) {
-      out.statements = rawStmts.map(s => {
-        if (typeof s === 'string') return { text: normalizeText(s), answer: null, level: '' };
-        if (typeof s === 'object' && s !== null) {
-          return {
-            text: normalizeText(String(getField(s, 'stText', '') || '')),
-            answer: toBoolean(getField(s, 'stAnswer', null)),
-            level: String(getField(s, 'level', '') || ''),
-          };
+      out.statements = rawStmts.map((s, idx) => {
+        let statementText = '';
+        let statementAnswer = null;
+
+        if (typeof s === 'string') {
+          // Trường hợp HTML gốc: statements: ['...', '...'], answers: [true, false, ...]
+          statementText = normalizeText(s);
+          if (Array.isArray(rawAnswersArray) && idx < rawAnswersArray.length) {
+            statementAnswer = toBoolean(rawAnswersArray[idx]);
+          }
+        } else if (typeof s === 'object' && s !== null) {
+          // Trường hợp statement là object: { text: '...', answer: true }
+          statementText = normalizeText(String(getField(s, 'stText', '') || ''));
+          const ownAnswer = getField(s, 'stAnswer', null);
+          if (ownAnswer !== null && ownAnswer !== undefined) {
+            statementAnswer = toBoolean(ownAnswer);
+          } else if (Array.isArray(rawAnswersArray) && idx < rawAnswersArray.length) {
+            // Fallback: lấy từ mảng answers theo index
+            statementAnswer = toBoolean(rawAnswersArray[idx]);
+          }
         }
-        return null;
+
+        if (!statementText) return null;
+        return {
+          text: statementText,
+          answer: statementAnswer,
+          level: (typeof s === 'object' && s !== null) ? String(getField(s, 'level', '') || '') : '',
+        };
       }).filter(Boolean);
     } else out.statements = null;
 
     out.explanation = normalizeText(String(getField(q, 'explanation', '') || ''));
     out.topic = String(getField(q, 'topic', '') || '');
 
+    // --- AUTO-DETECT TYPE ---
     if (!out.type) {
       if (Array.isArray(out.statements) && out.statements.length > 0) out.type = 'tf';
       else if (Array.isArray(out.options) && out.options.length > 0 && rawAnswer !== null && rawAnswer !== undefined) out.type = 'mcq';
@@ -711,6 +1464,7 @@
       if (aliases.some(a => a.toLowerCase().replace(/[_\s-]/g, '') === typeNorm)) { out.type = canon; break; }
     }
 
+    // --- ANSWER RESOLUTION ---
     if (out.type === 'mcq' && Array.isArray(out.options)) {
       const formatted = formatAnswerDisplay(rawAnswer, out.options, 'mcq');
       out.answer = formatted.letter;
@@ -722,6 +1476,13 @@
       if (typeof rawAnswer === 'string') out.answer = rawAnswer.trim();
       else if (rawAnswer !== null && rawAnswer !== undefined) out.answer = String(rawAnswer).trim();
       else out.answer = null;
+    } else if (out.type === 'tf') {
+      // Với TF, đáp án nằm trong từng statement — không dùng out.answer
+      out.answer = rawAnswersArray || null;
+      // 🆕: Thêm mảng answers phẳng để app.js dễ dùng
+      if (Array.isArray(out.statements)) {
+        out.answers = out.statements.map(st => st.answer);
+      }
     } else out.answer = rawAnswer;
 
     return out;
@@ -824,7 +1585,7 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // SHUFFLE DETECTION
+  // SHUFFLE
   // ═══════════════════════════════════════════════════════════════
 
   function detectShufflePattern(js) {
@@ -926,10 +1687,6 @@
     return { decks, stats: { resolved, warned, total } };
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // 🆕 v35: VERIFY CANDIDATE (RESTORED)
-  // ═══════════════════════════════════════════════════════════════
-
   function verifyCandidate(candidate) {
     if (!candidate || !candidate.data) return { valid: false, reason: 'empty' };
     try {
@@ -937,45 +1694,30 @@
       if (!decks.length) return { valid: false, reason: 'no-decks' };
       const totalQ = decks.reduce((s, d) => s + d.questions.length, 0);
       if (totalQ === 0) return { valid: false, reason: 'no-questions' };
-      let validQ = 0;
-      let hasAnswer = false;
+      let validQ = 0, hasAnswer = false;
       for (const d of decks) {
         for (const q of d.questions) {
           if (q.question || q.answer !== null || q.options) validQ++;
           if (q.answer !== null && q.answer !== undefined) hasAnswer = true;
           if (q.type === 'tf' && Array.isArray(q.statements)) {
-            for (const st of q.statements) {
-              if (st.answer !== null) hasAnswer = true;
-            }
+            for (const st of q.statements) if (st.answer !== null) hasAnswer = true;
           }
         }
       }
       return { valid: validQ > 0 && hasAnswer, deckCount: decks.length, totalQuestions: totalQ, validQuestions: validQ };
-    } catch (e) {
-      return { valid: false, reason: e.message };
-    }
+    } catch (e) { return { valid: false, reason: e.message }; }
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // 🆕 v35: MASTER EXTRACTOR (FULL — with chain vars)
+  // MASTER EXTRACTOR
   // ═══════════════════════════════════════════════════════════════
 
   function extractQuizData(html, options = {}) {
     if (!html || typeof html !== 'string') throw new Error('HTML rỗng');
-
     const stats = {
-      htmlSize: html.length,
-      strategiesRun: 0,
-      candidatesFound: 0,
-      helpersFound: 0,
-      helperNames: [],
-      chainVarsFound: 0,
-      chainVarNames: [],
-      chemistryDataFound: 0,
-      generatedQuestions: 0,
-      verified: 0,
-      timeMs: 0,
-      errors: [],
+      htmlSize: html.length, strategiesRun: 0, candidatesFound: 0,
+      helpersFound: 0, helperNames: [], chainVarsFound: 0, chainVarNames: [],
+      chemistryDataFound: 0, generatedQuestions: 0, verified: 0, timeMs: 0, errors: [],
     };
     const startTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     const candidates = [];
@@ -999,8 +1741,6 @@
     const js = scripts.join('\n');
 
     const shuffleInfo = detectShufflePattern(js);
-
-    // Compile helpers
     let helpers = null;
     try {
       helpers = compileHelperFunctions(js);
@@ -1008,7 +1748,6 @@
       stats.helperNames = helpers ? Object.keys(helpers) : [];
     } catch (e) { stats.errors.push('helper: ' + e.message); }
 
-    // Collect chain vars
     let chainVars = new Map();
     try {
       chainVars = collectChainVariables(js, helpers);
@@ -1016,7 +1755,7 @@
       stats.chainVarNames = [...chainVars.keys()];
     } catch (e) { stats.errors.push('chain-collect: ' + e.message); }
 
-    // Strategy 1: Named vars WITH chain vars
+    // Strategy 1: Named vars
     try {
       for (const name of VAR_NAMES) {
         const re1 = new RegExp('(?:const|var|let)\\s+' + name + '\\s*=\\s*', 'g');
@@ -1038,7 +1777,7 @@
     } catch (e) { stats.errors.push('named: ' + e.message); }
     stats.strategiesRun++;
 
-    // Strategy 2: Chain vars → build decks
+    // Strategy 2: Chain vars
     try {
       if (chainVars.size > 0) {
         const byPrefix = {};
@@ -1052,7 +1791,6 @@
           if (!byPrefix[prefix]) byPrefix[prefix] = {};
           byPrefix[prefix][type] = data;
         }
-
         for (const prefix in byPrefix) {
           const parts = byPrefix[prefix];
           const deckObj = {};
@@ -1061,11 +1799,8 @@
           if (parts.tf) deckObj.tf = parts.tf;
           if (parts.short) deckObj.short = parts.short;
           else if (parts.sa) deckObj.short = parts.sa;
-          if (Object.keys(deckObj).length >= 1) {
-            addCandidate([deckObj], `chain:${prefix}`, 'chain-deck', 60);
-          }
+          if (Object.keys(deckObj).length >= 1) addCandidate([deckObj], `chain:${prefix}`, 'chain-deck', 60);
         }
-
         if (Object.keys(byPrefix).length >= 2) {
           const combinedDATA = {};
           const prefixes = Object.keys(byPrefix).sort((a, b) => {
@@ -1083,15 +1818,13 @@
             else if (parts.sa) deckObj.short = parts.sa;
             if (Object.keys(deckObj).length >= 1) combinedDATA[i + 1] = deckObj;
           });
-          if (Object.keys(combinedDATA).length >= 2) {
-            addCandidate(combinedDATA, 'chain:combined', 'chain-combined', 70);
-          }
+          if (Object.keys(combinedDATA).length >= 2) addCandidate(combinedDATA, 'chain:combined', 'chain-combined', 70);
         }
       }
     } catch (e) { stats.errors.push('chain-build: ' + e.message); }
     stats.strategiesRun++;
 
-    // Strategy 3: Generic scan
+    // Strategy 3: Generic
     try {
       const reObj = /(?:const|var|let)\s+([A-Za-z_$][\w$]*)\s*=\s*/g;
       let count = 0;
@@ -1143,23 +1876,15 @@
     try {
       const chemResult = extractChemistryQuiz(html);
       if (chemResult && chemResult.data && chemResult.data.length > 0) {
-        stats.chemistryDataFound = (chemResult.chemInfo || []).length;
+        stats.chemistryDataFound = 1;
         stats.generatedQuestions = chemResult.data[0].questions.length;
         addCandidate(chemResult.data, 'chemistry-data', 'auto-generated', 100);
       }
     } catch (e) { stats.errors.push('chemistry: ' + e.message); }
     stats.strategiesRun++;
 
-    if (!candidates.length) {
-      throw new Error(
-        'Không tìm thấy dữ liệu quiz hoặc data hóa học. ' +
-        'Helpers: ' + stats.helperNames.slice(0, 10).join(', ') + '. ' +
-        'Chain vars: ' + stats.chainVarNames.slice(0, 10).join(', ') + '. ' +
-        'Errors: ' + stats.errors.join('; ')
-      );
-    }
+    if (!candidates.length) throw new Error('Không tìm thấy dữ liệu quiz hoặc data hóa học.');
 
-    // Cross-check duplicates
     for (let i = 0; i < candidates.length; i++) {
       for (let j = i + 1; j < candidates.length; j++) {
         try {
@@ -1171,10 +1896,7 @@
     }
     candidates.sort((a, b) => b.score - a.score);
 
-    let best = null;
-    let bestVerification = null;
-    let bestDeckCount = 0;
-
+    let best = null, bestVerification = null, bestDeckCount = 0;
     for (const c of candidates) {
       const v = verifyCandidate(c);
       if (v.valid) {
@@ -1186,7 +1908,6 @@
         }
       }
     }
-
     if (!best) {
       for (const c of candidates) {
         const decks = normalizeDecks(c.data);
@@ -1197,8 +1918,7 @@
         }
       }
     }
-
-    if (!best) throw new Error('Không có candidate hợp lệ. Total: ' + candidates.length);
+    if (!best) throw new Error('Không có candidate hợp lệ.');
 
     stats.timeMs = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime);
 
@@ -1210,7 +1930,6 @@
       verification: bestVerification,
       stats,
       shuffle: shuffleInfo,
-      allCandidates: candidates.slice(0, 10).map(c => ({ source: c.source, method: c.method, score: c.score })),
     };
   }
 
@@ -1293,10 +2012,7 @@
 
   async function smartFetchAndParse(url, options = {}) {
     const { onProgress = null } = options;
-
-    // STEP 1: Try static fetch
-    let scriptResult = null;
-    let scriptError = null;
+    let scriptResult = null, scriptError = null;
     try {
       if (onProgress) onProgress('📡 Đang fetch HTML tĩnh...');
       const { html, proxy } = await fetchUrlWithProxies(url, options);
@@ -1306,12 +2022,10 @@
       const awareness = applyShuffleAwareness(decks, scriptResult.shuffle);
       scriptResult.decks = awareness.decks;
       scriptResult.awareness = awareness.stats;
-    } catch (e) {
-      scriptError = e.message;
-    }
+    } catch (e) { scriptError = e.message; }
 
     const needIframe = !scriptResult ||
-                       (scriptResult.shuffle && scriptResult.shuffle.detected && scriptResult.shuffle.confidence >= 40);
+      (scriptResult.shuffle && scriptResult.shuffle.detected && scriptResult.shuffle.confidence >= 40);
 
     if (!needIframe && scriptResult) {
       return { ...scriptResult, mode: 'script', source: 'script-only' };
@@ -1319,73 +2033,136 @@
 
     if (onProgress) onProgress('🔴 Phát hiện shuffle — thử iframe live...');
 
-    const iframeResult = await extractFromIframe(url, {
+    const iframeResult = await inspectIframeFully(url, {
+      onProgress,
       waitMs: options.iframeWaitMs || 3000,
       timeoutMs: options.iframeTimeoutMs || 15000,
-      onProgress,
+      autoStart: true,
     });
 
-    const finalResult = crossCheckResults(scriptResult, iframeResult);
+    const scriptDecks = scriptResult ? scriptResult.decks : [];
+    const iframeDecks = (iframeResult && iframeResult.scriptDecks) || [];
+    const visibleDecks = (iframeResult && iframeResult.visibleDecks) || [];
+    const networkDecks = (iframeResult && iframeResult.networkDecks) || [];
+
+    const truth = resolveGroundTruth({
+      scriptResult, iframeResult, networkDecks, visibleDecks, staticDecks: scriptDecks,
+    });
 
     return {
-      decks: finalResult.data,
-      mode: iframeResult.success ? 'iframe' : 'script',
-      source: finalResult.method,
-      confidence: finalResult.confidence,
-      crossCheck: finalResult.crossCheck,
+      decks: truth.decks,
+      mode: iframeResult && iframeResult.success ? 'iframe' : 'script',
+      source: truth.source,
+      confidence: truth.confidence,
+      reason: truth.reason,
       shuffle: scriptResult ? scriptResult.shuffle : null,
       awareness: scriptResult ? scriptResult.awareness : null,
       scriptError,
-      iframeError: iframeResult.success ? null : iframeResult.error,
+      iframeError: iframeResult && !iframeResult.success ? iframeResult.error : null,
       proxyUsed: scriptResult ? scriptResult.proxyUsed : null,
+      networkCount: networkDecks.length,
+      visibleCount: visibleDecks.length,
     };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🆕 v37: SELF-VERIFY — Kiểm tra function nào còn thiếu
+  // ═══════════════════════════════════════════════════════════════
+
+  const REQUIRED_FUNCTIONS = [
+    'extractQuizData', 'normalizeDecks', 'normalizeQuestion', 'normalizeText',
+    'formatAnswerDisplay', 'toBoolean',
+    'detectShufflePattern', 'resolveAnswerWithShuffleAwareness', 'applyShuffleAwareness',
+    'fetchUrlWithProxies', 'fetchAndParse', 'smartFetchAndParse', 'smartInspect',
+    'extractFromIframe', 'inspectIframeFully', 'crossCheckResults', 'resolveGroundTruth',
+    'extractVisibleQuestions', 'extractVisibleQuestionDetail', 'isElementVisible',
+    'autoStartQuizInIframe', 'verifyCandidate', 'scoreQuizObject',
+    'detectScreenState', 'detectStartButton', 'detectDeckButtons', 'detectActiveQuestion',
+    'createLiveContextWatcher', 'watchCurrentPage', 'smartContextInspect',
+    'detectHelperFunctions', 'compileHelperFunctions', 'collectChainVariables',
+    'safeEvalWithHelpers', 'safeEvalWithChainVars', 'safeEval',
+    'extractChemistryQuiz', 'detectChemistryData', 'generateQuizFromElectrodes',
+  ];
+
+  function selfVerify() {
+    const missing = [];
+    const defined = {};
+    for (const name of REQUIRED_FUNCTIONS) {
+      if (typeof eval(name) === 'function') defined[name] = true;
+      else missing.push(name);
+    }
+    if (missing.length > 0) {
+      console.error(`%c❌ Parser v${VERSION} MISSING FUNCTIONS: ${missing.join(', ')}`, 'color:#ff0000;font-weight:bold');
+      return false;
+    }
+    if (DEBUG) console.log(`%c✅ Self-verify passed: ${REQUIRED_FUNCTIONS.length} functions`, 'color:#2ecc71');
+    return true;
   }
 
   // ═══════════════════════════════════════════════════════════════
   // PUBLIC API
   // ═══════════════════════════════════════════════════════════════
 
-  global.QuizParser = {
+  const PUBLIC_API = {
     version: VERSION,
-    extractQuizData,
-    extractFromIframe,
+
+    // Core
+    extractQuizData, normalizeDecks, normalizeQuestion, normalizeText,
+    formatAnswerDisplay, toBoolean,
+
+    // Shuffle
+    detectShufflePattern, resolveAnswerWithShuffleAwareness, applyShuffleAwareness,
+
+    // Fetch
+    fetchUrlWithProxies, fetchAndParse, smartFetchAndParse, smartInspect,
+
+    // Iframe
+    extractFromIframe: inspectIframeFully,
+    inspectIframeFully,
     crossCheckResults,
-    smartFetchAndParse,
-    fetchUrlWithProxies,
-    fetchAndParse,
-    extractChemistryQuiz,
-    detectChemistryData,
-    generateQuizFromElectrodes,
-    normalizeDecks,
-    normalizeQuestion,
-    normalizeText,
-    formatAnswerDisplay,
-    toBoolean,
-    detectShufflePattern,
-    resolveAnswerWithShuffleAwareness,
-    applyShuffleAwareness,
-    detectHelperFunctions,
-    compileHelperFunctions,
-    collectChainVariables,
-    safeEvalWithHelpers,
-    safeEvalWithChainVars,
-    verifyCandidate,
-    scoreQuizObject,
+    resolveGroundTruth,
+
+    // Visible DOM
+    extractVisibleQuestions, extractVisibleQuestionDetail, isElementVisible,
+    autoStartQuizInIframe,
+
+    // 🆕 v37: Context-aware
+    detectScreenState, detectStartButton, detectDeckButtons, detectActiveQuestion,
+    createLiveContextWatcher, watchCurrentPage, smartContextInspect,
+
+    // Helpers
+    verifyCandidate, scoreQuizObject,
+    detectHelperFunctions, compileHelperFunctions, collectChainVariables,
+    safeEvalWithHelpers, safeEvalWithChainVars, safeEval,
+
+    // Chemistry
+    extractChemistryQuiz, detectChemistryData, generateQuizFromElectrodes,
+
+    // Meta
+    selfVerify,
     getStats: () => ({
       version: VERSION,
       varNames: VAR_NAMES.length,
       chainPatterns: CHAIN_VAR_PATTERNS.length,
       helperWhitelist: HELPER_NAME_WHITELIST.length,
+      requiredFunctions: REQUIRED_FUNCTIONS.length,
+      uptimeMs: Date.now() - _startupTime,
     }),
     _internal: {
-      safeEval, matchBracket, findOpen,
+      safeEval, matchBracket,
       FIELD_ALIASES, VAR_NAMES, TYPE_ALIASES, PART_KEY_MAP,
       HELPER_NAME_WHITELIST, GENERIC_HELPERS, CHAIN_VAR_PATTERNS,
+      REQUIRED_FUNCTIONS,
     },
   };
 
+  global.QuizParser = PUBLIC_API;
+
+  // Self-verify sau khi export
+  try { selfVerify(); } catch (e) {}
+
   if (DEBUG) {
-    console.log(`%c🐱 QuizParser v${VERSION} loaded`, 'color:#ff6ac1;font-weight:bold');
+    console.log(`%c🐱 QuizParser v${VERSION} loaded (${REQUIRED_FUNCTIONS.length} functions)`, 'color:#ff6ac1;font-weight:bold');
   }
 
 })(typeof window !== 'undefined' ? window : globalThis);
